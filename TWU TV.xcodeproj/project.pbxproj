@@ -7,13 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1712506C1EEF1532005288E3 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1712506B1EEF1532005288E3 /* Constants.swift */; };
+		171250721EEF154D005288E3 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1712506D1EEF154D005288E3 /* Globals.swift */; };
+		171250731EEF154D005288E3 /* Series.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1712506E1EEF154D005288E3 /* Series.swift */; };
+		171250741EEF154D005288E3 /* Sermon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1712506F1EEF154D005288E3 /* Sermon.swift */; };
+		171250751EEF154D005288E3 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250701EEF154D005288E3 /* Reachability.swift */; };
+		171250761EEF154D005288E3 /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250711EEF154D005288E3 /* SwiftyJSON.swift */; };
+		1712507B1EEF1569005288E3 /* functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250771EEF1569005288E3 /* functions.swift */; };
+		1712507C1EEF1569005288E3 /* MediaCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250781EEF1569005288E3 /* MediaCollectionViewCell.swift */; };
+		1712507D1EEF1569005288E3 /* MediaCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250791EEF1569005288E3 /* MediaCollectionViewController.swift */; };
+		1712507E1EEF1569005288E3 /* PopoverTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1712507A1EEF1569005288E3 /* PopoverTableViewController.swift */; };
+		171250821EEF1582005288E3 /* MediaTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1712507F1EEF1582005288E3 /* MediaTableViewCell.swift */; };
+		171250831EEF1582005288E3 /* MediaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250801EEF1582005288E3 /* MediaViewController.swift */; };
+		171250841EEF1582005288E3 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250811EEF1582005288E3 /* AboutViewController.swift */; };
 		17812B811EEEE10100894B45 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B801EEEE10100894B45 /* AppDelegate.swift */; };
-		17812B831EEEE10100894B45 /* FirstViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B821EEEE10100894B45 /* FirstViewController.swift */; };
-		17812B851EEEE10100894B45 /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B841EEEE10100894B45 /* SecondViewController.swift */; };
 		17812B881EEEE10100894B45 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17812B861EEEE10100894B45 /* Main.storyboard */; };
 		17812B8A1EEEE10100894B45 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17812B891EEEE10100894B45 /* Assets.xcassets */; };
 		17812B951EEEE10100894B45 /* TWU_TVTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B941EEEE10100894B45 /* TWU_TVTests.swift */; };
 		17812BA01EEEE10100894B45 /* TWU_TVUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B9F1EEEE10100894B45 /* TWU_TVUITests.swift */; };
+		17FB80AD1EEF08AD006B4010 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17FB80AC1EEF08AD006B4010 /* Images.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,10 +46,21 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1712506B1EEF1532005288E3 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		1712506D1EEF154D005288E3 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
+		1712506E1EEF154D005288E3 /* Series.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Series.swift; sourceTree = "<group>"; };
+		1712506F1EEF154D005288E3 /* Sermon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sermon.swift; sourceTree = "<group>"; };
+		171250701EEF154D005288E3 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
+		171250711EEF154D005288E3 /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
+		171250771EEF1569005288E3 /* functions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = functions.swift; sourceTree = "<group>"; };
+		171250781EEF1569005288E3 /* MediaCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaCollectionViewCell.swift; sourceTree = "<group>"; };
+		171250791EEF1569005288E3 /* MediaCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaCollectionViewController.swift; sourceTree = "<group>"; };
+		1712507A1EEF1569005288E3 /* PopoverTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverTableViewController.swift; sourceTree = "<group>"; };
+		1712507F1EEF1582005288E3 /* MediaTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaTableViewCell.swift; sourceTree = "<group>"; };
+		171250801EEF1582005288E3 /* MediaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaViewController.swift; sourceTree = "<group>"; };
+		171250811EEF1582005288E3 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		17812B7D1EEEE10100894B45 /* TWU TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TWU TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		17812B801EEEE10100894B45 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		17812B821EEEE10100894B45 /* FirstViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstViewController.swift; sourceTree = "<group>"; };
-		17812B841EEEE10100894B45 /* SecondViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondViewController.swift; sourceTree = "<group>"; };
 		17812B871EEEE10100894B45 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		17812B891EEEE10100894B45 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		17812B8B1EEEE10100894B45 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -47,6 +70,8 @@
 		17812B9B1EEEE10100894B45 /* TWU TVUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TWU TVUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		17812B9F1EEEE10100894B45 /* TWU_TVUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TWU_TVUITests.swift; sourceTree = "<group>"; };
 		17812BA11EEEE10100894B45 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		17FB80AB1EEF0824006B4010 /* fontawesome-webfont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fontawesome-webfont.ttf"; sourceTree = "<group>"; };
+		17FB80AC1EEF08AD006B4010 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,10 +123,23 @@
 			isa = PBXGroup;
 			children = (
 				17812B801EEEE10100894B45 /* AppDelegate.swift */,
-				17812B821EEEE10100894B45 /* FirstViewController.swift */,
-				17812B841EEEE10100894B45 /* SecondViewController.swift */,
+				1712506B1EEF1532005288E3 /* Constants.swift */,
+				1712506D1EEF154D005288E3 /* Globals.swift */,
+				1712506E1EEF154D005288E3 /* Series.swift */,
+				1712506F1EEF154D005288E3 /* Sermon.swift */,
+				171250771EEF1569005288E3 /* functions.swift */,
+				171250781EEF1569005288E3 /* MediaCollectionViewCell.swift */,
+				171250791EEF1569005288E3 /* MediaCollectionViewController.swift */,
+				1712507F1EEF1582005288E3 /* MediaTableViewCell.swift */,
+				171250801EEF1582005288E3 /* MediaViewController.swift */,
+				171250811EEF1582005288E3 /* AboutViewController.swift */,
+				1712507A1EEF1569005288E3 /* PopoverTableViewController.swift */,
+				171250701EEF154D005288E3 /* Reachability.swift */,
+				171250711EEF154D005288E3 /* SwiftyJSON.swift */,
 				17812B861EEEE10100894B45 /* Main.storyboard */,
+				17FB80AB1EEF0824006B4010 /* fontawesome-webfont.ttf */,
 				17812B891EEEE10100894B45 /* Assets.xcassets */,
+				17FB80AC1EEF08AD006B4010 /* Images.xcassets */,
 				17812B8B1EEEE10100894B45 /* Info.plist */,
 			);
 			path = "TWU TV";
@@ -235,6 +273,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17FB80AD1EEF08AD006B4010 /* Images.xcassets in Resources */,
 				17812B8A1EEEE10100894B45 /* Assets.xcassets in Resources */,
 				17812B881EEEE10100894B45 /* Main.storyboard in Resources */,
 			);
@@ -261,9 +300,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				17812B851EEEE10100894B45 /* SecondViewController.swift in Sources */,
 				17812B811EEEE10100894B45 /* AppDelegate.swift in Sources */,
-				17812B831EEEE10100894B45 /* FirstViewController.swift in Sources */,
+				1712507C1EEF1569005288E3 /* MediaCollectionViewCell.swift in Sources */,
+				1712506C1EEF1532005288E3 /* Constants.swift in Sources */,
+				171250751EEF154D005288E3 /* Reachability.swift in Sources */,
+				1712507B1EEF1569005288E3 /* functions.swift in Sources */,
+				171250831EEF1582005288E3 /* MediaViewController.swift in Sources */,
+				171250741EEF154D005288E3 /* Sermon.swift in Sources */,
+				171250731EEF154D005288E3 /* Series.swift in Sources */,
+				1712507D1EEF1569005288E3 /* MediaCollectionViewController.swift in Sources */,
+				1712507E1EEF1569005288E3 /* PopoverTableViewController.swift in Sources */,
+				171250841EEF1582005288E3 /* AboutViewController.swift in Sources */,
+				171250761EEF154D005288E3 /* SwiftyJSON.swift in Sources */,
+				171250821EEF1582005288E3 /* MediaTableViewCell.swift in Sources */,
+				171250721EEF154D005288E3 /* Globals.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -508,6 +558,7 @@
 				17812BA61EEEE10100894B45 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		17812BA71EEEE10100894B45 /* Build configuration list for PBXNativeTarget "TWU TVTests" */ = {
 			isa = XCConfigurationList;
@@ -516,6 +567,7 @@
 				17812BA91EEEE10100894B45 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		17812BAA1EEEE10100894B45 /* Build configuration list for PBXNativeTarget "TWU TVUITests" */ = {
 			isa = XCConfigurationList;
@@ -524,6 +576,7 @@
 				17812BAC1EEEE10100894B45 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

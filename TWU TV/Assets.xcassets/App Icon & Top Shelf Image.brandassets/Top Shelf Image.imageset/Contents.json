@@ -2,6 +2,7 @@
   "images" : [
     {
       "idiom" : "tv",
+      "filename" : "cbc_tvos_1920w_720h.jpg",
       "scale" : "1x"
     }
   ],

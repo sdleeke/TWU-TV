@@ -9,13 +9,46 @@
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
+class AppDelegate: UIResponder, UIApplicationDelegate, AVAudioSessionDelegate, UISplitViewControllerDelegate {
+    
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController:UIViewController, onto primaryViewController:UIViewController) -> Bool {
+        guard let secondaryAsNavController = secondaryViewController as? UINavigationController else { return false }
+        guard let topAsDetailController = secondaryAsNavController.topViewController as? MediaViewController else { return false }
+        if topAsDetailController.sermonSelected == nil {
+            // Return true to indicate that we have handled the collapse by doing nothing; the secondary controller will be discarded.
+            return true
+        }
+        return false
+    }
+    
     var window: UIWindow?
-
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        //        print("application:didFinishLaunchingWithOptions")
+        
+        let splitViewController = window!.rootViewController as! UISplitViewController
+        
+        splitViewController.delegate = self
+        
+        let hClass = splitViewController.traitCollection.horizontalSizeClass
+        let vClass = splitViewController.traitCollection.verticalSizeClass
+        
+        if (hClass == UIUserInterfaceSizeClass.regular) && (vClass == UIUserInterfaceSizeClass.compact) {
+            let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
+            navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+        }
+        
+        // Override point for customization after application launch.
+        
+        globals = Globals()
+        
+        globals.addAccessoryEvents()
+        
+        startAudio()
+        
+        UIApplication.shared.beginReceivingRemoteControlEvents()
+        
         return true
     }
 
@@ -31,6 +64,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+        
+        if (globals.mediaPlayer.rate == 0) {
+            //It is paused, possibly not by us, but by the system
+            if globals.mediaPlayer.isPlaying {
+                globals.mediaPlayer.pause()
+            }
+        }
+        
+        if (globals.mediaPlayer.rate != 0) {
+            if globals.mediaPlayer.isPaused {
+                globals.mediaPlayer.play()
+            }
+        }
+        
+        globals.setupPlayingInfoCenter()
+        
+        DispatchQueue.main.async(execute: { () -> Void in
+            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERIES_UPDATE_UI), object: nil)
+            
+            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERMON_UPDATE_PLAY_PAUSE), object: nil)
+            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERMON_UPDATE_PLAYING_PAUSED), object: nil)
+        })
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
