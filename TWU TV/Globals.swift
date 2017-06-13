@@ -8,7 +8,7 @@
 
 import Foundation
 import MediaPlayer
-import CloudKit
+//import CloudKit
 
 enum Showing {
     case all
@@ -396,7 +396,7 @@ class Globals : NSObject {
         }
     }
     
-    var isRefreshing:Bool   = false
+//    var isRefreshing:Bool   = false
     var isLoading:Bool      = false
     
     var seriesSettings:[String:[String:String]]?
@@ -522,26 +522,26 @@ class Globals : NSObject {
         }
     }
     
-    func cancelAllDownloads()
-    {
-        if (series != nil) {
-            for series in series! {
-                if series.sermons != nil {
-                    for sermon in series.sermons! {
-                        if sermon.audioDownload.active {
-                            sermon.audioDownload.task?.cancel()
-                            sermon.audioDownload.task = nil
-                            
-                            sermon.audioDownload.totalBytesWritten = 0
-                            sermon.audioDownload.totalBytesExpectedToWrite = 0
-                            
-                            sermon.audioDownload.state = .none
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    func cancelAllDownloads()
+//    {
+//        if (series != nil) {
+//            for series in series! {
+//                if series.sermons != nil {
+//                    for sermon in series.sermons! {
+//                        if sermon.audioDownload.active {
+//                            sermon.audioDownload.task?.cancel()
+//                            sermon.audioDownload.task = nil
+//                            
+//                            sermon.audioDownload.totalBytesWritten = 0
+//                            sermon.audioDownload.totalBytesExpectedToWrite = 0
+//                            
+//                            sermon.audioDownload.state = .none
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
     
     func playerTimer()
     {

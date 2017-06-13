@@ -116,6 +116,11 @@ struct Constants {
         static let PLAY = "\u{f04b}"
         static let PAUSE = "\u{f04c}"
         static let ACTION = "\u{f150}"
+        
+        static let RESTART = "\u{f049}"
+        
+        static let REWIND = "\u{f04a}"
+        static let FF = "\u{f04e}"
     }
     
     struct FILE_EXTENSION {

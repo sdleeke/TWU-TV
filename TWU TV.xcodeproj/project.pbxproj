@@ -25,6 +25,7 @@
 		17812B8A1EEEE10100894B45 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17812B891EEEE10100894B45 /* Assets.xcassets */; };
 		17812B951EEEE10100894B45 /* TWU_TVTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B941EEEE10100894B45 /* TWU_TVTests.swift */; };
 		17812BA01EEEE10100894B45 /* TWU_TVUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B9F1EEEE10100894B45 /* TWU_TVUITests.swift */; };
+		17E9E5741EEF9E7300553408 /* fontawesome-webfont.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 17FB80AB1EEF0824006B4010 /* fontawesome-webfont.ttf */; };
 		17FB80AD1EEF08AD006B4010 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17FB80AC1EEF08AD006B4010 /* Images.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -273,6 +274,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				17E9E5741EEF9E7300553408 /* fontawesome-webfont.ttf in Resources */,
 				17FB80AD1EEF08AD006B4010 /* Images.xcassets in Resources */,
 				17812B8A1EEEE10100894B45 /* Assets.xcassets in Resources */,
 				17812B881EEEE10100894B45 /* Main.storyboard in Resources */,
