@@ -61,10 +61,12 @@ class PlayerStateTime {
         dateEntered = Date()
     }
     
-    convenience init(sermon:Sermon?)
+    convenience init(sermon:Sermon?,state:PlayerState)
     {
         self.init()
         self.sermon = sermon
+        self.state = state
+        self.startTime = sermon?.currentTime
     }
     
     func log()
@@ -139,6 +141,62 @@ class MediaPlayer {
     
     private var stateTime : PlayerStateTime?
     
+    @objc func didPlayToEnd()
+    {
+        globals.didPlayToEnd()
+    }
+    
+    func observe()
+    {
+        // We use both a timer and a periodicTimeObserver in CBC.  Why?  Because we need to monitor the player even when it isn't playing.  Do we need to do that here? 
+        
+        //        DispatchQueue.main.async(execute: { () -> Void in
+        //            self.playerObserver = Timer.scheduledTimer(timeInterval: Constants.TIMER_INTERVAL.PLAYER, target: self, selector: #selector(Globals.playerTimer), userInfo: nil, repeats: true)
+        //        })
+        
+        unobserve()
+        
+        player?.addObserver( globals,
+                             forKeyPath: #keyPath(AVPlayer.timeControlStatus),
+                             options: [.old, .new],
+                             context: nil) // &GlobalPlayerContext
+        
+        player?.currentItem?.addObserver(globals,
+                                         forKeyPath: #keyPath(AVPlayerItem.status),
+                                         options: [.old, .new],
+                                         context: nil) // &GlobalPlayerContext
+        observerActive = true
+        
+        playerTimerReturn = player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak globals] (time:CMTime) in
+            globals?.playerTimer()
+        })
+        
+        DispatchQueue.main.async {
+            NotificationCenter.default.addObserver(self, selector: #selector(MediaPlayer.didPlayToEnd), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+        }
+        
+        pause()
+    }
+    
+    func unobserve()
+    {
+        //        self.playerObserver?.invalidate()
+        //        self.playerObserver = nil
+        
+        if playerTimerReturn != nil {
+            player?.removeTimeObserver(playerTimerReturn!)
+            playerTimerReturn = nil
+        }
+        
+        if observerActive {
+            player?.removeObserver(globals, forKeyPath: #keyPath(AVPlayer.timeControlStatus), context: nil) // &GlobalPlayerContext
+            player?.currentItem?.removeObserver(globals, forKeyPath: #keyPath(AVPlayerItem.status), context: nil) // &GlobalPlayerContext
+            observerActive = false
+        }
+        
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+    }
+
     func unload()
     {
         loaded = false
@@ -182,13 +240,13 @@ class MediaPlayer {
     func play()
     {
         if loaded {
-            if (playing != stateTime?.sermon) || (stateTime?.sermon == nil) {
-                stateTime = PlayerStateTime(sermon: playing)
-            }
+//            if (playing != stateTime?.sermon) || (stateTime?.sermon == nil) {
+//                stateTime = PlayerStateTime(sermon: playing)
+//            }
+
+            stateTime = PlayerStateTime(sermon: playing,state:.playing)
             
-            stateTime?.startTime = playing?.currentTime
-            
-            stateTime?.state = .playing
+//            stateTime?.startTime = playing?.currentTime
             
             DispatchQueue.main.async(execute: { () -> Void in
                 NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
@@ -200,18 +258,31 @@ class MediaPlayer {
         }
     }
     
+    func stop()
+    {
+        pause()
+        
+        unload()
+        
+        unobserve()
+        
+        stateTime = PlayerStateTime(sermon: playing,state:.stopped)
+        
+        playing = nil
+        player = nil
+    }
+    
     func pause()
     {
+        updateCurrentTimeExact()
+        stateTime = PlayerStateTime(sermon: playing,state:.paused)
+        
         player?.pause()
         
-        updateCurrentTimeExact()
-        
-        if (playing != stateTime?.sermon) || (stateTime?.sermon == nil) {
-            stateTime = PlayerStateTime(sermon: playing)
-        }
-        
-        stateTime?.state = .paused
-        
+//        if (playing != stateTime?.sermon) || (stateTime?.sermon == nil) {
+//            stateTime = PlayerStateTime(sermon: playing)
+//        }
+
         DispatchQueue.main.async(execute: { () -> Void in
             NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
             NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERMON_UPDATE_PLAYING_PAUSED), object: nil)
@@ -341,7 +412,20 @@ class MediaPlayer {
 
 var globals:Globals!
 
-class Globals : NSObject {
+class Globals : NSObject
+{
+    func freeMemory()
+    {
+        // Free memory in classes
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.FREE_MEMORY), object: nil)
+        }
+        
+        URLCache.shared.removeAllCachedResponses()
+    }
+
+    var popoverNavCon: UINavigationController?
+
     let reachability = Reachability()!
 
     var playerTimerReturn:Any?
@@ -733,6 +817,82 @@ class Globals : NSObject {
 //            return
 //        }
         
+        if keyPath == #keyPath(AVPlayer.timeControlStatus) {
+            if  let statusNumber = change?[.newKey] as? NSNumber,
+                let status = AVPlayerTimeControlStatus(rawValue: statusNumber.intValue) {
+                switch status {
+                case .waitingToPlayAtSpecifiedRate:
+                    if let reason = mediaPlayer.player?.reasonForWaitingToPlay {
+                        print("waitingToPlayAtSpecifiedRate: ",reason)
+                    } else {
+                        print("waitingToPlayAtSpecifiedRate: no reason")
+                    }
+                    break
+                    
+                case .paused:
+                    if let state = mediaPlayer.state {
+                        switch state {
+                        case .none:
+                            break
+                            
+                        case .paused:
+                            break
+                            
+                        case .playing:
+                            mediaPlayer.pause()
+                            
+                            // didPlayToEnd observer doesn't always work.  This seemds to catch the cases where it doesn't.
+                            if let currentTime = mediaPlayer.currentTime?.seconds,
+                                let duration = mediaPlayer.duration?.seconds,
+                                Int(currentTime) >= Int(duration) {
+                                globals.didPlayToEnd()
+                            }
+                            break
+                            
+                        case .seekingBackward:
+                            //                                mediaPlayer.pause()
+                            break
+                            
+                        case .seekingForward:
+                            //                                mediaPlayer.pause()
+                            break
+                            
+                        case .stopped:
+                            break
+                        }
+                    }
+                    break
+                    
+                case .playing:
+                    if let state = mediaPlayer.state {
+                        switch state {
+                        case .none:
+                            break
+                            
+                        case .paused:
+                            mediaPlayer.play()
+                            break
+                            
+                        case .playing:
+                            break
+                            
+                        case .seekingBackward:
+                            //                                mediaPlayer.play()
+                            break
+                            
+                        case .seekingForward:
+                            //                                mediaPlayer.play()
+                            break
+                            
+                        case .stopped:
+                            break
+                        }
+                    }
+                    break
+                }
+            }
+        }
+        
         if keyPath == #keyPath(AVPlayerItem.status) {
             let status: AVPlayerItemStatus
             
@@ -806,15 +966,16 @@ class Globals : NSObject {
         }
     }
     
-    var autoAdvance:Bool {
-        get {
-            return UserDefaults.standard.bool(forKey: Constants.AUTO_ADVANCE)
-        }
-        set {
-            UserDefaults.standard.set(newValue, forKey: Constants.AUTO_ADVANCE)
-            UserDefaults.standard.synchronize()
-        }
-    }
+    var autoAdvance:Bool = false
+//    {
+//        get {
+//            return UserDefaults.standard.bool(forKey: Constants.AUTO_ADVANCE)
+//        }
+//        set {
+//            UserDefaults.standard.set(newValue, forKey: Constants.AUTO_ADVANCE)
+//            UserDefaults.standard.synchronize()
+//        }
+//    }
     
     func didPlayToEnd()
     {
@@ -842,57 +1003,20 @@ class Globals : NSObject {
             let mediaItems = mediaPlayer.playing?.series?.sermons,
             let index = mediaItems.index(of: mediaPlayer.playing!), index < (mediaItems.count - 1) {
             let nextMediaItem = mediaItems[index + 1]
+            
             nextMediaItem.currentTime = Constants.ZERO
+            
             mediaPlayer.playing = nextMediaItem
             mediaPlayer.playOnLoad = true
+            
             setupPlayer(nextMediaItem)
-            DispatchQueue.main.async(execute: { () -> Void in
-                NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SHOW_PLAYING), object: nil)
-            })
+        } else {
+            mediaPlayer.stop()
         }
-    }
-    
-    func observePlayer()
-    {
-        //        DispatchQueue.main.async(execute: { () -> Void in
-        //            self.playerObserver = Timer.scheduledTimer(timeInterval: Constants.TIMER_INTERVAL.PLAYER, target: self, selector: #selector(Globals.playerTimer), userInfo: nil, repeats: true)
-        //        })
         
-        unobservePlayer()
-        
-        mediaPlayer.player?.currentItem?.addObserver(self,
-                                                     forKeyPath: #keyPath(AVPlayerItem.status),
-                                                     options: [.old, .new],
-                                                     context: nil) // &GlobalPlayerContext
-        mediaPlayer.observerActive = true
-        
-        mediaPlayer.playerTimerReturn = mediaPlayer.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak self] (time:CMTime) in
-            self?.playerTimer()
+        DispatchQueue.main.async(execute: { () -> Void in
+            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SHOW_PLAYING), object: nil)
         })
-        
-        DispatchQueue.main.async {
-            NotificationCenter.default.addObserver(self, selector: #selector(Globals.didPlayToEnd), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
-        }
-        
-        mediaPlayer.pause()
-    }
-    
-    func unobservePlayer()
-    {
-        //        self.playerObserver?.invalidate()
-        //        self.playerObserver = nil
-        
-        if mediaPlayer.playerTimerReturn != nil {
-            mediaPlayer.player?.removeTimeObserver(mediaPlayer.playerTimerReturn!)
-            mediaPlayer.playerTimerReturn = nil
-        }
-        
-        if mediaPlayer.observerActive {
-            mediaPlayer.player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil) // &GlobalPlayerContext
-            mediaPlayer.observerActive = false
-        }
-        
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
     }
     
     func reloadPlayer(_ sermon:Sermon?)
@@ -907,21 +1031,24 @@ class Globals : NSObject {
         if (url != nil) {
             mediaPlayer.unload()
             
-            unobservePlayer()
+            mediaPlayer.unobserve()
             
             mediaPlayer.player?.replaceCurrentItem(with: AVPlayerItem(url: url!))
             
-            observePlayer()
+            mediaPlayer.observe()
         }
     }
     
     func setupPlayer(_ sermon:Sermon?)
     {
-        if (sermon != nil) {
-            mediaPlayer.unload()
-            
-            unobservePlayer()
-            
+        guard (sermon != nil) else {
+            return
+        }
+        
+        mediaPlayer.unload()
+        
+        mediaPlayer.unobserve()
+        
 //            if playerTimerReturn != nil {
 //                mediaPlayer.player?.removeTimeObserver(playerTimerReturn!)
 //                playerTimerReturn = nil
@@ -933,30 +1060,29 @@ class Globals : NSObject {
 //                globals.mediaPlayer.player?.removeTimeObserver(globals.mediaPlayer.sliderTimerReturn!)
 //                globals.mediaPlayer.sliderTimerReturn = nil
 //            }
-            
-            mediaPlayer.player = AVPlayer(url: sermon!.playingURL!)
+        
+        mediaPlayer.player = AVPlayer(url: sermon!.playingURL!)
 
-            if #available(iOS 10.0, *) {
-                mediaPlayer.player?.automaticallyWaitsToMinimizeStalling = false
-            } else {
-                // Fallback on earlier versions
-            }
-            
-            mediaPlayer.player?.actionAtItemEnd = .pause
+        if #available(iOS 10.0, *) {
+            mediaPlayer.player?.automaticallyWaitsToMinimizeStalling = false
+        } else {
+            // Fallback on earlier versions
+        }
+        
+        mediaPlayer.player?.actionAtItemEnd = .pause
 
-            observePlayer()
-            
+        mediaPlayer.observe()
+        
 //            mediaPlayer.player?.currentItem?.addObserver(self,
 //                                             forKeyPath: #keyPath(AVPlayerItem.status),
 //                                             options: [.old, .new],
 //                                             context: nil) // &GlobalPlayerContext
-            
+        
 //            playerTimerReturn = mediaPlayer.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak self] (CMTime) in
 //                self?.playerTimer()
 //            })
 
-            mediaPlayer.pause()
-        }
+        mediaPlayer.pause() // Puts the player in a known state .paused
     }
     
     func setupPlayerAtEnd(_ sermon:Sermon?)
@@ -1080,13 +1206,13 @@ class Globals : NSObject {
         
         MPRemoteCommandCenter.shared().skipBackwardCommand.isEnabled = true
         MPRemoteCommandCenter.shared().skipBackwardCommand.addTarget (handler: { (event:MPRemoteCommandEvent!) -> MPRemoteCommandHandlerStatus in
-            self.mediaPlayer.seek(to: self.mediaPlayer.currentTime!.seconds - 15)
+            self.mediaPlayer.seek(to: self.mediaPlayer.currentTime!.seconds - Constants.INTERVAL.SKIP_TIME)
             return MPRemoteCommandHandlerStatus.success
         })
         
         MPRemoteCommandCenter.shared().skipForwardCommand.isEnabled = true
         MPRemoteCommandCenter.shared().skipForwardCommand.addTarget (handler: { (event:MPRemoteCommandEvent!) -> MPRemoteCommandHandlerStatus in
-            self.mediaPlayer.seek(to: self.mediaPlayer.currentTime!.seconds + 15)
+            self.mediaPlayer.seek(to: self.mediaPlayer.currentTime!.seconds + Constants.INTERVAL.SKIP_TIME)
             return MPRemoteCommandHandlerStatus.success
         })
         

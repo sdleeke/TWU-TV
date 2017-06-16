@@ -1,6 +1,6 @@
 //
 //  PopoverTableViewController.swift
-//  TPS
+//  CBC
 //
 //  Created by Steve Leeke on 8/19/15.
 //  Copyright (c) 2015 Steve Leeke. All rights reserved.
@@ -9,162 +9,265 @@
 import UIKit
 
 enum PopoverPurpose {
-    case selectingShow
-    
     case selectingSorting
     case selectingFiltering
-    
-    case selectingAction
+    case selectingSettings
+    case selectingMenu
 }
 
 protocol PopoverTableViewControllerDelegate
 {
-    func rowClickedAtIndex(_ index:Int, strings:[String], purpose:PopoverPurpose, sermon:Sermon?)
+    func rowClickedAtIndex(_ index:Int, strings:[String]?, purpose:PopoverPurpose)
 }
 
-struct Section {
+class Section {
+    var strings:[String]? {
+        willSet {
+            
+        }
+        didSet {
+            indexStrings = strings?.map({ (string:String) -> String in
+                return indexTransform != nil ? indexTransform!(string.uppercased())! : string.uppercased()
+            })
+        }
+    }
+    
+    var indexStrings:[String]?
+    
+    var indexTransform:((String?)->String?)? = stringWithoutPrefixes
+    
+    var showHeaders = false
+    var showIndex = false
+    
     var titles:[String]?
     var counts:[Int]?
     var indexes:[Int]?
+    
+    func build()
+    {
+        guard strings?.count > 0 else {
+            titles = nil
+            counts = nil
+            indexes = nil
+            
+            return
+        }
+        
+        if showIndex {
+            guard indexStrings?.count > 0 else {
+                titles = nil
+                counts = nil
+                indexes = nil
+                
+                return
+            }
+        }
+        
+        let a = "A"
+        
+        titles = Array(Set(indexStrings!
+            
+            .map({ (string:String) -> String in
+                if string.endIndex >= a.endIndex {
+                    return string.substring(to: a.endIndex).uppercased()
+                } else {
+                    return string
+                }
+            })
+            
+        )).sorted() { $0 < $1 }
+        
+        if titles?.count == 0 {
+            titles = nil
+            counts = nil
+            indexes = nil
+        } else {
+            var stringIndex = [String:[String]]()
+            
+            for indexString in indexStrings! {
+                if stringIndex[indexString.substring(to: a.endIndex)] == nil {
+                    stringIndex[indexString.substring(to: a.endIndex)] = [String]()
+                }
+                //                print(testString,string)
+                stringIndex[indexString.substring(to: a.endIndex)]?.append(indexString)
+            }
+            
+            var counter = 0
+            
+            var counts = [Int]()
+            var indexes = [Int]()
+            
+            for key in stringIndex.keys.sorted() {
+                //                print(stringIndex[key]!)
+                
+                indexes.append(counter)
+                counts.append(stringIndex[key]!.count)
+                
+                counter += stringIndex[key]!.count
+            }
+            
+            self.counts = counts.count > 0 ? counts : nil
+            self.indexes = indexes.count > 0 ? indexes : nil
+        }
+    }
 }
 
-class PopoverTableViewController: UITableViewController {
+class PopoverTableViewController : UIViewController {
+    var vc:UIViewController?
+    
+    var selectedText:String!
+
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
+    @IBOutlet weak var tableView: UITableView! {
+        didSet {
+            tableView.mask = nil
+        }
+    }
     
     var delegate : PopoverTableViewControllerDelegate?
     var purpose : PopoverPurpose?
     
-    var selectedSermon:Sermon?
+    @IBOutlet weak var tableViewWidth: NSLayoutConstraint!
+    
+//    var stringsFunction:((Void)->[String]?)?
     
     var allowsSelection:Bool = true
     var allowsMultipleSelection:Bool = false
     
-    var showIndex:Bool = false
-    var indexByLastName:Bool = false
-    var showSectionHeaders:Bool = false
+    var indexTransform:((String?)->String?)? = stringWithoutPrefixes {
+        willSet {
+            
+        }
+        didSet {
+            section.indexTransform = indexTransform
+        }
+    }
     
-    var strings:[String]?
-    
-    lazy var section:Section! = {
-        var section = Section()
-        return section
-    }()
+    var section = Section()
     
     func setPreferredContentSize()
     {
-        guard (strings != nil) else {
+        guard Thread.isMainThread else {
             return
         }
         
-        self.tableView.sizeToFit()
+        guard (section.strings != nil) else {
+            return
+        }
+        
+        let margins:CGFloat = 2
+        let marginSpace:CGFloat = 9
+        
+//        let checkmarkSpace:CGFloat = 160
+        let indexSpace:CGFloat = 40
         
         var height:CGFloat = 0.0
         var width:CGFloat = 0.0
         
-        //        print(strings)
+        var deducts:CGFloat = 0
         
-        for string in strings! {
-            let widthSize: CGSize = CGSize(width: .greatestFiniteMagnitude, height: 44.0)
-            let maxWidth = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 16.0)], context: nil)
-            
-            let heightSize: CGSize = CGSize(width: view.bounds.width - 30, height: .greatestFiniteMagnitude)
-            let maxHeight = string.boundingRect(with: heightSize, options: .usesLineFragmentOrigin, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 16.0)], context: nil)
-            
-            //            print(string)
-            //            print(maxSize)
-            
-            if maxWidth.width > width {
-                //                print(string)
-                width = maxWidth.width
-            }
-            
-            height += 44
-            
-            //            print(maxHeight.height, (Int(maxHeight.height) / 16) - 1)
-            height += CGFloat(((Int(maxHeight.height) / 16) - 1) * 16)
+        deducts += margins * marginSpace
+        
+        if section.showIndex {
+            deducts += indexSpace
         }
         
-        width += 2*20
-        
-        switch purpose! {
+        switch self.purpose! {
         case .selectingFiltering:
             fallthrough
         case .selectingSorting:
-            width += 44
+//            deducts += checkmarkSpace
             break
             
         default:
             break
         }
         
-        if showIndex {
-            width += 24
+        let viewWidth = view.frame.width
+        
+//        if (vc!.splitViewController?.viewControllers.count > 1) {
+//            viewWidth = vc!.splitViewController!.view.frame.width
+//        }
+        
+        //        print(view.frame.width - deducts)
+        
+        let heightSize: CGSize = CGSize(width: viewWidth - deducts, height: .greatestFiniteMagnitude)
+        let widthSize: CGSize = CGSize(width: .greatestFiniteMagnitude, height: Constants.Fonts.bold.lineHeight)
+        
+        if let title = self.navigationItem.title {
+            let string = title.replacingOccurrences(of: Constants.SINGLE_SPACE, with: Constants.UNBREAKABLE_SPACE)
+            
+            width = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil).width
         }
         
-        self.preferredContentSize = CGSize(width: width, height: height)
+        //        print(strings)
+        
+        for string in self.section.strings! {
+            let string = string.replacingOccurrences(of: Constants.SINGLE_SPACE, with: Constants.UNBREAKABLE_SPACE)
+            
+            let maxWidth = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil)
+            
+            let maxHeight = string.boundingRect(with: heightSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil)
+            
+            //            print(string)
+            //            print(maxSize)
+            
+            //            print(string,width,maxWidth.width)
+            
+            if maxWidth.width > width {
+                width = maxWidth.width
+            }
+            
+            //            print(string,maxHeight.height) // baseHeight
+            
+            if tableView.rowHeight != -1 {
+                height += tableView.rowHeight
+            } else {
+                height += 2*8 + maxHeight.height // - baseHeight
+            }
+            
+            //            print(maxHeight.height, (Int(maxHeight.height) / 16) - 1)
+            //            height += CGFloat(((Int(maxHeight.height) / 16) - 1) * 16)
+        }
+        
+        width += margins * marginSpace
+        
+        switch self.purpose! {
+        case .selectingSorting:
+            fallthrough
+        case .selectingFiltering:
+            fallthrough
+        case .selectingSorting:
+//            width += checkmarkSpace
+            break
+            
+        default:
+            break
+        }
+        
+        if self.section.showIndex {
+            width += indexSpace
+            height += self.tableView.sectionHeaderHeight * CGFloat(self.section.indexStrings!.count)
+        }
+        
+//        print(height)
+//        print(width)
+        
+        tableViewWidth.constant = width
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        guard (strings != nil) else {
-            return
-        }
         
         //This makes accurate scrolling to sections impossible but since we don't use scrollToRowAtIndexPath with
         //the popover, this makes multi-line rows possible.
+
         tableView.estimatedRowHeight = tableView.rowHeight
         tableView.rowHeight = UITableViewAutomaticDimension
 
         tableView.allowsSelection = allowsSelection
         tableView.allowsMultipleSelection = allowsMultipleSelection
-        
-//        var max = 0
-//        
-//        if (navigationItem.title != nil) {
-//            max = navigationItem.title!.characters.count
-//        }
-//        
-//        for string in strings! {
-//            if string.characters.contains("\n") {
-//                var newString = string
-//                
-//                var strings = [String]()
-//                
-//                repeat {
-//                    strings.append(newString.substring(to: newString.range(of: "\n")!.lowerBound))
-//                    newString = newString.substring(from: newString.range(of: "\n")!.upperBound)
-//                } while newString.characters.contains("\n")
-//                
-//                strings.append(newString)
-//                
-//                for string in strings {
-//                    if string.characters.count > max {
-//                        max = string.characters.count
-//                    }
-//                }
-//            } else {
-//                if string.characters.count > max {
-//                    max = string.characters.count
-//                }
-//            }
-//        }
-//        
-//        //        print("count: \(CGFloat(strings!.count)) rowHeight: \(tableView.rowHeight) height: \(height)")
-//        
-//        var width = CGFloat(max * 12)
-//        if width < 200 {
-//            width = 200
-//        }
-//        var height = 50 * CGFloat(strings!.count) //35 tableView.rowHeight was -1 which I don't understand
-//        if height < 150 {
-//            height = 150
-//        }
-//        
-//        if showSectionHeaders {
-//            height = 1.5*height
-//        }
-//
-//        self.preferredContentSize = CGSize(width: width, height: height)
         
 //        print("Strings: \(strings)")
 //        print("Sections: \(sections)")
@@ -178,57 +281,171 @@ class PopoverTableViewController: UITableViewController {
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
     
-    func setupIndex()
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator)
     {
-        if (showIndex) {
-            let a = "A"
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { (UIViewControllerTransitionCoordinatorContext) -> Void in
+
+        }) { (UIViewControllerTransitionCoordinatorContext) -> Void in
             
-            section.titles = Array(Set(strings!.map({ (string:String) -> String in
-                if indexByLastName {
-                    return lastNameFromName(string)!.substring(to: a.endIndex)
-                } else {
-                    return stringWithoutPrefixes(string)!.substring(to: a.endIndex)
-                }
-            }))).sorted() { $0 < $1 }
-            
-            var indexes = [Int]()
-            var counts = [Int]()
-            
-            for sectionTitle in section.titles! {
-                var counter = 0
-                
-                for index in 0..<strings!.count {
-                    var string:String?
-                    
-                    if indexByLastName {
-                        string = lastNameFromName(strings?[index])!.substring(to: a.endIndex)
-                    } else {
-                        string = stringWithoutPrefixes(strings?[index])!.substring(to: a.endIndex)
-                    }
-                    
-                    if (sectionTitle == string) {
-                        if (counter == 0) {
-                            indexes.append(index)
-                        }
-                        counter += 1
-                    }
-                }
-                
-                counts.append(counter)
-            }
-            
-            section.indexes = indexes.count > 0 ? indexes : nil
-            section.counts = counts.count > 0 ? counts : nil
         }
+    }
+    
+    func selectString(_ string:String?,scroll:Bool,select:Bool)
+    {
+        guard (string != nil) else {
+            return
+        }
+        
+        selectedText = string
+        
+//        if let active = self.searchController?.isActive, active {
+        if let selectedText = selectedText,  let index = section.strings?.index(where: { (string:String) -> Bool in
+            return selectedText.uppercased() == string.substring(to: string.range(of: " (")!.lowerBound).uppercased()
+        }) {
+            //                if let selectedText = self.selectedText, let index = self.filteredStrings?.index(of: selectedText) {
+            var i = 0
+            
+            repeat {
+                i += 1
+            } while (i < self.section.indexes?.count) && (self.section.indexes?[i] <= index)
+            
+            let section = i - 1
+            
+            if let base = self.section.indexes?[section] {
+                let row = index - base
+                
+                if self.section.strings?.count > 0 {
+                    DispatchQueue.main.async(execute: { () -> Void in
+                        if section < self.tableView.numberOfSections, row < self.tableView.numberOfRows(inSection: section) {
+                            let indexPath = IndexPath(row: row,section: section)
+                            if scroll {
+                                self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+                            }
+                            if select {
+                                self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+                            }
+                        } else {
+                            userAlert(title:"String not found!",message:"THIS SHOULD NOT HAPPEN.")
+                        }
+                    })
+                }
+            }
+        } else {
+            userAlert(title:"String not found!",message:"Search is active and the string \(selectedText!) is not in the results.")
+        }
+//        if searchActive {
+//            if let selectedText = self.selectedText,  let index = self.filteredSection.strings?.index(where: { (string:String) -> Bool in
+//                return selectedText == string.substring(to: string.range(of: " (")!.lowerBound).uppercased()
+//            }) {
+//                //                if let selectedText = self.selectedText, let index = self.filteredStrings?.index(of: selectedText) {
+//                var i = 0
+//                
+//                repeat {
+//                    i += 1
+//                } while (i < self.filteredSection.indexes?.count) && (self.filteredSection.indexes?[i] <= index)
+//                
+//                let section = i - 1
+//                
+//                if let base = self.filteredSection.indexes?[section] {
+//                    let row = index - base
+//                    
+//                    if self.filteredSection.strings?.count > 0 {
+//                        DispatchQueue.main.async(execute: { () -> Void in
+//                            if section < self.tableView.numberOfSections, row < self.tableView.numberOfRows(inSection: section) {
+//                                let indexPath = IndexPath(row: row,section: section)
+//                                if scroll {
+//                                    self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+//                                }
+//                                if select {
+//                                    self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+//                                }
+//                            } else {
+//                                userAlert(title:"String not found!",message:"THIS SHOULD NOT HAPPEN.")
+//                            }
+//                        })
+//                    }
+//                }
+//            } else {
+//                userAlert(title:"String not found!",message:"Search is active and the string \(selectedText!) is not in the results.")
+//            }
+//        } else {
+//            if let selectedText = self.selectedText,  let index = self.section.strings?.index(where: { (string:String) -> Bool in
+//                return selectedText == string.substring(to: string.range(of: " (")!.lowerBound).uppercased()
+//            }) {
+//                //                if let selectedText = self.selectedText, let index = self.strings?.index(of: selectedText) {
+//                var i = 0
+//                
+//                while i < self.section.indexes?.count, self.section.indexes?[i] <= index {
+//                    i += 1
+//                }
+//                
+//                let section = i - 1
+//                
+//                if let base = self.section.indexes?[section] {
+//                    let row = index - base
+//                    
+//                    if self.section.strings?.count > 0 {
+//                        DispatchQueue.main.async(execute: { () -> Void in
+//                            if section < self.tableView.numberOfSections, row < self.tableView.numberOfRows(inSection: section) {
+//                                let indexPath = IndexPath(row: row,section: section)
+//                                if scroll {
+//                                    self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+//                                }
+//                                if select {
+//                                    self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+//                                }
+//                            }
+//                        })
+//                    }
+//                }
+//            } else {
+//                userAlert(title:"String not found!",message:"The string \(selectedText!) is not in the results - THIS SHOULD NEVER HAPPEN.")
+//            }
+//        }
+    }
+    
+    
+    override func viewWillDisappear(_ animated: Bool)
+    {
+        super.viewWillDisappear(animated)
+        globals.popoverNavCon = nil
+    }
+    
+    func updateTitle()
+    {
+
+    }
+    
+    func willResignActive()
+    {
+        dismiss(animated: true, completion: nil)
     }
     
     override func viewWillAppear(_ animated: Bool)
     {
         super.viewWillAppear(animated)
         
-        setupIndex()
+        NotificationCenter.default.addObserver(self, selector: #selector(PopoverTableViewController.willResignActive), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.WILL_RESIGN_ACTIVE), object: nil)
         
-        tableView.reloadData()
+        if section.strings != nil {
+            if section.showIndex {
+                if (self.section.indexStrings?.count > 1) {
+                    section.build()
+                } else {
+                    section.showIndex = false
+                }
+            }
+
+            tableView.reloadData()
+            
+            activityIndicator?.stopAnimating()
+            activityIndicator?.isHidden = true
+        } else {
+            activityIndicator?.stopAnimating()
+            activityIndicator?.isHidden = true
+        }
         
         setPreferredContentSize()
     }
@@ -236,176 +453,259 @@ class PopoverTableViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool)
     {
         super.viewDidAppear(animated)
-
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-        URLCache.shared.removeAllCachedResponses()
+        globals.freeMemory()
     }
+}
 
-    // MARK: - Table view data source
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
+extension PopoverTableViewController : UITableViewDataSource
+{
+    // MARK: UITableViewDataSource
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Potentially incomplete method implementation.
         // Return the number of sections.
-        if (showIndex) {
-            return self.section.titles != nil ? self.section.titles!.count : 0
+        if section.showIndex {
+            //        if let active = self.searchController?.isActive, active {
+            return section.titles != nil ? section.titles!.count : 0
+//            if searchActive {
+//                return filteredSection.titles != nil ? filteredSection.titles!.count : 0
+//            } else {
+//                return section.titles != nil ? section.titles!.count : 0
+//            }
         } else {
             return 1
         }
     }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
-        if (showIndex) {
-            return self.section.counts != nil ? self.section.counts![section] : 0
+        if self.section.showIndex {
+            //        if let active = self.searchController?.isActive, active {
+            return self.section.counts != nil ? ((section < self.section.counts?.count) ? self.section.counts![section] : 0) : 0
+//            if searchActive {
+//                return self.filteredSection.counts != nil ? ((section < self.filteredSection.counts?.count) ? self.filteredSection.counts![section] : 0) : 0
+//            } else {
+//                return self.section.counts != nil ? ((section < self.section.counts?.count) ? self.section.counts![section] : 0) : 0
+//            }
         } else {
-            return strings != nil ? strings!.count : 0
+            return self.section.strings != nil ? self.section.strings!.count : 0
+//            if searchActive {
+//                return self.filteredSection.strings != nil ? self.filteredSection.strings!.count : 0
+//            } else {
+//                return self.section.strings != nil ? self.section.strings!.count : 0
+//            }
         }
     }
-
-    override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
-        if (showIndex) {
-            return self.section.titles
+    
+    func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+        if section.showIndex {
+            //        if let active = self.searchController?.isActive, active {
+            return section.titles
+//            if searchActive {
+//                return filteredSection.titles
+//            } else {
+//                return section.titles
+//            }
         } else {
             return nil
         }
     }
     
-//    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-//        return 48
-//    }
+    //    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    //        return 48
+    //    }
     
-    override func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
-        if (showIndex) {
+    func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+        if section.showIndex {
+            //            if let pause = mediaListGroupSort?.lexicon?.pauseUpdates, !pause, let creating = mediaListGroupSort?.lexicon?.creating, creating {
+            //                mediaListGroupSort?.lexicon?.pauseUpdates = true
+            //
+            //                DispatchQueue.main.async(execute: { () -> Void in
+            //                    self.navigationItem.title = "Lexicon Updates Paused"
+            
+            //                    var strings = [String]()
+            //
+            //                    if let words = self.mediaListGroupSort?.lexicon?.words?.keys.sorted() {
+            //                        for word in words {
+            //                            if let count = self.mediaListGroupSort?.lexicon?.words?[word]?.count {
+            //                                strings.append("\(word) (\(count))")
+            //                            }
+            //                        }
+            //                    }
+            //
+            //                    self.strings = strings
+            //
+            //                    let array = Array(Set(self.strings!)).sorted() { $0.uppercased() < $1.uppercased() }
+            //
+            //                    self.indexStrings = array.map({ (string:String) -> String in
+            //                        return string.uppercased()
+            //                    })
+            //
+            //                    self.setupIndex()
+            //
+            //                    tableView.reloadData()
+            //                    tableView.scrollToRow(at: IndexPath(row:0, section:index), at: .top, animated: true)
+            //                })
+            //            }
             return index
         } else {
             return 1
         }
     }
     
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if (showIndex && showSectionHeaders) {
-            return self.section.titles != nil ? self.section.titles![section] : nil
-        } else {
-            return nil
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if self.section.showIndex, self.section.showHeaders { // showIndex &&
+            //        if let active = self.searchController?.isActive, active {
+            if let count = self.section.titles?.count, section < count {
+                return self.section.titles?[section]
+            }
+//            if searchActive {
+//                if let count = self.filteredSection.titles?.count, section < count {
+//                    return self.filteredSection.titles?[section]
+//                }
+//            } else {
+//                if let count = self.section.titles?.count, section < count {
+//                    return self.section.titles?[section]
+//                }
+//            }
         }
+        
+        return nil
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.IDENTIFIER.POPOVER_CELL, for: indexPath)
-
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
+    {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.IDENTIFIER.POPOVER_CELL, for: indexPath) as! PopoverTableViewCell
+        
+        cell.title.text = nil
+        cell.title.attributedText = nil
+        
         var index = -1
         
-        if (showIndex) {
-            index = section.indexes != nil ? section.indexes![(indexPath as NSIndexPath).section]+(indexPath as NSIndexPath).row : -1
+        if (section.showIndex) {
+            index = section.indexes != nil ? section.indexes![indexPath.section] + indexPath.row : -1
         } else {
-            index = (indexPath as NSIndexPath).row
+            index = indexPath.row
         }
         
-        // Configure the cell...
+        guard index > -1 else {
+            print("ERROR")
+            return cell
+        }
+        
+        guard let string = section.strings?[index] else {
+            return cell
+        }
+        
+//        cell.title.text = string
+
+        cell.accessoryType = .none
+        
         switch purpose! {
-        case .selectingAction:
-            cell.accessoryType = UITableViewCellAccessoryType.none
+        case .selectingSorting:
+            if (globals.sorting == Constants.Sorting.Options[index]) {
+                cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
+            } else {
+                cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
+            }
             break
             
         case .selectingFiltering:
             //            print("strings: \(strings[indexPath.row]) sermontTag: \(globals.sermonTag)")
             switch globals.showing {
             case .all:
-                if strings![index] == Constants.All {
-                    cell.accessoryType = UITableViewCellAccessoryType.checkmark
+                if string == Constants.All {
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
                 } else {
-                    cell.accessoryType = UITableViewCellAccessoryType.none
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
                 }
                 break
-            
+                
             case .filtered:
-                if strings![index] == globals.filter {
-                    cell.accessoryType = UITableViewCellAccessoryType.checkmark
+                if string == globals.filter {
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
                 } else {
-                    cell.accessoryType = UITableViewCellAccessoryType.none
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
                 }
                 break
-            }
-            
-        case .selectingSorting:
-            if (strings?[index].lowercased() == globals.sorting?.lowercased()) {
-                cell.accessoryType = UITableViewCellAccessoryType.checkmark
-            } else {
-                cell.accessoryType = UITableViewCellAccessoryType.none
             }
             break
             
-        case .selectingShow:
-            cell.accessoryType = UITableViewCellAccessoryType.none
+        default:
+            cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
             break
         }
-
-        cell.textLabel?.text = strings![index]
 
         return cell
     }
 
-    override func tableView(_ TableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let cell = tableView.cellForRowAtIndexPath(indexPath)
+    /*
+     // Override to support conditional editing of the table view.
+     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+     // Return NO if you do not want the specified item to be editable.
+     return true
+     }
+     */
+    
+    /*
+     // Override to support editing the table view.
+     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+     if editingStyle == .Delete {
+     // Delete the row from the data source
+     tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+     } else if editingStyle == .Insert {
+     // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+     }
+     }
+     */
+    
+    /*
+     // Override to support rearranging the table view.
+     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
+     
+     }
+     */
+    
+    /*
+     // Override to support conditional rearranging of the table view.
+     override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+     // Return NO if you do not want the item to be re-orderable.
+     return true
+     }
+     */
+}
 
+extension PopoverTableViewController : UITableViewDelegate
+{
+    // MARK: UITableViewDelegate
+    
+    func tableView(_ TableView: UITableView, didSelectRowAt indexPath: IndexPath)
+    {
+        //        let cell = tableView.cellForRow(at: indexPath)
+        
         var index = -1
-        if (showIndex) {
-            index = self.section.indexes != nil ? self.section.indexes![(indexPath as NSIndexPath).section]+(indexPath as NSIndexPath).row : -1
+        
+        if (section.showIndex) {
+            //        if let active = self.searchController?.isActive, active {
+            index = section.indexes != nil ? section.indexes![indexPath.section] + indexPath.row : -1
+            if let range = section.strings?[index].range(of: " (") {
+                selectedText = section.strings?[index].substring(to: range.lowerBound).uppercased()
+            }
         } else {
-            index = (indexPath as NSIndexPath).row
+            index = indexPath.row
+            if let range = section.strings?[index].range(of: " (") {
+                selectedText = section.strings?[index].substring(to: range.lowerBound).uppercased()
+            }
         }
-
-        delegate?.rowClickedAtIndex(index, strings: self.strings!, purpose: self.purpose!, sermon: self.selectedSermon)
+        
+        //        print(index,strings![index])
+        
+        delegate?.rowClickedAtIndex(index, strings: section.strings, purpose: purpose!)
     }
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

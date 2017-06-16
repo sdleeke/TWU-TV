@@ -24,6 +24,21 @@ class MediaCollectionViewCell: UICollectionViewCell {
         }
     }
     
+    override var canBecomeFocused: Bool {
+        get {
+            return true
+        }
+    }
+    
+    override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator)
+    {
+        if isFocused {
+            seriesArt.adjustsImageWhenAncestorFocused = true
+        } else {
+            seriesArt.adjustsImageWhenAncestorFocused = false
+        }
+    }
+    
     fileprivate func updateUI()
     {
         if let series = self.series {

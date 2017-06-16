@@ -10,6 +10,25 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 
+func userAlert(title:String?,message:String?)
+{
+    if (UIApplication.shared.applicationState == UIApplicationState.active) {
+        
+        let alert = UIAlertController(title: title,
+                                      message: message,
+                                      preferredStyle: UIAlertControllerStyle.alert)
+        
+        let action = UIAlertAction(title: Constants.Cancel, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
+            
+        })
+        alert.addAction(action)
+        
+        DispatchQueue.main.async(execute: { () -> Void in
+            UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true, completion: nil)
+        })
+    }
+}
+
 func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
   switch (lhs, rhs) {
   case let (l?, r?):

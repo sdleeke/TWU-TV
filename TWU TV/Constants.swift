@@ -33,7 +33,7 @@ struct Constants {
         static let PLAY_OBSERVER_TIME = 10.0 // seconds
         
         static let VIEW_TRANSITION_TIME = 0.50 // seconds
-        static let SKIP_TIME = 15
+        static let SKIP_TIME = 10.0
     }
     
     struct FIELDS {
@@ -49,6 +49,8 @@ struct Constants {
     }
     
     struct NOTIFICATION {
+        static let FREE_MEMORY              = "FREE MEMORY"
+        
         static let UPDATE_PLAY_PAUSE    = "UPDATE PLAY PAUSE"
         
         static let READY_TO_PLAY        = "READY TO PLAY"
@@ -68,6 +70,12 @@ struct Constants {
         static let SERMON_UPDATE_UI             = "SERMON UPDATE UI"
         static let SERMON_UPDATE_PLAYING_PAUSED = "SERMON UPDATE PLAYING PAUSED"
         static let SERMON_UPDATE_PLAY_PAUSE     = "SERMON UPDATE PLAY PAUSE"
+        
+        static let WILL_RESIGN_ACTIVE       = "WILL RESIGN ACTIVE"
+        static let DID_BECOME_ACTIVE        = "DID BECOME ACTIVE"
+        static let WILL_TERMINATE           = "WILL TERMINATE"
+        static let WILL_ENTER_FORGROUND     = "WILL ENTER FORGROUND"
+        static let DID_ENTER_BACKGROUND     = "DID ENTER BACKGROUND"
     }
     
     struct JSON {
@@ -103,11 +111,33 @@ struct Constants {
     struct IDENTIFIER {
         static let POPOVER_CELL = "PopoverCell"
         static let POPOVER_TABLEVIEW = "PopoverTableView"
+        static let POPOVER_TABLEVIEW_NAV    = "PopoverTableViewNav"
         
         static let SERIES_CELL = "SeriesCell"
         static let SERMON_CELL = "SeriesSermon"
         
         static let DOWNLOAD = "com.leeke.TWU.download."
+    }
+    
+    struct Fonts {
+        static let body = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
+        
+        static let bold = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
+        
+        struct Attributes {
+            static let normal = [ NSFontAttributeName: Fonts.body ]
+            
+            static let bold = [ NSFontAttributeName: Fonts.bold ]
+            
+            static let boldGrey = [ NSForegroundColorAttributeName: UIColor.gray,
+                                    NSFontAttributeName: Fonts.bold ]
+            
+            static let highlighted = [ NSBackgroundColorAttributeName: UIColor.yellow,
+                                       NSFontAttributeName: Fonts.body ]
+            
+            static let boldHighlighted = [ NSBackgroundColorAttributeName: UIColor.yellow,
+                                           NSFontAttributeName: Fonts.bold ]
+        }
     }
     
     struct FA {
@@ -210,7 +240,10 @@ struct Constants {
     static let FILENAME_FORMAT = "%04d" + Constants.FILE_EXTENSION.MP3
     
     static let EMPTY_STRING = ""
+
     static let SINGLE_SPACE = " "
+    static let UNBREAKABLE_SPACE = "\u{00A0}"
+
     static let NEWLINE = "\n"
     static let FORWARD_SLASH = "/"
     

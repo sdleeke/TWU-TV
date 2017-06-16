@@ -361,17 +361,8 @@ class Sermon : NSObject {
     var title:String?
     {
         get {
-            if let numberOfSermons = series?.numberOfSermons {
-                switch numberOfSermons {
-                case 1:
-                    return series?.title
-                    
-                default:
-                    if let index = series?.sermons?.index(of: self) {
-                        return "\(series!.title!) (Part\u{00a0}\(index+1))"
-                    }
-                    break
-                }
+            if let numberOfSermons = series?.numberOfSermons, let index = series?.sermons?.index(of: self) {
+                return "Part\u{00a0}\(index+1) of \(numberOfSermons)"
             }
             
             return series?.title
