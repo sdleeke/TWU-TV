@@ -65,7 +65,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        globals.setupPlayingInfoCenter()
+        globals.mediaPlayer.setupPlayingInfoCenter()
         
         DispatchQueue.main.async(execute: { () -> Void in
             NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERIES_UPDATE_UI), object: nil)

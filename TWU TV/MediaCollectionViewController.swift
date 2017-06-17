@@ -1364,7 +1364,7 @@ class MediaCollectionViewController: UIViewController
     fileprivate func reloadCurrentSermon(_ sermon:Sermon?) {
         //This guarantees a fresh start.
         globals.mediaPlayer.playOnLoad = true
-        globals.reloadPlayer(sermon)
+        globals.mediaPlayer.reload(sermon)
         addSliderObserver()
         setupPlayPauseButton()
     }
@@ -1388,7 +1388,7 @@ class MediaCollectionViewController: UIViewController
         
         //This guarantees a fresh start.
         globals.mediaPlayer.playOnLoad = true
-        globals.setupPlayer(sermon)
+        globals.mediaPlayer.setup(sermon)
         
         addSliderObserver()
         
@@ -1760,7 +1760,7 @@ class MediaCollectionViewController: UIViewController
                 self.navigationItem.title = Constants.Titles.Setting_up_Player
                 if (globals.mediaPlayer.playing != nil) {
                     globals.mediaPlayer.playOnLoad = false
-                    globals.setupPlayer(globals.mediaPlayer.playing)
+                    globals.mediaPlayer.setup(globals.mediaPlayer.playing)
                 }
 
                 self.navigationItem.title = Constants.TWU.LONG
@@ -1944,10 +1944,11 @@ class MediaCollectionViewController: UIViewController
         view.backgroundColor = #colorLiteral(red: 0.7254902124, green: 0.4784313738, blue: 0.09803921729, alpha: 0.75)
         
         if globals.series == nil {
-            loadSeries({
+            loadSeries()
+            {
                 self.collectionView.reloadData()
                 self.scrollToSeries(self.seriesSelected)
-            })
+            }
         }
         
         let menuPressRecognizer = UITapGestureRecognizer(target: self, action: #selector(MediaCollectionViewController.menuButtonAction(tap:)))
