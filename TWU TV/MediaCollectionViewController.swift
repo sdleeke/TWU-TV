@@ -377,13 +377,11 @@ class MediaCollectionViewController: UIViewController
         case .seekingForward:
             print("seekingForward")
             globals.mediaPlayer.pause()
-            //                setupPlayPauseButton()
             break
             
         case .seekingBackward:
             print("seekingBackward")
             globals.mediaPlayer.pause()
-            //                setupPlayPauseButton()
             break
         }
     }
@@ -670,8 +668,6 @@ class MediaCollectionViewController: UIViewController
             backgroundLogo.isHidden = !logo.isHidden
             tomPennington.isHidden = !logo.isHidden
             
-            //            seriesArt.image = UIImage(named: "twu_logo_circle_r") // cover170x170
-            
             let description = "Tom Pennington is Pastor-Teacher at Countryside Bible Church in Southlake, TX.<br/>His pulpit ministry provides the material for The Word Unleashed.\n\nOur ministry is founded upon one principle: God has given you every spiritual resource you need to grow in Jesus Christ, and you find those resources in His all-sufficient Word (2 Pet. 1:3). That's why Tom embraces expository preaching - an approach that seeks to understand what the original authors of Scripture meant, rather than an approach that reads our own meaning into it. If that's what you've been looking for, you've come to the right place.\n\nIt's our prayer that the transforming power of God's Word be unleashed in your life.\n\nP.O. Box 96077<br>Southlake, Texas 76092<br/>www.thewordunleashed.org<br/>listeners@thewordunleashed.org<br/>877-577-WORD (9673)"
             
             let text = description.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
@@ -689,8 +685,6 @@ class MediaCollectionViewController: UIViewController
 
             return
         }
-        
-        //            seriesArtAndDescription.isHidden = false
         
         logo.isHidden = true
         tomPennington.isHidden = true
@@ -793,14 +787,12 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        self.setupArtAndDescription()
+        setupArtAndDescription()
         
-        self.setupTitle()
-        self.setupPlayPauseButton()
-        self.setupSpinner()
-        self.setupSlider()
-
-//        addSliderObserver()
+        setupTitle()
+        setupPlayPauseButton()
+        setupSpinner()
+        setupSlider()
     }
     
     func scrollToSermon(_ sermon:Sermon?,select:Bool,position:UITableViewScrollPosition)
@@ -1588,6 +1580,10 @@ class MediaCollectionViewController: UIViewController
         NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.updateUI), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.FAILED_TO_PLAY), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.readyToPlay), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.READY_TO_PLAY), object: nil)
 
+        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.updateUI), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.PAUSED), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.setupPlayPauseButton), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
+        
         updateUI()
     }
     

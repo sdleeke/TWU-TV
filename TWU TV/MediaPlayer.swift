@@ -175,11 +175,6 @@ class MediaPlayer : NSObject {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = sermonInfo
         }
     }
-
-//    @objc func didPlayToEnd()
-//    {
-//        globals.didPlayToEnd()
-//    }
     
     override func observeValue(forKeyPath keyPath: String?,
                                of object: Any?,
@@ -415,18 +410,6 @@ class MediaPlayer : NSObject {
         
         unobserve()
         
-        //            if playerTimerReturn != nil {
-        //                player?.removeTimeObserver(playerTimerReturn!)
-        //                playerTimerReturn = nil
-        //            }
-        //
-        //            player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil) // &GlobalPlayerContext
-        //
-        //            if sliderTimerReturn != nil {
-        //                player?.removeTimeObserver(sliderTimerReturn!)
-        //                sliderTimerReturn = nil
-        //            }
-        
         player = AVPlayer(url: sermon!.playingURL!)
         
         if #available(iOS 10.0, *) {
@@ -438,15 +421,6 @@ class MediaPlayer : NSObject {
         player?.actionAtItemEnd = .pause
         
         observe()
-        
-        //            player?.currentItem?.addObserver(self,
-        //                                             forKeyPath: #keyPath(AVPlayerItem.status),
-        //                                             options: [.old, .new],
-        //                                             context: nil) // &GlobalPlayerContext
-        
-        //            playerTimerReturn = player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak self] (CMTime) in
-        //                self?.playerTimer()
-        //            })
         
         pause() // Puts the player in a known state .paused
     }
@@ -629,13 +603,7 @@ class MediaPlayer : NSObject {
     func play()
     {
         if loaded {
-            //            if (playing != stateTime?.sermon) || (stateTime?.sermon == nil) {
-            //                stateTime = PlayerStateTime(sermon: playing)
-            //            }
-            
             stateTime = PlayerStateTime(sermon: playing,state:.playing)
-            
-            //            stateTime?.startTime = playing?.currentTime
             
             DispatchQueue.main.async(execute: { () -> Void in
                 NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
@@ -668,13 +636,8 @@ class MediaPlayer : NSObject {
         
         player?.pause()
         
-        //        if (playing != stateTime?.sermon) || (stateTime?.sermon == nil) {
-        //            stateTime = PlayerStateTime(sermon: playing)
-        //        }
-        
         DispatchQueue.main.async(execute: { () -> Void in
             NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
-            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERMON_UPDATE_PLAYING_PAUSED), object: nil)
         })
         
         setupPlayingInfoCenter()
@@ -776,9 +739,7 @@ class MediaPlayer : NSObject {
             if playing == nil {
                 MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
             } else {
-                DispatchQueue.main.async(execute: { () -> Void in
-                    NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERMON_UPDATE_PLAYING_PAUSED), object: nil)
-                })
+
             }
             
             let defaults = UserDefaults.standard

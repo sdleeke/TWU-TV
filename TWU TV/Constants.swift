@@ -25,7 +25,6 @@ struct Constants {
     static let MIN_LOAD_TIME = 30.0
     
     struct INTERVAL {
-//        static let DOWNLOAD_TIMER   = 0.5
         static let SLIDER_TIMER     = 0.5
         static let PLAYER_TIMER     = 0.2
         static let SEEKING_TIMER    = 0.1
@@ -68,7 +67,6 @@ struct Constants {
         static let MEDIA_DOWNLOAD_FAILED    = "MEDIA DOWNLOAD FAILED"
 
         static let SERMON_UPDATE_UI             = "SERMON UPDATE UI"
-        static let SERMON_UPDATE_PLAYING_PAUSED = "SERMON UPDATE PLAYING PAUSED"
         static let SERMON_UPDATE_PLAY_PAUSE     = "SERMON UPDATE PLAY PAUSE"
         
         static let WILL_RESIGN_ACTIVE       = "WILL RESIGN ACTIVE"
@@ -297,7 +295,6 @@ struct Constants {
     static let Open_Scripture = "Open Scripture"
     
     static let Open_Series = "Open on TWU Web Site" // Series 
-//    static let Email_Series = "E-Mail" // Series
     static let Share = "Share" // Series
     
     static let Share_on_Facebook = "Share on Facebook"

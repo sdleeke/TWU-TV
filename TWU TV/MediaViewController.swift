@@ -123,17 +123,17 @@ class MediaViewController : UIViewController  {
 //        }
 //    }
     
-    override var canBecomeFirstResponder : Bool
-    {
-        return true
-    }
-
-    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
-    {
-        if let isCollapsed = splitViewController?.isCollapsed, isCollapsed {
-            globals.motionEnded(motion, event: event)
-        }
-    }
+//    override var canBecomeFirstResponder : Bool
+//    {
+//        return true
+//    }
+//
+//    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
+//    {
+//        if let isCollapsed = splitViewController?.isCollapsed, isCollapsed {
+//            globals.motionEnded(motion, event: event)
+//        }
+//    }
 
 //    @IBOutlet weak var slider: OBSlider!
     

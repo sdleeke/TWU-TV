@@ -130,8 +130,6 @@ class PopoverTableViewController : UIViewController {
     
     @IBOutlet weak var tableViewWidth: NSLayoutConstraint!
     
-//    var stringsFunction:((Void)->[String]?)?
-    
     var allowsSelection:Bool = true
     var allowsMultipleSelection:Bool = false
     
@@ -159,7 +157,6 @@ class PopoverTableViewController : UIViewController {
         let margins:CGFloat = 2
         let marginSpace:CGFloat = 9
         
-//        let checkmarkSpace:CGFloat = 160
         let indexSpace:CGFloat = 40
         
         var height:CGFloat = 0.0
@@ -173,22 +170,7 @@ class PopoverTableViewController : UIViewController {
             deducts += indexSpace
         }
         
-        switch self.purpose! {
-        case .selectingFiltering:
-            fallthrough
-        case .selectingSorting:
-//            deducts += checkmarkSpace
-            break
-            
-        default:
-            break
-        }
-        
         let viewWidth = view.frame.width
-        
-//        if (vc!.splitViewController?.viewControllers.count > 1) {
-//            viewWidth = vc!.splitViewController!.view.frame.width
-//        }
         
         //        print(view.frame.width - deducts)
         
@@ -232,19 +214,6 @@ class PopoverTableViewController : UIViewController {
         }
         
         width += margins * marginSpace
-        
-        switch self.purpose! {
-        case .selectingSorting:
-            fallthrough
-        case .selectingFiltering:
-            fallthrough
-        case .selectingSorting:
-//            width += checkmarkSpace
-            break
-            
-        default:
-            break
-        }
         
         if self.section.showIndex {
             width += indexSpace
@@ -300,7 +269,6 @@ class PopoverTableViewController : UIViewController {
         
         selectedText = string
         
-//        if let active = self.searchController?.isActive, active {
         if let selectedText = selectedText,  let index = section.strings?.index(where: { (string:String) -> Bool in
             return selectedText.uppercased() == string.substring(to: string.range(of: " (")!.lowerBound).uppercased()
         }) {
@@ -335,75 +303,6 @@ class PopoverTableViewController : UIViewController {
         } else {
             userAlert(title:"String not found!",message:"Search is active and the string \(selectedText!) is not in the results.")
         }
-//        if searchActive {
-//            if let selectedText = self.selectedText,  let index = self.filteredSection.strings?.index(where: { (string:String) -> Bool in
-//                return selectedText == string.substring(to: string.range(of: " (")!.lowerBound).uppercased()
-//            }) {
-//                //                if let selectedText = self.selectedText, let index = self.filteredStrings?.index(of: selectedText) {
-//                var i = 0
-//                
-//                repeat {
-//                    i += 1
-//                } while (i < self.filteredSection.indexes?.count) && (self.filteredSection.indexes?[i] <= index)
-//                
-//                let section = i - 1
-//                
-//                if let base = self.filteredSection.indexes?[section] {
-//                    let row = index - base
-//                    
-//                    if self.filteredSection.strings?.count > 0 {
-//                        DispatchQueue.main.async(execute: { () -> Void in
-//                            if section < self.tableView.numberOfSections, row < self.tableView.numberOfRows(inSection: section) {
-//                                let indexPath = IndexPath(row: row,section: section)
-//                                if scroll {
-//                                    self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
-//                                }
-//                                if select {
-//                                    self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
-//                                }
-//                            } else {
-//                                userAlert(title:"String not found!",message:"THIS SHOULD NOT HAPPEN.")
-//                            }
-//                        })
-//                    }
-//                }
-//            } else {
-//                userAlert(title:"String not found!",message:"Search is active and the string \(selectedText!) is not in the results.")
-//            }
-//        } else {
-//            if let selectedText = self.selectedText,  let index = self.section.strings?.index(where: { (string:String) -> Bool in
-//                return selectedText == string.substring(to: string.range(of: " (")!.lowerBound).uppercased()
-//            }) {
-//                //                if let selectedText = self.selectedText, let index = self.strings?.index(of: selectedText) {
-//                var i = 0
-//                
-//                while i < self.section.indexes?.count, self.section.indexes?[i] <= index {
-//                    i += 1
-//                }
-//                
-//                let section = i - 1
-//                
-//                if let base = self.section.indexes?[section] {
-//                    let row = index - base
-//                    
-//                    if self.section.strings?.count > 0 {
-//                        DispatchQueue.main.async(execute: { () -> Void in
-//                            if section < self.tableView.numberOfSections, row < self.tableView.numberOfRows(inSection: section) {
-//                                let indexPath = IndexPath(row: row,section: section)
-//                                if scroll {
-//                                    self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
-//                                }
-//                                if select {
-//                                    self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
-//                                }
-//                            }
-//                        })
-//                    }
-//                }
-//            } else {
-//                userAlert(title:"String not found!",message:"The string \(selectedText!) is not in the results - THIS SHOULD NEVER HAPPEN.")
-//            }
-//        }
     }
     
     
@@ -472,11 +371,6 @@ extension PopoverTableViewController : UITableViewDataSource
         if section.showIndex {
             //        if let active = self.searchController?.isActive, active {
             return section.titles != nil ? section.titles!.count : 0
-//            if searchActive {
-//                return filteredSection.titles != nil ? filteredSection.titles!.count : 0
-//            } else {
-//                return section.titles != nil ? section.titles!.count : 0
-//            }
         } else {
             return 1
         }
@@ -488,18 +382,8 @@ extension PopoverTableViewController : UITableViewDataSource
         if self.section.showIndex {
             //        if let active = self.searchController?.isActive, active {
             return self.section.counts != nil ? ((section < self.section.counts?.count) ? self.section.counts![section] : 0) : 0
-//            if searchActive {
-//                return self.filteredSection.counts != nil ? ((section < self.filteredSection.counts?.count) ? self.filteredSection.counts![section] : 0) : 0
-//            } else {
-//                return self.section.counts != nil ? ((section < self.section.counts?.count) ? self.section.counts![section] : 0) : 0
-//            }
         } else {
             return self.section.strings != nil ? self.section.strings!.count : 0
-//            if searchActive {
-//                return self.filteredSection.strings != nil ? self.filteredSection.strings!.count : 0
-//            } else {
-//                return self.section.strings != nil ? self.section.strings!.count : 0
-//            }
         }
     }
     
@@ -507,11 +391,6 @@ extension PopoverTableViewController : UITableViewDataSource
         if section.showIndex {
             //        if let active = self.searchController?.isActive, active {
             return section.titles
-//            if searchActive {
-//                return filteredSection.titles
-//            } else {
-//                return section.titles
-//            }
         } else {
             return nil
         }
@@ -523,36 +402,6 @@ extension PopoverTableViewController : UITableViewDataSource
     
     func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
         if section.showIndex {
-            //            if let pause = mediaListGroupSort?.lexicon?.pauseUpdates, !pause, let creating = mediaListGroupSort?.lexicon?.creating, creating {
-            //                mediaListGroupSort?.lexicon?.pauseUpdates = true
-            //
-            //                DispatchQueue.main.async(execute: { () -> Void in
-            //                    self.navigationItem.title = "Lexicon Updates Paused"
-            
-            //                    var strings = [String]()
-            //
-            //                    if let words = self.mediaListGroupSort?.lexicon?.words?.keys.sorted() {
-            //                        for word in words {
-            //                            if let count = self.mediaListGroupSort?.lexicon?.words?[word]?.count {
-            //                                strings.append("\(word) (\(count))")
-            //                            }
-            //                        }
-            //                    }
-            //
-            //                    self.strings = strings
-            //
-            //                    let array = Array(Set(self.strings!)).sorted() { $0.uppercased() < $1.uppercased() }
-            //
-            //                    self.indexStrings = array.map({ (string:String) -> String in
-            //                        return string.uppercased()
-            //                    })
-            //
-            //                    self.setupIndex()
-            //
-            //                    tableView.reloadData()
-            //                    tableView.scrollToRow(at: IndexPath(row:0, section:index), at: .top, animated: true)
-            //                })
-            //            }
             return index
         } else {
             return 1
@@ -565,15 +414,6 @@ extension PopoverTableViewController : UITableViewDataSource
             if let count = self.section.titles?.count, section < count {
                 return self.section.titles?[section]
             }
-//            if searchActive {
-//                if let count = self.filteredSection.titles?.count, section < count {
-//                    return self.filteredSection.titles?[section]
-//                }
-//            } else {
-//                if let count = self.section.titles?.count, section < count {
-//                    return self.section.titles?[section]
-//                }
-//            }
         }
         
         return nil
@@ -602,8 +442,6 @@ extension PopoverTableViewController : UITableViewDataSource
         guard let string = section.strings?[index] else {
             return cell
         }
-        
-//        cell.title.text = string
 
         cell.accessoryType = .none
         

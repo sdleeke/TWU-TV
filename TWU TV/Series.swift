@@ -287,39 +287,6 @@ class Series : Equatable, CustomStringConvertible {
             }
         }
     }
-    
-    init() {
-    }
-    
-//    func bookFromScripture()
-//    {
-//        let selectedScriptures:String = Constants.Selected_Scriptures
-//        
-//        if (scripture == selectedScriptures) {
-//            book = selectedScriptures
-//        } else {
-//            for bookTitle in Constants.OLD_TESTAMENT {
-//                if (scripture.endIndex >= bookTitle.endIndex) &&
-//                    (scripture.substringToIndex(bookTitle.endIndex) == bookTitle) {
-//                        book = bookTitle
-//                }
-//            }
-//            for bookTitle in Constants.NEW_TESTAMENT {
-//                if (scripture.endIndex >= bookTitle.endIndex) &&
-//                    (scripture.substringToIndex(bookTitle.endIndex) == bookTitle) {
-//                        book = bookTitle
-//                }
-//            }
-//        }
-//        
-//        //        println("\(book)")
-//        
-//        if (scripture != selectedScriptures) && (book == Constants.EMPTY_STRING) {
-//            print("ERROR in bookFromScripture")
-//            print("\(scripture)")
-//            print("\(book)")
-//        }
-//    }
 
     var description : String {
         //This requires that date, service, title, and speaker fields all be non-nil
