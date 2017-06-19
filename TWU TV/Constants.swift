@@ -24,10 +24,17 @@ struct Constants {
     static let MIN_PLAY_TIME = 15.0
     static let MIN_LOAD_TIME = 30.0
     
+    struct TIMER_INTERVAL {
+        static let SLIDER       = 0.1
+        static let PLAYER       = 0.1
+        static let LOADING      = 0.2
+        static let PROGRESS     = 0.1
+    }
+    
     struct INTERVAL {
-        static let SLIDER_TIMER     = 0.5
-        static let PLAYER_TIMER     = 0.2
-        static let SEEKING_TIMER    = 0.1
+//        static let SLIDER_TIMER     = 0.5
+//        static let PLAYER_TIMER     = 0.2
+//        static let SEEKING_TIMER    = 0.1
         
         static let PLAY_OBSERVER_TIME = 10.0 // seconds
         
@@ -48,12 +55,16 @@ struct Constants {
     }
     
     struct NOTIFICATION {
-        static let FREE_MEMORY              = "FREE MEMORY"
+        static let FREE_MEMORY          = "FREE MEMORY"
+        
+        static let DONE_SEEKING         = "DONE SEEKING"
         
         static let UPDATE_PLAY_PAUSE    = "UPDATE PLAY PAUSE"
         
         static let READY_TO_PLAY        = "READY TO PLAY"
+        
         static let FAILED_TO_PLAY       = "FAILED TO PLAY"
+        static let FAILED_TO_LOAD       = "FAILED TO LOAD"
         
         static let SHOW_PLAYING         = "SHOW PLAYING"
 

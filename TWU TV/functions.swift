@@ -202,6 +202,31 @@ func sortSeries(_ series:[Series]?,sorting:String?) -> [Series]?
     return results
 }
 
+func alert(title:String?,message:String?)
+{
+    guard alert == nil else {
+        return
+    }
+    
+    guard UIApplication.shared.applicationState == UIApplicationState.active else {
+        return
+    }
+    
+    alert = UIAlertController(title:title,
+                              message: message,
+                              preferredStyle: UIAlertControllerStyle.alert)
+    
+    let action = UIAlertAction(title: Constants.Cancel, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
+        alert = nil
+    })
+    alert.addAction(action)
+    
+    DispatchQueue.main.async(execute: { () -> Void in
+        UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true, completion: nil)
+        UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true, completion: nil)
+    })
+}
+
 func bookNumberInBible(_ book:String?) -> Int?
 {
     if (book != nil) {

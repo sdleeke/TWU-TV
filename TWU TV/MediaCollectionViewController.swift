@@ -240,7 +240,7 @@ extension MediaCollectionViewController : UITableViewDelegate
         sermonSelected = seriesSelected?.sermons?[(indexPath as NSIndexPath).row]
 
         if (sermonSelected?.series == seriesSelected) && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
-            addSliderObserver()
+            addProgressObserver()
         }
         
         updateUI()
@@ -286,7 +286,7 @@ class MediaCollectionViewController: UIViewController
     @IBOutlet weak var logo: UIImageView!
     @IBOutlet weak var backgroundLogo: UIImageView!
 
-    @IBOutlet weak var slider:UIProgressView!
+    @IBOutlet weak var progressView:UIProgressView!
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
@@ -363,7 +363,7 @@ class MediaCollectionViewController: UIViewController
         case .paused:
             print("paused")
             if globals.mediaPlayer.loaded && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
-                addSliderObserver()
+                addProgressObserver()
                 playCurrentSermon(sermonSelected)
             } else {
                 playNewSermon(sermonSelected)
@@ -453,7 +453,7 @@ class MediaCollectionViewController: UIViewController
                         //                    print("progress",progress)
                         //                    print("length",length)
                         
-                        slider.progress = Float(progress)
+                        progressView.progress = Float(progress)
                         setTimes(timeNow: timeNow,length: length)
                         
                         avPlayerSpinner.stopAnimating()
@@ -462,7 +462,7 @@ class MediaCollectionViewController: UIViewController
                         controlView.isHidden = false
                         elapsed.isHidden = false
                         remaining.isHidden = false
-                        slider.isHidden = false
+                        progressView.isHidden = false
                     }
                 }
                 
@@ -516,7 +516,7 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    var sliderObserver: Timer?
+    var progressObserver: Timer?
     
     var seriesSelected:Series? {
         willSet {
@@ -534,7 +534,7 @@ class MediaCollectionViewController: UIViewController
                 preferredFocusView = tableView
                 
                 if (sermonSelected?.series == seriesSelected) && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
-                    addSliderObserver()
+                    addProgressObserver()
                 } else {
                     globals.mediaPlayer.stop()
                 }
@@ -576,12 +576,12 @@ class MediaCollectionViewController: UIViewController
                 
                 if (sermonSelected != globals.mediaPlayer.playing) {
                     globals.mediaPlayer.stop()
-                    removeSliderObserver()
+                    removeProgressObserver()
                     playerURL(url: sermonSelected!.playingURL!)
                 } else {
                     preferredFocusView = playPauseButton
                     removePlayerObserver()
-                    addSliderObserver()
+                    addProgressObserver()
                 }
             } else {
                 //                print("MediaViewController:sermonSelected nil")
@@ -792,7 +792,7 @@ class MediaCollectionViewController: UIViewController
         setupTitle()
         setupPlayPauseButton()
         setupSpinner()
-        setupSlider()
+        setupProgressView()
     }
     
     func scrollToSermon(_ sermon:Sermon?,select:Bool,position:UITableViewScrollPosition)
@@ -828,9 +828,9 @@ class MediaCollectionViewController: UIViewController
 
     fileprivate func setTimes(timeNow:Double, length:Double)
     {
-        let elapsedHours = Int(timeNow / (60*60))
-        let elapsedMins = Int((timeNow - (Double(elapsedHours) * 60*60)) / 60)
-        let elapsedSec = Int(timeNow.truncatingRemainder(dividingBy: 60))
+        let elapsedHours = max(Int(timeNow / (60*60)),0)
+        let elapsedMins = max(Int((timeNow - (Double(elapsedHours) * 60*60)) / 60),0)
+        let elapsedSec = max(Int(timeNow.truncatingRemainder(dividingBy: 60)),0)
         
         var elapsed:String
         
@@ -844,10 +844,10 @@ class MediaCollectionViewController: UIViewController
         
         self.elapsed.text = elapsed
         
-        let timeRemaining = length - timeNow
-        let remainingHours = Int(timeRemaining / (60*60))
-        let remainingMins = Int((timeRemaining - (Double(remainingHours) * 60*60)) / 60)
-        let remainingSec = Int(timeRemaining.truncatingRemainder(dividingBy: 60))
+        let timeRemaining = max(length - timeNow,0)
+        let remainingHours = max(Int(timeRemaining / (60*60)),0)
+        let remainingMins = max(Int((timeRemaining - (Double(remainingHours) * 60*60)) / 60),0)
+        let remainingSec = max(Int(timeRemaining.truncatingRemainder(dividingBy: 60)),0)
         
         var remaining:String
         
@@ -863,7 +863,7 @@ class MediaCollectionViewController: UIViewController
     }
     
     
-    fileprivate func setSliderAndTimesToAudio()
+    fileprivate func setProgressAndTimesToAudio()
     {
         guard Thread.isMainThread else {
             return
@@ -914,17 +914,17 @@ class MediaCollectionViewController: UIViewController
                     if globals.mediaPlayer.loaded { // !sliding &&
                         if playerCurrentTime == 0 {
                             progress = playingCurrentTime / length
-                            slider.progress = Float(progress)
+                            progressView.progress = Float(progress)
                             setTimes(timeNow: playingCurrentTime,length: length)
                         } else {
-                            slider.progress = Float(progress)
+                            progressView.progress = Float(progress)
                             setTimes(timeNow: playerCurrentTime,length: length)
                         }
                     }
                     
                     elapsed.isHidden = false
                     remaining.isHidden = false
-                    slider.isHidden = false
+                    progressView.isHidden = false
                 }
                 break
                 
@@ -936,12 +936,12 @@ class MediaCollectionViewController: UIViewController
                 //                        print("progress",progress)
                 //                        print("length",length)
                 
-                slider.progress = Float(progress)
+                progressView.progress = Float(progress)
                 setTimes(timeNow: playingCurrentTime,length: length)
                 
                 elapsed.isHidden = false
                 remaining.isHidden = false
-                slider.isHidden = false
+                progressView.isHidden = false
                 break
                 
             case .stopped:
@@ -952,12 +952,12 @@ class MediaCollectionViewController: UIViewController
                 //                        print("progress",progress)
                 //                        print("length",length)
                 
-                slider.progress = Float(progress)
+                progressView.progress = Float(progress)
                 setTimes(timeNow: playingCurrentTime,length: length)
                 
                 elapsed.isHidden = false
                 remaining.isHidden = false
-                slider.isHidden = false
+                progressView.isHidden = false
                 break
                 
             default:
@@ -997,7 +997,7 @@ class MediaCollectionViewController: UIViewController
         })
     }
     
-    func sliderTimer()
+    func progressTimer()
     {
         guard Thread.isMainThread else {
             return
@@ -1039,7 +1039,7 @@ class MediaCollectionViewController: UIViewController
             
         case .playing:
             print("playing")
-            setSliderAndTimesToAudio()
+            setProgressAndTimesToAudio()
             
             if (!globals.mediaPlayer.loaded) {
                 if (!spinner.isAnimating) {
@@ -1065,7 +1065,7 @@ class MediaCollectionViewController: UIViewController
             print("paused")
             
             if globals.mediaPlayer.loaded {
-                setSliderAndTimesToAudio()
+                setProgressAndTimesToAudio()
             }
             
             if globals.mediaPlayer.loaded || globals.mediaPlayer.loadFailed {
@@ -1142,7 +1142,7 @@ class MediaCollectionViewController: UIViewController
         //This guarantees a fresh start.
         globals.mediaPlayer.playOnLoad = true
         globals.mediaPlayer.reload(sermon)
-        addSliderObserver()
+        addProgressObserver()
         setupPlayPauseButton()
     }
     
@@ -1161,21 +1161,21 @@ class MediaCollectionViewController: UIViewController
         
         globals.mediaPlayer.playing = sermon
         
-        removeSliderObserver()
+        removeProgressObserver()
         
         //This guarantees a fresh start.
         globals.mediaPlayer.playOnLoad = true
         globals.mediaPlayer.setup(sermon)
         
-        addSliderObserver()
+        addProgressObserver()
         
         if (view.window != nil) {
-            setupSlider()
+            setupProgressView()
             setupPlayPauseButton()
         }
     }
     
-    fileprivate func setupSlider()
+    fileprivate func setupProgressView()
     {
         guard Thread.isMainThread else {
             return
@@ -1184,17 +1184,17 @@ class MediaCollectionViewController: UIViewController
         guard (sermonSelected != nil) else {
             elapsed.isHidden = true
             remaining.isHidden = true
-            slider.isHidden = true
+            progressView.isHidden = true
             return
         }
         
         if (globals.mediaPlayer.playing != nil) && (globals.mediaPlayer.playing == sermonSelected) {
             if !globals.mediaPlayer.loadFailed {
-                setSliderAndTimesToAudio()
+                setProgressAndTimesToAudio()
             } else {
                 elapsed.isHidden = true
                 remaining.isHidden = true
-                slider.isHidden = true
+                progressView.isHidden = true
             }
         } else {
             //            print(player?.currentItem?.status.rawValue)
@@ -1207,21 +1207,21 @@ class MediaCollectionViewController: UIViewController
                     //                        print("progress",progress)
                     //                        print("length",length)
                     
-                    slider.progress = Float(progress)
+                    progressView.progress = Float(progress)
                     setTimes(timeNow: timeNow,length: length)
                     
                     elapsed.isHidden = false
                     remaining.isHidden = false
-                    slider.isHidden = false
+                    progressView.isHidden = false
                 } else {
                     elapsed.isHidden = true
                     remaining.isHidden = true
-                    slider.isHidden = true
+                    progressView.isHidden = true
                 }
             } else {
                 elapsed.isHidden = true
                 remaining.isHidden = true
-                slider.isHidden = true
+                progressView.isHidden = true
             }
         }
     }
@@ -1461,7 +1461,7 @@ class MediaCollectionViewController: UIViewController
                 
             case .paused:
                 if globals.mediaPlayer.url == sermonSelected?.playingURL {
-                    addSliderObserver()
+                    addProgressObserver()
                 }
                 globals.mediaPlayer.play()
                 
@@ -1555,26 +1555,34 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if globals.mediaPlayer.playing != nil {
+        if (globals.mediaPlayer.playing != nil) && (seriesSelected?.sermons?.index(of: globals.mediaPlayer.playing!) != nil) {
             sermonSelected = globals.mediaPlayer.playing
+            scrollToSermon(sermonSelected, select: true, position: UITableViewScrollPosition.none)
         } else {
-            removeSliderObserver()
+            removeProgressObserver()
             if let url = sermonSelected?.playingURL {
                 playerURL(url: url)
             }
             preferredFocusView = playPauseButton
         }
-        
-        self.scrollToSermon(self.sermonSelected, select: true, position: UITableViewScrollPosition.none)
 
         updateUI()
     }
-
+    
+    func doneSeeking()
+    {
+        print("DONE SEEKING")
+        
+        globals.mediaPlayer.checkPlayToEnd()
+    }
+    
     override func viewWillAppear(_ animated: Bool)
     {
         super.viewWillAppear(animated)
         
         collectionView.remembersLastFocusedIndexPath = true
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.doneSeeking), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.DONE_SEEKING), object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.showPlaying), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.SHOW_PLAYING), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.updateUI), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.FAILED_TO_PLAY), object: nil)
@@ -1596,19 +1604,19 @@ class MediaCollectionViewController: UIViewController
         setNeedsFocusUpdate()
     }
     
-    func removeSliderObserver() {
-        if globals.mediaPlayer.sliderTimerReturn != nil {
-            globals.mediaPlayer.player?.removeTimeObserver(globals.mediaPlayer.sliderTimerReturn!)
-            globals.mediaPlayer.sliderTimerReturn = nil
+    func removeProgressObserver() {
+        if globals.mediaPlayer.progressTimerReturn != nil {
+            globals.mediaPlayer.player?.removeTimeObserver(globals.mediaPlayer.progressTimerReturn!)
+            globals.mediaPlayer.progressTimerReturn = nil
         }
     }
     
-    func addSliderObserver()
+    func addProgressObserver()
     {
-        removeSliderObserver()
+        removeProgressObserver()
         
-        globals.mediaPlayer.sliderTimerReturn = globals.mediaPlayer.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak self] (CMTime) in
-            self?.sliderTimer()
+        globals.mediaPlayer.progressTimerReturn = globals.mediaPlayer.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak self] (CMTime) in
+            self?.progressTimer()
         })
     }
     
@@ -1616,12 +1624,12 @@ class MediaCollectionViewController: UIViewController
     {
         super.viewWillDisappear(animated)
         
-        removeSliderObserver()
+        removeProgressObserver()
         removePlayerObserver()
         
         NotificationCenter.default.removeObserver(self)
         
-        sliderObserver?.invalidate()
+        progressObserver?.invalidate()
     }
     
     override func viewDidDisappear(_ animated: Bool)

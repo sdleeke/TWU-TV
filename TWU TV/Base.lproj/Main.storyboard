@@ -299,6 +299,7 @@
                         <outlet property="elapsed" destination="J5P-mW-Nvz" id="YuN-fn-nyx"/>
                         <outlet property="logo" destination="v9q-Nr-bjf" id="uEx-Tf-Qfe"/>
                         <outlet property="playPauseButton" destination="oe3-VS-UnT" id="Zjy-aO-7Dh"/>
+                        <outlet property="progressView" destination="TXJ-Ez-TAM" id="xZJ-VD-NaM"/>
                         <outlet property="remaining" destination="Huh-fy-RBn" id="tu0-Sn-AZ4"/>
                         <outlet property="restartButton" destination="8Lc-co-FWe" id="TXZ-Zr-xHL"/>
                         <outlet property="seriesArt" destination="FcM-Py-mbJ" id="phK-rm-q67"/>
@@ -307,7 +308,6 @@
                         <outlet property="sermonLabel" destination="XTS-8z-3GM" id="PU6-vC-QVC"/>
                         <outlet property="skipBackwardsButton" destination="uq8-VD-1Bp" id="XBV-ta-GVN"/>
                         <outlet property="skipForwardsButton" destination="Lc0-Nf-XfK" id="Qj8-4Z-g7Q"/>
-                        <outlet property="slider" destination="TXJ-Ez-TAM" id="7zN-3O-WaX"/>
                         <outlet property="spinner" destination="hrw-ew-qCw" id="f0R-XH-xip"/>
                         <outlet property="tableView" destination="94R-4l-bDj" id="zOh-7Q-5HE"/>
                         <outlet property="tomPennington" destination="yAL-Yv-ZQQ" id="cix-fM-z4Y"/>
