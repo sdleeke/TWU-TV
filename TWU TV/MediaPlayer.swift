@@ -524,15 +524,6 @@ class MediaPlayer : NSObject {
 //        }
 //    }
 
-    func playerTimer()
-    {
-        if (state != nil) {
-            if (rate > 0) {
-                updateCurrentTimeForPlaying()
-            }
-        }
-    }
-    
     func failedToLoad()
     {
         loadFailed = true
@@ -635,28 +626,31 @@ class MediaPlayer : NSObject {
             
         case .playing:
             if loaded && !loadFailed {
-                if Int(currentTime) <= Int(start) {
-                    // This is trying to catch failures to play after loading due to low bandwidth (or anything else).
-                    // BUT it is in a timer so it may fire when start and currentTime are changing and may cause problems
-                    // due to timing errors.  It certainly does in tvOS.  May just want to eliminate it.
-                    if (timeElapsed > Constants.MIN_LOAD_TIME) {
-                        //                            pause()
-                        //                            failedToLoad()
-                    } else {
-                        // Kick the player in the pants to get it going (audio primarily requiring this when the network is poor)
-                        print("KICK")
-                        player?.play()
-                    }
-                } else {
-                    if #available(iOS 10.0, *) {
-                    } else {
-                        // Was playing normally and the system paused it.
-                        // This is redundant to KVO monitoring of AVPlayer.timeControlStatus but that is only available in 10.0 and later.
-                        if (rate == 0) {
-                            pause()
-                        }
-                    }
-                }
+                // This causes too many problems if it fires at the wrong time during skip forwar or backward.
+                // The whole thing can be commented out because the minimum tvOS is 10.0
+                
+//                if Int(currentTime) <= Int(start) {
+//                    // This is trying to catch failures to play after loading due to low bandwidth (or anything else).
+//                    // BUT it is in a timer so it may fire when start and currentTime are changing and may cause problems
+//                    // due to timing errors.  It certainly does in tvOS.  May just want to eliminate it.
+//                    if (timeElapsed > Constants.MIN_LOAD_TIME) {
+//                        //                            pause()
+//                        //                            failedToLoad()
+//                    } else {
+//                        // Kick the player in the pants to get it going (audio primarily requiring this when the network is poor)
+//                        print("KICK")
+//                        player?.play()
+//                    }
+//                } else {
+//                    if #available(iOS 10.0, *) {
+//                    } else {
+//                        // Was playing normally and the system paused it.
+//                        // This is redundant to KVO monitoring of AVPlayer.timeControlStatus but that is only available in 10.0 and later.
+//                        if (rate == 0) {
+//                            pause()
+//                        }
+//                    }
+//                }
             } else {
                 // If it isn't loaded then it shouldn't be playing.
             }
@@ -665,9 +659,9 @@ class MediaPlayer : NSObject {
         case .paused:
             if loaded {
                 // What would cause this?
-                if (rate != 0) {
-                    pause()
-                }
+//                if (rate != 0) {
+//                    pause()
+//                }
             } else {
                 if !loadFailed {
                     if Int(currentTime) <= Int(start) {
@@ -694,6 +688,15 @@ class MediaPlayer : NSObject {
             
         case .seekingBackward:
             break
+        }
+    }
+    
+    func playerTimer()
+    {
+        if (state != nil) {
+            if (rate > 0) {
+                updateCurrentTimeForPlaying()
+            }
         }
     }
     
