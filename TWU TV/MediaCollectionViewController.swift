@@ -670,18 +670,20 @@ class MediaCollectionViewController: UIViewController
             
             let description = "Tom Pennington is Pastor-Teacher at Countryside Bible Church in Southlake, TX.<br/>His pulpit ministry provides the material for The Word Unleashed.\n\nOur ministry is founded upon one principle: God has given you every spiritual resource you need to grow in Jesus Christ, and you find those resources in His all-sufficient Word (2 Pet. 1:3). That's why Tom embraces expository preaching - an approach that seeks to understand what the original authors of Scripture meant, rather than an approach that reads our own meaning into it. If that's what you've been looking for, you've come to the right place.\n\nIt's our prayer that the transforming power of God's Word be unleashed in your life.\n\nP.O. Box 96077<br>Southlake, Texas 76092<br/>www.thewordunleashed.org<br/>listeners@thewordunleashed.org<br/>877-577-WORD (9673)"
             
-            let text = description.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
+            seriesLabel.text = description.replacingOccurrences(of: "<br/>", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
             
-            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
-                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
-                                                                     documentAttributes: nil) {
-                
-                attributedString.addAttributes([NSFontAttributeName:UIFont.preferredFont(forTextStyle: UIFontTextStyle.footnote)],
-                                               range: NSMakeRange(0, attributedString.length))
-                
-                
-                seriesLabel.attributedText = attributedString
-            }
+            let text = description.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
+
+//            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
+//                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
+//                                                                     documentAttributes: nil) {
+//                
+//                attributedString.addAttributes([NSFontAttributeName:UIFont.preferredFont(forTextStyle: UIFontTextStyle.footnote)],
+//                                               range: NSMakeRange(0, attributedString.length))
+//                
+//                
+//                seriesLabel.attributedText = attributedString
+//            }
 
             return
         }
@@ -692,21 +694,26 @@ class MediaCollectionViewController: UIViewController
         backgroundLogo.isHidden = false
 
         //            print(seriesSelected?.text)
+
+        seriesLabel.text = seriesSelected?.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
         
+        //?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
+
         if let text = seriesSelected?.text?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...") {
-            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
-                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
-                                                                     documentAttributes: nil) {
-                
-                // preferredFont(forTextStyle: UIFontTextStyle.footnote)
-                
-                attributedString.addAttributes([NSFontAttributeName:UIFont.systemFont(ofSize: 31.0)],
-                                               range: NSMakeRange(0, attributedString.length))
-                
-                
-                seriesDescription.attributedText = nil
-                seriesLabel.attributedText = attributedString
-            }
+            
+//            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
+//                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
+//                                                                     documentAttributes: nil) {
+//                
+//                // preferredFont(forTextStyle: UIFontTextStyle.footnote)
+//                
+//                attributedString.addAttributes([NSFontAttributeName:UIFont.systemFont(ofSize: 30.0)],
+//                                               range: NSMakeRange(0, attributedString.length))
+//                
+//                
+//                seriesDescription.attributedText = nil
+//                seriesLabel.attributedText = attributedString
+//            }
         }
         
         if let series = self.seriesSelected {
@@ -1321,78 +1328,170 @@ class MediaCollectionViewController: UIViewController
         })
     }
     
-    func jsonFromURL() -> JSON
+    func jsonFromFileSystem(filename:String?) -> Any?
     {
-        let jsonFileSystemURL = cachesURL()?.appendingPathComponent(Constants.JSON.SERIES)
+        guard let filename = filename else {
+            return nil
+        }
+        
+        guard let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) else {
+            return nil
+        }
         
         do {
-            let data = try Data(contentsOf: URL(string: Constants.JSON.URL)!) // , options: NSData.ReadingOptions.mappedIfSafe
+            let data = try Data(contentsOf: jsonFileSystemURL) // , options: NSData.ReadingOptions.mappedIfSafe
+            print("able to read json from the URL.")
             
-            let json = JSON(data: data)
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: [])
+                return json
+            } catch let error as NSError {
+                NSLog(error.localizedDescription)
+                return nil
+            }
+        } catch let error as NSError {
+            print("Network unavailable: json could not be read from the file system.")
+            NSLog(error.localizedDescription)
+            return nil
+        }
+    }
+    
+    func jsonFromURL(url:String,filename:String) -> Any?
+    {
+        guard let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) else {
+            return nil
+        }
+        
+        guard globals.reachability.currentReachabilityStatus != .notReachable else {
+            print("json not reachable.")
             
-            if json != JSON.null {
-                try data.write(to: jsonFileSystemURL!, options: NSData.WritingOptions.atomicWrite)
+            //            globals.alert(title:"Network Error",message:"Newtork not available, attempting to load last available media list.")
+            
+            return jsonFromFileSystem(filename: filename)
+        }
+        
+        do {
+            let data = try Data(contentsOf: URL(string: url)!) // , options: NSData.ReadingOptions.mappedIfSafe
+            print("able to read json from the URL.")
+            
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: [])
                 
-                print(json)
+                do {
+                    try data.write(to: jsonFileSystemURL)//, options: NSData.WritingOptions.atomic)
+                    
+                    print("able to write json to the file system")
+                } catch let error as NSError {
+                    print("unable to write json to the file system.")
+                    
+                    NSLog(error.localizedDescription)
+                }
                 
                 return json
-            } else {
-                print("could not get json from file, make sure that file contains valid json.")
-                
-                let data = try Data(contentsOf: jsonFileSystemURL!) // , options: NSData.ReadingOptions.mappedIfSafe
-                
-                let json = JSON(data: data)
-                if json != JSON.null {
-                    print(json)
-                    return json
-                }
+            } catch let error as NSError {
+                NSLog(error.localizedDescription)
+                return jsonFromFileSystem(filename: filename)
             }
         } catch let error as NSError {
             NSLog(error.localizedDescription)
-            
-            do {
-                let data = try Data(contentsOf: jsonFileSystemURL!) // , options: NSData.ReadingOptions.mappedIfSafe
-                
-                let json = JSON(data: data)
-                if json != JSON.null {
-                    print(json)
-                    return json
-                }
-            } catch let error as NSError {
-                NSLog(error.localizedDescription)
-            }
+            return jsonFromFileSystem(filename: filename)
         }
-
-        return nil
     }
+    
+//    func jsonFromURL() -> JSON
+//    {
+//        let jsonFileSystemURL = cachesURL()?.appendingPathComponent(Constants.JSON.SERIES)
+//        
+//        do {
+//            let data = try Data(contentsOf: URL(string: Constants.JSON.URL)!) // , options: NSData.ReadingOptions.mappedIfSafe
+//            
+//            let json = JSON(data: data)
+//            
+//            if json != JSON.null {
+//                try data.write(to: jsonFileSystemURL!, options: NSData.WritingOptions.atomicWrite)
+//                
+//                print(json)
+//                
+//                return json
+//            } else {
+//                print("could not get json from file, make sure that file contains valid json.")
+//                
+//                let data = try Data(contentsOf: jsonFileSystemURL!) // , options: NSData.ReadingOptions.mappedIfSafe
+//                
+//                let json = JSON(data: data)
+//                if json != JSON.null {
+//                    print(json)
+//                    return json
+//                }
+//            }
+//        } catch let error as NSError {
+//            NSLog(error.localizedDescription)
+//            
+//            do {
+//                let data = try Data(contentsOf: jsonFileSystemURL!) // , options: NSData.ReadingOptions.mappedIfSafe
+//                
+//                let json = JSON(data: data)
+//                if json != JSON.null {
+//                    print(json)
+//                    return json
+//                }
+//            } catch let error as NSError {
+//                NSLog(error.localizedDescription)
+//            }
+//        }
+//
+//        return nil
+//    }
     
     func loadSeriesDicts() -> [[String:String]]?
     {
-        let json = jsonFromURL()
-        
-        if json != nil {
-//            print("json:\(json)")
-            
+        if let json = jsonFromURL(url: Constants.JSON.URL,filename: Constants.JSON.SERIES) as? [String:Any] {
             var seriesDicts = [[String:String]]()
             
-            let series = json[Constants.JSON.ARRAY_KEY]
-            
-            for i in 0..<series.count {
-                //                    print("sermon: \(series[i])")
-                
-                var dict = [String:String]()
-                
-                for (key,value) in series[i] {
-                    dict["\(key)"] = "\(value)"
+            if let series = json[Constants.JSON.ARRAY_KEY] as? [[String:String]] {
+                for i in 0..<series.count {
+                    //                    print("sermon: \(series[i])")
+                    
+                    var dict = [String:String]()
+                    
+                    for (key,value) in series[i] {
+                        dict["\(key)"] = "\(value)".trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                    }
+                    
+                    seriesDicts.append(dict)
                 }
-                
-                seriesDicts.append(dict)
             }
             
             return seriesDicts.count > 0 ? seriesDicts : nil
         } else {
             print("could not get json from file, make sure that file contains valid json.")
         }
+
+//        let json = jsonFromURL(url:Constants.JSON.URL,filename: Constants.JSON.SERIES)
+//        
+//        if json != nil {
+////            print("json:\(json)")
+//            
+//            var seriesDicts = [[String:String]]()
+//            
+//            let series = json[Constants.JSON.ARRAY_KEY]
+//            
+//            for i in 0..<series.count {
+//                //                    print("sermon: \(series[i])")
+//                
+//                var dict = [String:String]()
+//                
+//                for (key,value) in series[i] {
+//                    dict["\(key)"] = "\(value)"
+//                }
+//                
+//                seriesDicts.append(dict)
+//            }
+//            
+//            return seriesDicts.count > 0 ? seriesDicts : nil
+//        } else {
+//            print("could not get json from file, make sure that file contains valid json.")
+//        }
         
         return nil
     }
