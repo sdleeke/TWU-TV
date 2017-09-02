@@ -1616,14 +1616,6 @@ class MediaCollectionViewController: UIViewController
         
         view.backgroundColor = #colorLiteral(red: 0.7254902124, green: 0.4784313738, blue: 0.09803921729, alpha: 0.75)
         
-        if globals.series == nil {
-            loadSeries()
-            {
-                self.collectionView.reloadData()
-                self.scrollToSeries(self.seriesSelected)
-            }
-        }
-        
         let menuPressRecognizer = UITapGestureRecognizer(target: self, action: #selector(MediaCollectionViewController.menuButtonAction(tap:)))
         menuPressRecognizer.allowedPressTypes = [NSNumber(value: UIPressType.menu.rawValue)]
         view.addGestureRecognizer(menuPressRecognizer)
@@ -1638,6 +1630,27 @@ class MediaCollectionViewController: UIViewController
             collectionView?.isPrefetchingEnabled = false
         } else {
             // Fallback on earlier versions
+        }
+        
+        if globals.series == nil {
+            loadSeries()
+                {
+                    if globals.series == nil {
+                        let alert = UIAlertController(title: "No media available.",
+                                                      message: "Please check your network connection and try again.",
+                                                      preferredStyle: UIAlertControllerStyle.alert)
+                        
+                        let action = UIAlertAction(title: Constants.Cancel, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
+                            
+                        })
+                        alert.addAction(action)
+                        
+                        self.present(alert, animated: true, completion: nil)
+                    } else {
+                        self.collectionView.reloadData()
+                        self.scrollToSeries(self.seriesSelected)
+                    }
+            }
         }
     }
     
@@ -1675,6 +1688,37 @@ class MediaCollectionViewController: UIViewController
         globals.mediaPlayer.checkPlayToEnd()
     }
     
+    func willEnterForeground()
+    {
+        
+    }
+    
+    func didBecomeActive()
+    {
+        guard globals.series == nil else {
+            return
+        }
+
+        loadSeries()
+            {
+                if globals.series == nil {
+                    let alert = UIAlertController(title: "No media available.",
+                                                  message: "Please check your network connection and try again.",
+                                                  preferredStyle: UIAlertControllerStyle.alert)
+                    
+                    let action = UIAlertAction(title: Constants.Cancel, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
+                        
+                    })
+                    alert.addAction(action)
+                    
+                    self.present(alert, animated: true, completion: nil)
+                } else {
+                    self.collectionView.reloadData()
+                    self.scrollToSeries(self.seriesSelected)
+                }
+        }
+    }
+    
     override func viewWillAppear(_ animated: Bool)
     {
         super.viewWillAppear(animated)
@@ -1691,6 +1735,9 @@ class MediaCollectionViewController: UIViewController
         
         NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.setupPlayPauseButton), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
         
+        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.willEnterForeground), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.WILL_ENTER_FORGROUND), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.didBecomeActive), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.DID_BECOME_ACTIVE), object: nil)
+
         updateUI()
     }
     
