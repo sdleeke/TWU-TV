@@ -20,7 +20,7 @@ class Sermon : NSObject {
     {
         get {
             if let numberOfSermons = series?.numberOfSermons, let index = series?.sermons?.index(of: self) {
-                return "Part\u{00a0}\(index+1) of \(numberOfSermons)"
+                return "Part\u{00a0}\(index+1)\u{00a0}of\u{00a0}\(numberOfSermons)"
             }
             
             return series?.title
