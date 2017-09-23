@@ -148,11 +148,11 @@ class Globals : NSObject
             
         }
         didSet {
-            if (series != nil) {
+            if let series = series {
                 index = [Int:Series]()
-                for sermonSeries in series! {
-                    if index![sermonSeries.id] == nil {
-                        index![sermonSeries.id] = sermonSeries
+                for sermonSeries in series {
+                    if let id = sermonSeries.id, index?[id] == nil {
+                        index?[id] = sermonSeries
                     } else {
                         print("DUPLICATE SERIES ID: \(sermonSeries)")
                     }
@@ -294,7 +294,7 @@ class Globals : NSObject
                     
                     if let sermonPlayingIndexStr = defaults.string(forKey: Constants.SETTINGS.PLAYING.SERMON_INDEX) {
                         if let sermonPlayingIndex = Int(sermonPlayingIndexStr) {
-                            if (sermonPlayingIndex > (seriesPlaying!.show - 1)) {
+                            if let show = seriesPlaying?.show, (sermonPlayingIndex > (show - 1)) {
                                 mediaPlayer.playing = nil
                             } else {
                                 mediaPlayer.playing = seriesPlaying?.sermons?[sermonPlayingIndex]
@@ -369,14 +369,22 @@ class Globals : NSObject
         
         MPRemoteCommandCenter.shared().skipBackwardCommand.isEnabled = true
         MPRemoteCommandCenter.shared().skipBackwardCommand.addTarget (handler: { (event:MPRemoteCommandEvent!) -> MPRemoteCommandHandlerStatus in
-            self.mediaPlayer.seek(to: self.mediaPlayer.currentTime!.seconds - Constants.INTERVAL.SKIP_TIME)
-            return MPRemoteCommandHandlerStatus.success
+            if let currentTime = self.mediaPlayer.currentTime {
+                self.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVAL.SKIP_TIME)
+                return MPRemoteCommandHandlerStatus.success
+            } else {
+                return MPRemoteCommandHandlerStatus.commandFailed
+            }
         })
         
         MPRemoteCommandCenter.shared().skipForwardCommand.isEnabled = true
         MPRemoteCommandCenter.shared().skipForwardCommand.addTarget (handler: { (event:MPRemoteCommandEvent!) -> MPRemoteCommandHandlerStatus in
-            self.mediaPlayer.seek(to: self.mediaPlayer.currentTime!.seconds + Constants.INTERVAL.SKIP_TIME)
-            return MPRemoteCommandHandlerStatus.success
+            if let currentTime = self.mediaPlayer.currentTime {
+                self.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVAL.SKIP_TIME)
+                return MPRemoteCommandHandlerStatus.success
+            } else {
+                return MPRemoteCommandHandlerStatus.commandFailed
+            }
         })
         
         if #available(iOS 9.1, *) {

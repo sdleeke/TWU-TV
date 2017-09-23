@@ -100,10 +100,11 @@ class Section {
             for key in stringIndex.keys.sorted() {
                 //                print(stringIndex[key]!)
                 
-                indexes.append(counter)
-                counts.append(stringIndex[key]!.count)
-                
-                counter += stringIndex[key]!.count
+                if let value = stringIndex[key] {
+                    indexes.append(counter)
+                    counts.append(value.count)
+                    counter += value.count
+                }
             }
             
             self.counts = counts.count > 0 ? counts : nil
@@ -215,9 +216,9 @@ class PopoverTableViewController : UIViewController {
         
         width += margins * marginSpace
         
-        if self.section.showIndex {
+        if section.showIndex, let count = section.indexStrings?.count {
             width += indexSpace
-            height += self.tableView.sectionHeaderHeight * CGFloat(self.section.indexStrings!.count)
+            height += tableView.sectionHeaderHeight * CGFloat(count)
         }
         
 //        print(height)
@@ -270,7 +271,11 @@ class PopoverTableViewController : UIViewController {
         selectedText = string
         
         if let selectedText = selectedText,  let index = section.strings?.index(where: { (string:String) -> Bool in
-            return selectedText.uppercased() == string.substring(to: string.range(of: " (")!.lowerBound).uppercased()
+            if let range = string.range(of: " (") {
+                return selectedText.uppercased() == string.substring(to: range.lowerBound).uppercased()
+            } else {
+                return false
+            }
         }) {
             //                if let selectedText = self.selectedText, let index = self.filteredStrings?.index(of: selectedText) {
             var i = 0
@@ -301,7 +306,9 @@ class PopoverTableViewController : UIViewController {
                 }
             }
         } else {
-            userAlert(title:"String not found!",message:"Search is active and the string \(selectedText!) is not in the results.")
+            if let selectedText = selectedText {
+                userAlert(title:"String not found!",message:"Search is active and the string \(selectedText) is not in the results.")
+            }
         }
     }
     
@@ -544,6 +551,8 @@ extension PopoverTableViewController : UITableViewDelegate
         
         //        print(index,strings![index])
         
-        delegate?.rowClickedAtIndex(index, strings: section.strings, purpose: purpose!)
+        if let purpose = purpose {
+            delegate?.rowClickedAtIndex(index, strings: section.strings, purpose: purpose)
+        }
     }
 }

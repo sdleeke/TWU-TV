@@ -229,19 +229,19 @@ func alert(title:String?,message:String?)
 
 func bookNumberInBible(_ book:String?) -> Int?
 {
-    if (book != nil) {
-        if let index = Constants.TESTAMENT.OLD.index(of: book!) {
-            return index
-        }
-        
-        if let index = Constants.TESTAMENT.NEW.index(of: book!) {
-            return Constants.TESTAMENT.OLD.count + index
-        }
-        
-        return Constants.TESTAMENT.OLD.count + Constants.TESTAMENT.NEW.count+1 // Not in the Bible.  E.g. Selected Scriptures
-    } else {
+    guard let book = book else {
         return nil
     }
+
+    if let index = Constants.TESTAMENT.OLD.index(of: book) {
+        return index
+    }
+    
+    if let index = Constants.TESTAMENT.NEW.index(of: book) {
+        return Constants.TESTAMENT.OLD.count + index
+    }
+    
+    return Constants.TESTAMENT.OLD.count + Constants.TESTAMENT.NEW.count+1 // Not in the Bible.  E.g. Selected Scriptures
 }
 
 func booksFromSeries(_ series:[Series]?) -> [String]?
@@ -249,7 +249,11 @@ func booksFromSeries(_ series:[Series]?) -> [String]?
 //    var bookSet = Set<String>()
 //    var bookArray = [String]()
     
-    return Array(Set(series!.filter({ (series:Series) -> Bool in
+    guard let series = series else {
+        return nil
+    }
+    
+    return Array(Set(series.filter({ (series:Series) -> Bool in
         return series.book != nil
     }).map { (series:Series) -> String in
         return series.book!
@@ -259,8 +263,8 @@ func booksFromSeries(_ series:[Series]?) -> [String]?
 func lastNameFromName(_ name:String?) -> String?
 {
     if var lastname = name {
-        while (lastname.range(of: Constants.SINGLE_SPACE) != nil) {
-            lastname = lastname.substring(from: lastname.range(of: Constants.SINGLE_SPACE)!.upperBound)
+        while let range = lastname.range(of: Constants.SINGLE_SPACE) {
+            lastname = lastname.substring(from: range.upperBound)
         }
         return lastname
     }
@@ -291,16 +295,20 @@ func networkUnavailable(_ message:String?)
 
 func filesOfTypeInCache(_ fileType:String) -> [String]?
 {
+    guard let path = cachesURL()?.path else {
+        return nil
+    }
+
     var files = [String]()
     
     let fileManager = FileManager.default
-    let path = cachesURL()?.path
+    
     do {
-        let array = try fileManager.contentsOfDirectory(atPath: path!)
+        let array = try fileManager.contentsOfDirectory(atPath: path)
         
         for string in array {
-            if string.range(of: fileType) != nil {
-                if fileType == string.substring(from: string.range(of: fileType)!.lowerBound) {
+            if let range = string.range(of: fileType) {
+                if fileType == string.substring(from: range.lowerBound) {
                     files.append(string)
                 }
             }
@@ -321,12 +329,12 @@ func stringWithoutPrefixes(_ fromString:String?) -> String?
     let prefixes = ["A ","An ","And ","The "]
     
     if (fromString?.endIndex >= quote.endIndex) && (fromString?.substring(to: quote.endIndex) == quote) {
-        sortString = fromString!.substring(from: quote.endIndex)
+        sortString = fromString?.substring(from: quote.endIndex)
     }
     
     for prefix in prefixes {
         if (fromString?.endIndex >= prefix.endIndex) && (fromString?.substring(to: prefix.endIndex) == prefix) {
-            sortString = fromString!.substring(from: prefix.endIndex)
+            sortString = fromString?.substring(from: prefix.endIndex)
             break
         }
     }

@@ -245,9 +245,9 @@ class MediaViewController : UIViewController  {
     fileprivate func setupBodyHTML(_ series:Series?) -> String? {
         var bodyString:String!
         
-        if (series?.url != nil) && (series?.title != nil) {
+        if let url = series?.url, let title = series?.title {
             bodyString = "I've enjoyed the sermon series "
-            bodyString = bodyString + "<a href=\"" + series!.url!.absoluteString + "\">" + series!.title! + "</a>"
+            bodyString = bodyString + "<a href=\"" + url.absoluteString + "\">" + title + "</a>"
             bodyString = bodyString + " by " + "Tom Pennington"
             bodyString = bodyString + " from <a href=\"http://www.thewordunleashed.org\">" + "The Word Unleashed" + "</a>"
             bodyString = bodyString + " and thought you would enjoy it as well."
@@ -414,7 +414,7 @@ class MediaViewController : UIViewController  {
 //        
 //        // Put up an action sheet
 //        
-//    if let navigationController = self.storyboard!.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW) as? UINavigationController,
+//    if let navigationController = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW) as? UINavigationController,
 //        let popover = navigationController.viewControllers[0] as? PopoverTableViewController {
 //            navigationController.modalPresentationStyle = .popover
 //            //            popover?.preferredContentSize = CGSizeMake(300, 500)

@@ -45,7 +45,11 @@ class Sermon : NSObject {
 
     var audioURL:URL? {
         get {
-            return URL(string: Constants.URL.BASE.AUDIO + audio!)
+            if let audio = audio {
+                return URL(string: Constants.URL.BASE.AUDIO + audio)
+            } else {
+                return nil
+            }
         }
     }
     
@@ -57,16 +61,24 @@ class Sermon : NSObject {
 
     var sermonID:String? {
         get {
-            if (series == nil) {
+            if let seriesID = series?.id {
+                return "\(seriesID)\(Constants.COLON)\(id)"
+            } else {
                 print("sermonID: series nil")
+                return nil
             }
-            return "\(series!.id)\(Constants.COLON)\(id)"
         }
     }
 
-    func hasCurrentTime() -> Bool
+    var hasCurrentTime : Bool
     {
-        return (currentTime != nil) && (Float(currentTime!) != nil)
+        get {
+            guard let currentTime = currentTime else {
+                return false
+            }
+            
+            return (Float(currentTime) != nil)
+        }
     }
     
     // this supports settings values that are saved in defaults between sessions
@@ -90,22 +102,29 @@ class Sermon : NSObject {
         self.id = id
     }
     
-    var index:Int {
+    var index:Int? {
         get {
-            return id - series!.startingIndex
+            if let startingIndex = series?.startingIndex {
+                return id - startingIndex
+            } else {
+                return nil
+            }
         }
     }
     
-    override var description : String {
+    override var description : String
+    {
         //This requires that date, service, title, and speaker fields all be non-nil
         
         var sermonString = "Sermon:"
         
-        if (series != nil) {
-            sermonString = "\(sermonString) \(series!.title ?? "Title")"
+        if let title = series?.title {
+            sermonString = "\(sermonString) \(title)"
         }
         
-        sermonString = "\(sermonString) Part:\(index+1)"
+        if let index = index {
+            sermonString = "\(sermonString) Part:\(index+1)"
+        }
         
         return sermonString
     }
@@ -123,7 +142,9 @@ class Sermon : NSObject {
         subscript(key:String) -> String? {
             get {
                 var value:String?
-                value = globals.sermonSettings?[self.sermon!.sermonID!]?[key]
+                if let sermonID = sermon?.sermonID {
+                    value = globals.sermonSettings?[sermonID]?[key]
+                }
                 return value
             }
             set {
@@ -132,12 +153,12 @@ class Sermon : NSObject {
                     return
                 }
                 
-                guard (sermon != nil) else {
+                guard let sermon = sermon else {
                     print("sermon == nil in Settings!")
                     return
                 }
                 
-                guard (sermon?.sermonID != nil) else {
+                guard let sermonID = sermon.sermonID else {
                     print("sermon!.sermonID == nil in Settings!")
                     return
                 }
@@ -146,16 +167,16 @@ class Sermon : NSObject {
                     globals.sermonSettings = [String:[String:String]]()
                 }
                 
-                if (globals.sermonSettings?[sermon!.sermonID!] == nil) {
-                    globals.sermonSettings?[sermon!.sermonID!] = [String:String]()
+                if (globals.sermonSettings?[sermonID] == nil) {
+                    globals.sermonSettings?[sermonID] = [String:String]()
                 }
                 
                 //                            print("\(globals.sermonSettings!)")
                 //                            print("\(sermon!)")
                 //                            print("\(newValue!)")
                 
-                if (globals.sermonSettings?[sermon!.sermonID!]?[key] != newValue) {
-                    globals.sermonSettings?[sermon!.sermonID!]?[key] = newValue
+                if (globals.sermonSettings?[sermonID]?[key] != newValue) {
+                    globals.sermonSettings?[sermonID]?[key] = newValue
                     
                     // For a high volume of activity this can be very expensive.
                     globals.saveSettingsBackground()

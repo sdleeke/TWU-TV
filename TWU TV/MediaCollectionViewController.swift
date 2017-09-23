@@ -211,8 +211,8 @@ extension MediaCollectionViewController : UITableViewDataSource
     {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
-        if (seriesSelected != nil) {
-            return seriesSelected!.show
+        if let show = seriesSelected?.show {
+            return show
         } else {
             return 0
         }
@@ -313,11 +313,11 @@ class MediaCollectionViewController: UIViewController
     }
     @IBAction func skipBackwards(_ sender: UIButton)
     {
-        guard globals.mediaPlayer.currentTime != nil else {
+        guard let currentTime = globals.mediaPlayer.currentTime else {
             return
         }
         
-        globals.mediaPlayer.seek(to: globals.mediaPlayer.currentTime!.seconds - Constants.INTERVAL.SKIP_TIME)
+        globals.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVAL.SKIP_TIME)
     }
     
     @IBOutlet weak var skipForwardsButton: UIButton!
@@ -328,11 +328,11 @@ class MediaCollectionViewController: UIViewController
     }
     @IBAction func skipForwards(_ sender: UIButton)
     {
-        guard globals.mediaPlayer.currentTime != nil else {
+        guard let currentTime = globals.mediaPlayer.currentTime else {
             return
         }
         
-        globals.mediaPlayer.seek(to: globals.mediaPlayer.currentTime!.seconds + Constants.INTERVAL.SKIP_TIME)
+        globals.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVAL.SKIP_TIME)
     }
     
     @IBOutlet weak var playPauseButton: UIButton!
@@ -444,26 +444,23 @@ class MediaCollectionViewController: UIViewController
                 //                print(player?.currentItem?.duration.timescale)
                 //                print(player?.currentItem?.duration.seconds)
                 
-                if sermonSelected != nil {
-                    if let length = player?.currentItem?.duration.seconds {
-                        let timeNow = Double(sermonSelected!.currentTime!)!
-                        let progress = timeNow / length
-                        
-                        //                    print("timeNow",timeNow)
-                        //                    print("progress",progress)
-                        //                    print("length",length)
-                        
-                        progressView.progress = Float(progress)
-                        setTimes(timeNow: timeNow,length: length)
-                        
-                        avPlayerSpinner.stopAnimating()
-                        avPlayerSpinner.isHidden = true
-                        
-                        controlView.isHidden = false
-                        elapsed.isHidden = false
-                        remaining.isHidden = false
-                        progressView.isHidden = false
-                    }
+                if let currentTime = sermonSelected?.currentTime, let timeNow = Double(currentTime), let length = player?.currentItem?.duration.seconds {
+                    let progress = timeNow / length
+                    
+                    //                    print("timeNow",timeNow)
+                    //                    print("progress",progress)
+                    //                    print("length",length)
+                    
+                    progressView.progress = Float(progress)
+                    setTimes(timeNow: timeNow,length: length)
+                    
+                    avPlayerSpinner.stopAnimating()
+                    avPlayerSpinner.isHidden = true
+                    
+                    controlView.isHidden = false
+                    elapsed.isHidden = false
+                    remaining.isHidden = false
+                    progressView.isHidden = false
                 }
                 
                 preferredFocusView = playPauseButton
@@ -503,17 +500,17 @@ class MediaCollectionViewController: UIViewController
     
     func playerURL(url: URL?)
     {
+        guard let url = url else {
+            return
+        }
+
         removePlayerObserver()
         
-        if url != nil {
-            avPlayerSpinner.isHidden = false
-            avPlayerSpinner.startAnimating()
-            
-            player = AVPlayer(url: url!)
-            addPlayerObserver()
-            //            if player == nil {
-            //            }
-        }
+        avPlayerSpinner.isHidden = false
+        avPlayerSpinner.startAnimating()
+        
+        player = AVPlayer(url: url)
+        addPlayerObserver()
     }
     
     var progressObserver: Timer?
@@ -539,10 +536,11 @@ class MediaCollectionViewController: UIViewController
                     globals.mediaPlayer.stop()
                 }
 
-                
-                let defaults = UserDefaults.standard
-                defaults.set("\(seriesSelected!.id)", forKey: Constants.SETTINGS.SELECTED.SERIES)
-                defaults.synchronize()
+                if let id = seriesSelected?.id {
+                    let defaults = UserDefaults.standard
+                    defaults.set("\(id)", forKey: Constants.SETTINGS.SELECTED.SERIES)
+                    defaults.synchronize()
+                }
             } else {
                 print("MediaCollectionViewController:seriesSelected nil")
                 sermonSelected = nil
@@ -574,10 +572,10 @@ class MediaCollectionViewController: UIViewController
             if (sermonSelected != oldValue) {
                 //                print("\(sermonSelected)")
                 
-                if (sermonSelected != globals.mediaPlayer.playing) {
+                if sermonSelected != globals.mediaPlayer.playing, let playingURL = sermonSelected?.playingURL {
                     globals.mediaPlayer.stop()
                     removeProgressObserver()
-                    playerURL(url: sermonSelected!.playingURL!)
+                    playerURL(url: playingURL)
                 } else {
                     preferredFocusView = playPauseButton
                     removePlayerObserver()
@@ -699,7 +697,7 @@ class MediaCollectionViewController: UIViewController
         
         //?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
 
-        if let text = seriesSelected?.text?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...") {
+        if let _ = seriesSelected?.text?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...") {
             
 //            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
 //                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
@@ -777,7 +775,7 @@ class MediaCollectionViewController: UIViewController
             }
             
             if globals.mediaPlayer.isPlaying {
-                if (globals.mediaPlayer.currentTime!.seconds > Double(globals.mediaPlayer.playing!.currentTime!)!) {
+                if let currentTime = globals.mediaPlayer.playing?.currentTime, globals.mediaPlayer.currentTime?.seconds > Double(currentTime) {
                     spinner.isHidden = true
                     spinner.stopAnimating()
                 } else {
@@ -815,7 +813,7 @@ class MediaCollectionViewController: UIViewController
         var indexPath = IndexPath(row: 0, section: 0)
         
         if (seriesSelected?.show > 1) {
-            if let sermonIndex = seriesSelected?.sermons?.index(of: sermon!) {
+            if let sermon = sermon, let sermonIndex = seriesSelected?.sermons?.index(of: sermon) {
                 //                    print("\(sermonIndex)")
                 indexPath = IndexPath(row: sermonIndex, section: 0)
             }
@@ -910,7 +908,7 @@ class MediaCollectionViewController: UIViewController
         if (length > 0) {
             switch globals.mediaPlayer.state! {
             case .playing:
-                if (playingCurrentTime >= 0) && (playerCurrentTime <= globals.mediaPlayer.duration!.seconds) {
+                if playingCurrentTime >= 0, let duration = globals.mediaPlayer.duration, playerCurrentTime <= duration.seconds {
                     progress = playerCurrentTime / length
                     
                     //                        print("playing")
@@ -1054,7 +1052,7 @@ class MediaCollectionViewController: UIViewController
                     spinner.startAnimating()
                 }
             } else {
-                if (globals.mediaPlayer.rate > 0) && (globals.mediaPlayer.currentTime!.seconds > Double((globals.mediaPlayer.startTime!))!) {
+                if globals.mediaPlayer.rate > 0, let startTime = globals.mediaPlayer.startTime, globals.mediaPlayer.currentTime?.seconds > Double(startTime) {
                     if spinner.isAnimating {
                         spinner.isHidden = true
                         spinner.stopAnimating()
@@ -1107,34 +1105,40 @@ class MediaCollectionViewController: UIViewController
     
     func playCurrentSermon(_ sermon:Sermon?)
     {
+        guard let sermon = sermon else {
+            return
+        }
+        
         var seekToTime:CMTime?
         
-        if sermonSelected!.hasCurrentTime() {
-            if sermon!.atEnd {
+        if let hasCurrentTime = sermonSelected?.hasCurrentTime, hasCurrentTime {
+            if sermon.atEnd {
                 NSLog("playPause globals.mediaPlayer.currentTime and globals.player.playing!.currentTime reset to 0!")
-                globals.mediaPlayer.playing!.currentTime = Constants.ZERO
+                globals.mediaPlayer.playing?.currentTime = Constants.ZERO
                 seekToTime = CMTimeMakeWithSeconds(0,Constants.CMTime_Resolution)
-                sermon?.atEnd = false
+                sermon.atEnd = false
             } else {
-                seekToTime = CMTimeMakeWithSeconds(Double(sermon!.currentTime!)!,Constants.CMTime_Resolution)
+                if let currentTime = sermon.currentTime, let num = Double(currentTime) {
+                    seekToTime = CMTimeMakeWithSeconds(num,Constants.CMTime_Resolution)
+                }
             }
         } else {
             NSLog("playPause selectedMediaItem has NO currentTime!")
-            sermon?.currentTime = Constants.ZERO
+            sermon.currentTime = Constants.ZERO
             seekToTime = CMTimeMakeWithSeconds(0,Constants.CMTime_Resolution)
         }
         
-        if seekToTime != nil {
+        if let seekToTime = seekToTime {
             let loadedTimeRanges = (globals.mediaPlayer.player?.currentItem?.loadedTimeRanges as? [CMTimeRange])?.filter({ (cmTimeRange:CMTimeRange) -> Bool in
-                return cmTimeRange.containsTime(seekToTime!)
+                return cmTimeRange.containsTime(seekToTime)
             })
             
             let seekableTimeRanges = (globals.mediaPlayer.player?.currentItem?.seekableTimeRanges as? [CMTimeRange])?.filter({ (cmTimeRange:CMTimeRange) -> Bool in
-                return cmTimeRange.containsTime(seekToTime!)
+                return cmTimeRange.containsTime(seekToTime)
             })
             
             if (loadedTimeRanges != nil) || (seekableTimeRanges != nil) {
-                globals.mediaPlayer.seek(to: seekToTime?.seconds)
+                globals.mediaPlayer.seek(to: seekToTime.seconds)
                 
                 globals.mediaPlayer.play()
                 
@@ -1205,26 +1209,22 @@ class MediaCollectionViewController: UIViewController
             }
         } else {
             //            print(player?.currentItem?.status.rawValue)
-            if (player?.currentItem?.status == .readyToPlay) {
-                if let length = player?.currentItem?.duration.seconds {
-                    let timeNow = Double(sermonSelected!.currentTime!)!
-                    let progress = timeNow / length
-                    
-                    //                        print("timeNow",timeNow)
-                    //                        print("progress",progress)
-                    //                        print("length",length)
-                    
-                    progressView.progress = Float(progress)
-                    setTimes(timeNow: timeNow,length: length)
-                    
-                    elapsed.isHidden = false
-                    remaining.isHidden = false
-                    progressView.isHidden = false
-                } else {
-                    elapsed.isHidden = true
-                    remaining.isHidden = true
-                    progressView.isHidden = true
-                }
+            if  player?.currentItem?.status == .readyToPlay,
+                let length = player?.currentItem?.duration.seconds,
+                let currentTime = sermonSelected?.currentTime,
+                let timeNow = Double(currentTime) {
+                let progress = timeNow / length
+                
+                //                        print("timeNow",timeNow)
+                //                        print("progress",progress)
+                //                        print("length",length)
+                
+                progressView.progress = Float(progress)
+                setTimes(timeNow: timeNow,length: length)
+                
+                elapsed.isHidden = false
+                remaining.isHidden = false
+                progressView.isHidden = false
             } else {
                 elapsed.isHidden = true
                 remaining.isHidden = true
@@ -1235,7 +1235,7 @@ class MediaCollectionViewController: UIViewController
 
     func sorting()
     {
-        if let navigationController = self.storyboard!.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController {
+        if let navigationController = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController {
             if let popover = navigationController.viewControllers[0] as? PopoverTableViewController {
                 navigationController.modalPresentationStyle = .fullScreen
                 //            popover?.preferredContentSize = CGSizeMake(300, 500)
@@ -1254,7 +1254,7 @@ class MediaCollectionViewController: UIViewController
     
     func filtering()
     {
-        if let navigationController = self.storyboard!.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController,
+        if let navigationController = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController,
             let popover = navigationController.viewControllers[0] as? PopoverTableViewController {
             navigationController.modalPresentationStyle = .fullScreen
             
@@ -1275,7 +1275,7 @@ class MediaCollectionViewController: UIViewController
         //In case we have one already showing
         dismiss(animated: true, completion: nil)
         
-        if let navigationController = self.storyboard!.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW) as? UINavigationController,
+        if let navigationController = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW) as? UINavigationController,
             let popover = navigationController.viewControllers[0] as? PopoverTableViewController {
             navigationController.modalPresentationStyle = .fullScreen
             
@@ -1292,16 +1292,16 @@ class MediaCollectionViewController: UIViewController
     
     func scrollToSeries(_ series:Series?)
     {
-        guard series != nil else {
+        guard let series = series else {
             return
         }
         
-        guard globals.activeSeries?.index(of: series!) != nil else {
+        guard let index = globals.activeSeries?.index(of: series) else {
             preferredFocusView = playPauseButton
             return
         }
         
-        let indexPath = IndexPath(item: globals.activeSeries!.index(of: series!)!, section: 0)
+        let indexPath = IndexPath(item: index, section: 0)
         
         self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.left, animated: false)
         self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: UICollectionViewScrollPosition.left)
@@ -1358,10 +1358,6 @@ class MediaCollectionViewController: UIViewController
     
     func jsonFromURL(url:String,filename:String) -> Any?
     {
-        guard let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) else {
-            return nil
-        }
-        
         guard globals.reachability.currentReachabilityStatus != .notReachable else {
             print("json not reachable.")
             
@@ -1370,8 +1366,16 @@ class MediaCollectionViewController: UIViewController
             return jsonFromFileSystem(filename: filename)
         }
         
+        guard let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) else {
+            return nil
+        }
+        
+        guard let url = URL(string: url) else {
+            return nil
+        }
+        
         do {
-            let data = try Data(contentsOf: URL(string: url)!) // , options: NSData.ReadingOptions.mappedIfSafe
+            let data = try Data(contentsOf: url) // , options: NSData.ReadingOptions.mappedIfSafe
             print("able to read json from the URL.")
             
             do {
@@ -1585,7 +1589,7 @@ class MediaCollectionViewController: UIViewController
             print("NOT MAIN THREAD")
         }
 
-        globals.popoverNavCon = self.storyboard!.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController
+        globals.popoverNavCon = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController
         
         if globals.popoverNavCon != nil, let popover = globals.popoverNavCon?.viewControllers[0] as? PopoverTableViewController {
             globals.popoverNavCon?.modalPresentationStyle = .fullScreen
@@ -1687,8 +1691,8 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if (globals.mediaPlayer.playing != nil) && (seriesSelected?.sermons?.index(of: globals.mediaPlayer.playing!) != nil) {
-            sermonSelected = globals.mediaPlayer.playing
+        if let playing = globals.mediaPlayer.playing, seriesSelected?.sermons?.index(of: playing) != nil {
+            sermonSelected = playing
             scrollToSermon(sermonSelected, select: true, position: UITableViewScrollPosition.none)
         } else {
             removeProgressObserver()
