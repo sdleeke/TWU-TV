@@ -164,7 +164,10 @@ class MediaPlayer : NSObject {
         sermonInfo[MPMediaItemPropertyAlbumArtist] = Constants.Tom_Pennington as AnyObject
         
         if let art = playing?.series?.loadArt() {
-            sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: art)
+//            sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: art)
+            sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: art.size, requestHandler: { (CGSize) -> UIImage in
+                return art
+            })
         }
         
         sermonInfo[MPMediaItemPropertyAlbumTrackNumber] = index + 1 as AnyObject

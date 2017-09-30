@@ -400,6 +400,7 @@ class MediaCollectionViewController: UIViewController
     {
         didSet {
             tableView.mask = nil
+            tableView.backgroundColor = UIColor.clear
         }
     }
     
@@ -666,11 +667,11 @@ class MediaCollectionViewController: UIViewController
             backgroundLogo.isHidden = !logo.isHidden
             tomPennington.isHidden = !logo.isHidden
             
-            let description = "Tom Pennington is Pastor-Teacher at Countryside Bible Church in Southlake, TX.<br/>His pulpit ministry provides the material for The Word Unleashed.\n\nOur ministry is founded upon one principle: God has given you every spiritual resource you need to grow in Jesus Christ, and you find those resources in His all-sufficient Word (2 Pet. 1:3). That's why Tom embraces expository preaching - an approach that seeks to understand what the original authors of Scripture meant, rather than an approach that reads our own meaning into it. If that's what you've been looking for, you've come to the right place.\n\nIt's our prayer that the transforming power of God's Word be unleashed in your life.\n\nP.O. Box 96077<br>Southlake, Texas 76092<br/>www.thewordunleashed.org<br/>listeners@thewordunleashed.org<br/>877-577-WORD (9673)"
+            let description = "Tom Pennington is Pastor-Teacher at Countryside Bible Church in Southlake, TX.<br/>His pulpit ministry provides the material for The Word Unleashed.\n\nOur ministry is founded upon one principle: God has given you every spiritual resource you need to grow in Jesus Christ, and you find those resources in His all-sufficient Word (2 Pet. 1:3). That's why Tom embraces expository preaching - an approach that seeks to understand what the original authors of Scripture meant, rather than an approach that reads our own meaning into it. If that's what you've been looking for, you've come to the right place.  It's our prayer that the transforming power of God's Word be unleashed in your life.\n\nP.O. Box 96077<br>Southlake, Texas 76092<br/>www.thewordunleashed.org<br/>listeners@thewordunleashed.org<br/>877-577-WORD (9673)"
             
             seriesLabel.text = description.replacingOccurrences(of: "<br/>", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
             
-            let text = description.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
+//            let text = description.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
 
 //            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
 //                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
@@ -1358,7 +1359,7 @@ class MediaCollectionViewController: UIViewController
     
     func jsonFromURL(url:String,filename:String) -> Any?
     {
-        guard globals.reachability.currentReachabilityStatus != .notReachable else {
+        guard globals.reachability.isReachable else { // currentReachabilityStatus != .notReachable
             print("json not reachable.")
             
             //            globals.alert(title:"Network Error",message:"Newtork not available, attempting to load last available media list.")
@@ -1502,9 +1503,9 @@ class MediaCollectionViewController: UIViewController
     
     func loadSeries(_ completion: (() -> Void)?)
     {
+        globals.isLoading = true
+        
         DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
-            globals.isLoading = true
-
             DispatchQueue.main.async(execute: { () -> Void in
                 self.navigationItem.title = Constants.Titles.Loading_Series
             })
@@ -1719,7 +1720,7 @@ class MediaCollectionViewController: UIViewController
     
     func didBecomeActive()
     {
-        guard globals.series == nil else {
+        guard !globals.isLoading, globals.series == nil else {
             return
         }
 

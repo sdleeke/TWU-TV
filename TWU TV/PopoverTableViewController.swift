@@ -123,6 +123,7 @@ class PopoverTableViewController : UIViewController {
     @IBOutlet weak var tableView: UITableView! {
         didSet {
             tableView.mask = nil
+            tableView.backgroundColor = UIColor.clear
         }
     }
     
@@ -156,7 +157,7 @@ class PopoverTableViewController : UIViewController {
         }
         
         let margins:CGFloat = 2
-        let marginSpace:CGFloat = 9
+        let marginSpace:CGFloat = 15
         
         let indexSpace:CGFloat = 40
         
