@@ -60,7 +60,7 @@ class Series : Equatable, CustomStringConvertible {
     
     var seriesID:String? {
         get {
-            return dict![Constants.FIELDS.ID]        }
+            return dict?[Constants.FIELDS.ID]        }
     }
     
     var url:URL? {
@@ -75,31 +75,31 @@ class Series : Equatable, CustomStringConvertible {
     
     var name:String? {
         get {
-            return dict![Constants.FIELDS.NAME]
+            return dict?[Constants.FIELDS.NAME]
         }
     }
     
     var title:String? {
         get {
-            return dict![Constants.FIELDS.TITLE]
+            return dict?[Constants.FIELDS.TITLE]
         }
     }
     
     var scripture:String? {
         get {
-            return dict![Constants.FIELDS.SCRIPTURE]
+            return dict?[Constants.FIELDS.SCRIPTURE]
         }
     }
     
     var text:String? {
         get {
-            return dict![Constants.FIELDS.TEXT]
+            return dict?[Constants.FIELDS.TEXT]
         }
     }
     
     var startingIndex:Int? {
         get {
-            if let startingIndex = dict![Constants.FIELDS.STARTING_INDEX] {
+            if let startingIndex = dict?[Constants.FIELDS.STARTING_INDEX] {
                 return Int(startingIndex)
             } else {
                 return nil
@@ -109,7 +109,7 @@ class Series : Equatable, CustomStringConvertible {
     
     var show:Int? {
         get {
-            if let show = dict![Constants.FIELDS.SHOW] {
+            if let show = dict?[Constants.FIELDS.SHOW] {
                 return Int(show)
             } else {
                 return numberOfSermons
@@ -119,7 +119,7 @@ class Series : Equatable, CustomStringConvertible {
     
     var numberOfSermons:Int? {
         get {
-            if let numberOfSermons = dict![Constants.FIELDS.NUMBER_OF_SERMONS] {
+            if let numberOfSermons = dict?[Constants.FIELDS.NUMBER_OF_SERMONS] {
                 return Int(numberOfSermons)
             } else {
                 return nil
@@ -129,11 +129,11 @@ class Series : Equatable, CustomStringConvertible {
     
     var titleSort:String? {
         get {
-            if (dict![Constants.FIELDS.TITLE+Constants.SORTING] == nil) {
-                dict![Constants.FIELDS.TITLE+Constants.SORTING] = stringWithoutPrefixes(title)?.lowercased()
+            if (dict?[Constants.FIELDS.TITLE+Constants.SORTING] == nil) {
+                dict?[Constants.FIELDS.TITLE+Constants.SORTING] = stringWithoutPrefixes(title)?.lowercased()
             }
             
-            return dict![Constants.FIELDS.TITLE+Constants.SORTING]
+            return dict?[Constants.FIELDS.TITLE+Constants.SORTING]
         }
     }
 
@@ -141,24 +141,24 @@ class Series : Equatable, CustomStringConvertible {
     
     var book:String? {
         get {
-            if (dict![Constants.FIELDS.BOOK] == nil) {
+            if (dict?[Constants.FIELDS.BOOK] == nil) {
                 if (scripture == Constants.Selected_Scriptures) {
-                    dict![Constants.FIELDS.BOOK] = Constants.Selected_Scriptures
+                    dict?[Constants.FIELDS.BOOK] = Constants.Selected_Scriptures
                 } else {
-                    if (dict![Constants.FIELDS.BOOK] == nil) {
+                    if (dict?[Constants.FIELDS.BOOK] == nil) {
                         for bookTitle in Constants.TESTAMENT.OLD {
                             if (scripture?.endIndex >= bookTitle.endIndex) &&
                                 (scripture?.substring(to: bookTitle.endIndex) == bookTitle) {
-                                    dict![Constants.FIELDS.BOOK] = bookTitle
+                                    dict?[Constants.FIELDS.BOOK] = bookTitle
                                     break
                             }
                         }
                     }
-                    if (dict![Constants.FIELDS.BOOK] == nil) {
+                    if (dict?[Constants.FIELDS.BOOK] == nil) {
                         for bookTitle in Constants.TESTAMENT.NEW {
                             if (scripture?.endIndex >= bookTitle.endIndex) &&
                                 (scripture?.substring(to: bookTitle.endIndex) == bookTitle) {
-                                    dict![Constants.FIELDS.BOOK] = bookTitle
+                                    dict?[Constants.FIELDS.BOOK] = bookTitle
                                     break
                             }
                         }
@@ -166,7 +166,7 @@ class Series : Equatable, CustomStringConvertible {
                 }
             }
             
-            return dict![Constants.FIELDS.BOOK]
+            return dict?[Constants.FIELDS.BOOK]
         }
     }
 
@@ -315,9 +315,6 @@ class Series : Equatable, CustomStringConvertible {
                 let range = sermonID.range(of: Constants.COLON),
                 let num = Int(sermonID.substring(from: range.upperBound)),
                 let startingIndex = startingIndex {
-//                print(sermonID)
-//                print(sermonID.substring(from: sermonID.range(of: ":")!.upperBound))
-//                print(Int(sermonID.substring(from: sermonID.range(of: ":")!.upperBound))! - startingIndex)
                 return sermons?[num - startingIndex]
             } else {
                 return nil
@@ -326,7 +323,6 @@ class Series : Equatable, CustomStringConvertible {
         
         set {
             if (newValue != nil) {
-//                print(newValue!.sermonID!)
                 settings?[Constants.SETTINGS.SELECTED.SERMON] = newValue?.sermonID
             } else {
                 print("newValue == nil")
@@ -339,15 +335,15 @@ class Series : Equatable, CustomStringConvertible {
         
         var seriesString = "Series: "
         
-        if (title != "") {
-            seriesString = "\(seriesString ) \(title ?? "TITLE")"
+        if let title = title, !title.isEmpty {
+            seriesString = "\(seriesString ) \(title)"
         }
         
-        if let scripture = scripture {
+        if let scripture = scripture, !scripture.isEmpty {
             seriesString = "\(seriesString ) \(scripture)"
         }
         
-        if let name = name {
+        if let name = name, !name.isEmpty {
             seriesString = "\(seriesString)\n\(name)"
         }
         
@@ -362,8 +358,10 @@ class Series : Equatable, CustomStringConvertible {
         if let numberOfSermons = numberOfSermons {
             seriesString = "\(seriesString) \(numberOfSermons)"
         }
-        
-        seriesString = "\(seriesString)\n\(text ?? "TEXT")"
+
+        if let text = text, !text.isEmpty {
+            seriesString = "\(seriesString)\n\(text)"
+        }
         
         return seriesString
     }

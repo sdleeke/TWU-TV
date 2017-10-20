@@ -98,8 +98,8 @@ class PlayerStateTime {
             break
         }
         
-        if stateName != nil {
-            print(stateName!)
+        if let stateName = stateName {
+            print(stateName)
         }
     }
 }
@@ -164,7 +164,6 @@ class MediaPlayer : NSObject {
         sermonInfo[MPMediaItemPropertyAlbumArtist] = Constants.Tom_Pennington as AnyObject
         
         if let art = playing?.series?.loadArt() {
-//            sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: art)
             sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: art.size, requestHandler: { (CGSize) -> UIImage in
                 return art
             })
@@ -280,8 +279,8 @@ class MediaPlayer : NSObject {
             let status: AVPlayerItemStatus
             
             // Get the status change from the change dictionary
-            if let statusNumber = change?[.newKey] as? NSNumber {
-                status = AVPlayerItemStatus(rawValue: statusNumber.intValue)!
+            if let statusNumber = change?[.newKey] as? NSNumber, let itemStatus = AVPlayerItemStatus(rawValue: statusNumber.intValue) {
+                status = itemStatus
             } else {
                 status = .unknown
             }
@@ -290,10 +289,6 @@ class MediaPlayer : NSObject {
             switch status {
             case .readyToPlay:
                 // Player item is ready to play.
-                //                print(player?.currentItem?.duration.value)
-                //                print(player?.currentItem?.duration.timescale)
-                //                print(player?.currentItem?.duration.seconds)
-                
                 if !loaded && (playing != nil) {
                     loaded = true
                     
@@ -340,7 +335,7 @@ class MediaPlayer : NSObject {
             case .unknown:
                 // Player item is not yet ready.
                 if #available(iOS 10.0, *) {
-                    print(player?.reasonForWaitingToPlay! as Any)
+                    print(player?.reasonForWaitingToPlay as Any)
                 } else {
                     // Fallback on earlier versions
                 }
@@ -361,11 +356,6 @@ class MediaPlayer : NSObject {
     
     @objc func didPlayToEnd()
     {
-        //        print("didPlayToEnd",globals.playing)
-        
-        //        print(currentTime?.seconds)
-        //        print(duration?.seconds)
-        
         pause()
         
         DispatchQueue.main.async(execute: { () -> Void in
@@ -381,14 +371,14 @@ class MediaPlayer : NSObject {
             playing?.atEnd = true
         }
         
-        if globals.autoAdvance, let atEnd = playing?.atEnd, atEnd,
-            let mediaItems = playing?.series?.sermons,
-            let index = mediaItems.index(of: playing!), index < (mediaItems.count - 1) {
+        if globals.autoAdvance, let playing = playing, playing.atEnd,
+            let mediaItems = playing.series?.sermons,
+            let index = mediaItems.index(of: playing), index < (mediaItems.count - 1) {
             let nextMediaItem = mediaItems[index + 1]
             
             nextMediaItem.currentTime = Constants.ZERO
             
-            playing = nextMediaItem
+            self.playing = nextMediaItem
             playOnLoad = true
             
             setup(nextMediaItem)
@@ -475,9 +465,6 @@ class MediaPlayer : NSObject {
 
     func updateCurrentTimeForPlaying()
     {
-        //        assert(player?.currentItem != nil,"player?.currentItem should not be nil if we're trying to update the currentTime in userDefaults")
-        assert(currentTime != nil,"currentTime should not be nil if we're trying to update the currentTime in userDefaults")
-        
         guard loaded else {
             return
         }
@@ -497,64 +484,11 @@ class MediaPlayer : NSObject {
         }
         
         if ((timeNow > 0) && (timeNow % 10) == 0) {
-            //                println("\(timeNow.description)")
             if let playingCurrentTime = playing?.currentTime, let num = Float(playingCurrentTime), Int(num) != Int(currentTime.seconds) {
                 playing?.currentTime = currentTime.seconds.description
             }
         }
     }
-    
-//    func playerTimer()
-//    {
-//        // This function is only called when the media is playing
-//        
-//        MPRemoteCommandCenter.shared().playCommand.isEnabled = player != nil
-//        MPRemoteCommandCenter.shared().skipBackwardCommand.isEnabled = player != nil
-//        MPRemoteCommandCenter.shared().skipForwardCommand.isEnabled = player != nil
-//        
-//        if (rate > 0) {
-//            updateCurrentTimeForPlaying()
-//        }
-//        
-//        if (player != nil) {
-//            switch state! {
-//            case .none:
-//                //                print("none")
-//                break
-//                
-//            case .playing:
-//                //                print("playing")
-//                break
-//                
-//            case .paused:
-//                //                print("paused")
-//                
-//                //                if !loaded && !loadFailed {
-//                //                    if (stateTime!.timeElapsed > Constants.MIN_LOAD_TIME) {
-//                //                        loadFailed = true
-//                //
-//                //                        if (UIApplication.shared.applicationState == UIApplicationState.active) {
-//                //                            let errorAlert = UIAlertView(title: "Unable to Load Content", message: "Please check your network connection and try to play it again.", delegate: self, cancelButtonTitle: "OK")
-//                //                            errorAlert.show()
-//                //                        }
-//                //                    }
-//                //                }
-//                break
-//                
-//            case .stopped:
-//                //                print("stopped")
-//                break
-//                
-//            case .seekingForward:
-//                //                print("seekingForward")
-//                break
-//                
-//            case .seekingBackward:
-//                //                print("seekingBackward")
-//                break
-//            }
-//        }
-//    }
 
     func failedToLoad()
     {
@@ -582,59 +516,6 @@ class MediaPlayer : NSObject {
         }
     }
     
-    //    func playerTimer()
-    //    {
-    //        // This function is only called when the media is playing
-    //
-    //        MPRemoteCommandCenter.shared().playCommand.isEnabled = player != nil
-    //        MPRemoteCommandCenter.shared().skipBackwardCommand.isEnabled = player != nil
-    //        MPRemoteCommandCenter.shared().skipForwardCommand.isEnabled = player != nil
-    //
-    //        if (rate > 0) {
-    //            updateCurrentTimeForPlaying()
-    //        }
-    //
-    //        if (player != nil) {
-    //            switch state! {
-    //            case .none:
-    //                //                print("none")
-    //                break
-    //
-    //            case .playing:
-    //                //                print("playing")
-    //                break
-    //
-    //            case .paused:
-    //                //                print("paused")
-    //
-    //                //                if !mediaPlayer.loaded && !mediaPlayer.loadFailed {
-    //                //                    if (mediaPlayer.stateTime!.timeElapsed > Constants.MIN_LOAD_TIME) {
-    //                //                        mediaPlayer.loadFailed = true
-    //                //
-    //                //                        if (UIApplication.shared.applicationState == UIApplicationState.active) {
-    //                //                            let errorAlert = UIAlertView(title: "Unable to Load Content", message: "Please check your network connection and try to play it again.", delegate: self, cancelButtonTitle: "OK")
-    //                //                            errorAlert.show()
-    //                //                        }
-    //                //                    }
-    //                //                }
-    //                break
-    //
-    //            case .stopped:
-    //                //                print("stopped")
-    //                break
-    //
-    //            case .seekingForward:
-    //                //                print("seekingForward")
-    //                break
-    //
-    //            case .seekingBackward:
-    //                //                print("seekingBackward")
-    //                break
-    //            }
-    //        }
-    //    }
-    
-    
     @objc func playerObserver()
     {
         //        logPlayerState()
@@ -647,42 +528,13 @@ class MediaPlayer : NSObject {
                 return
         }
         
-        //        print("startTime",startTime)
-        //        print("start",start)
-        //        print("currentTime",currentTime)
-        //        print("timeElapsed",timeElapsed)
-        
         switch state {
         case .none:
             break
             
         case .playing:
             if loaded && !loadFailed {
-                // This causes too many problems if it fires at the wrong time during skip forwar or backward.
-                // The whole thing can be commented out because the minimum tvOS is 10.0
                 
-//                if Int(currentTime) <= Int(start) {
-//                    // This is trying to catch failures to play after loading due to low bandwidth (or anything else).
-//                    // BUT it is in a timer so it may fire when start and currentTime are changing and may cause problems
-//                    // due to timing errors.  It certainly does in tvOS.  May just want to eliminate it.
-//                    if (timeElapsed > Constants.MIN_LOAD_TIME) {
-//                        //                            pause()
-//                        //                            failedToLoad()
-//                    } else {
-//                        // Kick the player in the pants to get it going (audio primarily requiring this when the network is poor)
-//                        print("KICK")
-//                        player?.play()
-//                    }
-//                } else {
-//                    if #available(iOS 10.0, *) {
-//                    } else {
-//                        // Was playing normally and the system paused it.
-//                        // This is redundant to KVO monitoring of AVPlayer.timeControlStatus but that is only available in 10.0 and later.
-//                        if (rate == 0) {
-//                            pause()
-//                        }
-//                    }
-//                }
             } else {
                 // If it isn't loaded then it shouldn't be playing.
             }
@@ -743,12 +595,12 @@ class MediaPlayer : NSObject {
         player?.addObserver( self,
                              forKeyPath: #keyPath(AVPlayer.timeControlStatus),
                              options: [.old, .new],
-                             context: nil) // &GlobalPlayerContext
+                             context: nil)
         
         player?.currentItem?.addObserver(self,
                                          forKeyPath: #keyPath(AVPlayerItem.status),
                                          options: [.old, .new],
-                                         context: nil) // &GlobalPlayerContext
+                                         context: nil)
         observerActive = true
         observedItem = currentItem
 
@@ -780,9 +632,9 @@ class MediaPlayer : NSObject {
             if observedItem != nil {
                 print("GLOBAL removeObserver: ",observedItem?.observationInfo as Any)
 
-                player?.removeObserver(self, forKeyPath: #keyPath(AVPlayer.timeControlStatus), context: nil) // &GlobalPlayerContext
-
-                player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil) // &GlobalPlayerContext
+                player?.removeObserver(self, forKeyPath: #keyPath(AVPlayer.timeControlStatus), context: nil)
+                
+                player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil)
                 
                 observedItem = nil
                 
@@ -908,8 +760,6 @@ class MediaPlayer : NSObject {
             seek = 0
         }
         
-        //                    player?.seek(to: CMTimeMakeWithSeconds(seek,Constants.CMTime_Resolution), toleranceBefore: CMTimeMakeWithSeconds(0,Constants.CMTime_Resolution), toleranceAfter: CMTimeMakeWithSeconds(0,Constants.CMTime_Resolution))
-        
         player?.seek(to: CMTimeMakeWithSeconds(seek,Constants.CMTime_Resolution), toleranceBefore: CMTimeMakeWithSeconds(0,Constants.CMTime_Resolution), toleranceAfter: CMTimeMakeWithSeconds(0,Constants.CMTime_Resolution),
                      completionHandler: { (finished:Bool) in
                         if finished {
@@ -948,8 +798,8 @@ class MediaPlayer : NSObject {
             return stateTime?.state
         }
         set {
-            if newValue != nil {
-                stateTime?.state = newValue!
+            if let newValue = newValue {
+                stateTime?.state = newValue
             }
         }
     }
@@ -984,8 +834,6 @@ class MediaPlayer : NSObject {
     var playOnLoad:Bool = true
     var loaded:Bool = false
     var loadFailed:Bool = false
-    
-    //    var observer: Timer?
     
     var playing:Sermon? {
         willSet {

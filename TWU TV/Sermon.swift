@@ -29,7 +29,7 @@ class Sermon : NSObject {
     
     var atEnd:Bool {
         get {
-            return settings![Constants.SETTINGS.AT_END] == "YES"
+            return settings?[Constants.SETTINGS.AT_END] == "YES"
         }
         
         set {
@@ -170,10 +170,6 @@ class Sermon : NSObject {
                 if (globals.sermonSettings?[sermonID] == nil) {
                     globals.sermonSettings?[sermonID] = [String:String]()
                 }
-                
-                //                            print("\(globals.sermonSettings!)")
-                //                            print("\(sermon!)")
-                //                            print("\(newValue!)")
                 
                 if (globals.sermonSettings?[sermonID]?[key] != newValue) {
                     globals.sermonSettings?[sermonID]?[key] = newValue

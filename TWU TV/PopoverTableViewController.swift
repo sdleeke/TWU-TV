@@ -27,7 +27,11 @@ class Section {
         }
         didSet {
             indexStrings = strings?.map({ (string:String) -> String in
-                return indexTransform != nil ? indexTransform!(string.uppercased())! : string.uppercased()
+                if let string = indexTransform?(string.uppercased()) {
+                    return string
+                } else {
+                    return string.uppercased()
+                }
             })
         }
     }
@@ -45,7 +49,7 @@ class Section {
     
     func build()
     {
-        guard strings?.count > 0 else {
+        guard let indexStrings = indexStrings, strings?.count > 0 else {
             titles = nil
             counts = nil
             indexes = nil
@@ -54,7 +58,7 @@ class Section {
         }
         
         if showIndex {
-            guard indexStrings?.count > 0 else {
+            guard indexStrings.count > 0 else {
                 titles = nil
                 counts = nil
                 indexes = nil
@@ -65,9 +69,7 @@ class Section {
         
         let a = "A"
         
-        titles = Array(Set(indexStrings!
-            
-            .map({ (string:String) -> String in
+        titles = Array(Set(indexStrings.map({ (string:String) -> String in
                 if string.endIndex >= a.endIndex {
                     return string.substring(to: a.endIndex).uppercased()
                 } else {
@@ -84,11 +86,11 @@ class Section {
         } else {
             var stringIndex = [String:[String]]()
             
-            for indexString in indexStrings! {
+            for indexString in indexStrings {
                 if stringIndex[indexString.substring(to: a.endIndex)] == nil {
                     stringIndex[indexString.substring(to: a.endIndex)] = [String]()
                 }
-                //                print(testString,string)
+
                 stringIndex[indexString.substring(to: a.endIndex)]?.append(indexString)
             }
             
@@ -98,8 +100,6 @@ class Section {
             var indexes = [Int]()
             
             for key in stringIndex.keys.sorted() {
-                //                print(stringIndex[key]!)
-                
                 if let value = stringIndex[key] {
                     indexes.append(counter)
                     counts.append(value.count)
@@ -152,7 +152,7 @@ class PopoverTableViewController : UIViewController {
             return
         }
         
-        guard (section.strings != nil) else {
+        guard let strings = section.strings else {
             return
         }
         
@@ -174,8 +174,6 @@ class PopoverTableViewController : UIViewController {
         
         let viewWidth = view.frame.width
         
-        //        print(view.frame.width - deducts)
-        
         let heightSize: CGSize = CGSize(width: viewWidth - deducts, height: .greatestFiniteMagnitude)
         let widthSize: CGSize = CGSize(width: .greatestFiniteMagnitude, height: Constants.Fonts.bold.lineHeight)
         
@@ -185,34 +183,22 @@ class PopoverTableViewController : UIViewController {
             width = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil).width
         }
         
-        //        print(strings)
-        
-        for string in self.section.strings! {
+        for string in strings {
             let string = string.replacingOccurrences(of: Constants.SINGLE_SPACE, with: Constants.UNBREAKABLE_SPACE)
             
             let maxWidth = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil)
             
             let maxHeight = string.boundingRect(with: heightSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil)
             
-            //            print(string)
-            //            print(maxSize)
-            
-            //            print(string,width,maxWidth.width)
-            
             if maxWidth.width > width {
                 width = maxWidth.width
             }
-            
-            //            print(string,maxHeight.height) // baseHeight
             
             if tableView.rowHeight != -1 {
                 height += tableView.rowHeight
             } else {
                 height += 2*8 + maxHeight.height // - baseHeight
             }
-            
-            //            print(maxHeight.height, (Int(maxHeight.height) / 16) - 1)
-            //            height += CGFloat(((Int(maxHeight.height) / 16) - 1) * 16)
         }
         
         width += margins * marginSpace
@@ -221,10 +207,7 @@ class PopoverTableViewController : UIViewController {
             width += indexSpace
             height += tableView.sectionHeaderHeight * CGFloat(count)
         }
-        
-//        print(height)
-//        print(width)
-        
+
         tableViewWidth.constant = width
     }
     
@@ -240,11 +223,6 @@ class PopoverTableViewController : UIViewController {
         tableView.allowsSelection = allowsSelection
         tableView.allowsMultipleSelection = allowsMultipleSelection
         
-//        print("Strings: \(strings)")
-//        print("Sections: \(sections)")
-//        print("Section Indexes: \(sectionIndexes)")
-//        print("Section Counts: \(sectionCounts)")
-
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -278,7 +256,6 @@ class PopoverTableViewController : UIViewController {
                 return false
             }
         }) {
-            //                if let selectedText = self.selectedText, let index = self.filteredStrings?.index(of: selectedText) {
             var i = 0
             
             repeat {
@@ -373,29 +350,26 @@ extension PopoverTableViewController : UITableViewDataSource
 {
     // MARK: UITableViewDataSource
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Potentially incomplete method implementation.
-        // Return the number of sections.
+    func numberOfSections(in tableView: UITableView) -> Int
+    {
         if section.showIndex {
-            //        if let active = self.searchController?.isActive, active {
-            return section.titles != nil ? section.titles!.count : 0
+            return section.titles?.count ?? 0
         } else {
             return 1
         }
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    {
         if self.section.showIndex {
-            //        if let active = self.searchController?.isActive, active {
-            return self.section.counts != nil ? ((section < self.section.counts?.count) ? self.section.counts![section] : 0) : 0
+            return self.section.counts?[section] ?? 0
         } else {
-            return self.section.strings != nil ? self.section.strings!.count : 0
+            return self.section.strings?.count ?? 0
         }
     }
     
-    func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+    func sectionIndexTitles(for tableView: UITableView) -> [String]?
+    {
         if section.showIndex {
             //        if let active = self.searchController?.isActive, active {
             return section.titles
@@ -404,11 +378,8 @@ extension PopoverTableViewController : UITableViewDataSource
         }
     }
     
-    //    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-    //        return 48
-    //    }
-    
-    func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+    func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int
+    {
         if section.showIndex {
             return index
         } else {
@@ -416,9 +387,9 @@ extension PopoverTableViewController : UITableViewDataSource
         }
     }
     
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if self.section.showIndex, self.section.showHeaders { // showIndex &&
-            //        if let active = self.searchController?.isActive, active {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String?
+    {
+        if self.section.showIndex, self.section.showHeaders {
             if let count = self.section.titles?.count, section < count {
                 return self.section.titles?[section]
             }
@@ -429,7 +400,7 @@ extension PopoverTableViewController : UITableViewDataSource
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.IDENTIFIER.POPOVER_CELL, for: indexPath) as! PopoverTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.IDENTIFIER.POPOVER_CELL, for: indexPath) as? PopoverTableViewCell ?? PopoverTableViewCell()
         
         cell.title.text = nil
         cell.title.attributedText = nil
@@ -453,7 +424,11 @@ extension PopoverTableViewController : UITableViewDataSource
 
         cell.accessoryType = .none
         
-        switch purpose! {
+        guard let purpose = purpose else {
+            return cell
+        }
+        
+        switch purpose {
         case .selectingSorting:
             if (globals.sorting == Constants.Sorting.Options[index]) {
                 cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
@@ -463,7 +438,6 @@ extension PopoverTableViewController : UITableViewDataSource
             break
             
         case .selectingFiltering:
-            //            print("strings: \(strings[indexPath.row]) sermontTag: \(globals.sermonTag)")
             switch globals.showing {
             case .all:
                 if string == Constants.All {
@@ -490,41 +464,6 @@ extension PopoverTableViewController : UITableViewDataSource
 
         return cell
     }
-
-    /*
-     // Override to support conditional editing of the table view.
-     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-     // Return NO if you do not want the specified item to be editable.
-     return true
-     }
-     */
-    
-    /*
-     // Override to support editing the table view.
-     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-     if editingStyle == .Delete {
-     // Delete the row from the data source
-     tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-     } else if editingStyle == .Insert {
-     // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-     }
-     }
-     */
-    
-    /*
-     // Override to support rearranging the table view.
-     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-     
-     }
-     */
-    
-    /*
-     // Override to support conditional rearranging of the table view.
-     override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-     // Return NO if you do not want the item to be re-orderable.
-     return true
-     }
-     */
 }
 
 extension PopoverTableViewController : UITableViewDelegate
@@ -533,12 +472,9 @@ extension PopoverTableViewController : UITableViewDelegate
     
     func tableView(_ TableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        //        let cell = tableView.cellForRow(at: indexPath)
-        
         var index = -1
         
         if (section.showIndex) {
-            //        if let active = self.searchController?.isActive, active {
             index = section.indexes != nil ? section.indexes![indexPath.section] + indexPath.row : -1
             if let range = section.strings?[index].range(of: " (") {
                 selectedText = section.strings?[index].substring(to: range.lowerBound).uppercased()
@@ -549,8 +485,6 @@ extension PopoverTableViewController : UITableViewDelegate
                 selectedText = section.strings?[index].substring(to: range.lowerBound).uppercased()
             }
         }
-        
-        //        print(index,strings![index])
         
         if let purpose = purpose {
             delegate?.rowClickedAtIndex(index, strings: section.strings, purpose: purpose)

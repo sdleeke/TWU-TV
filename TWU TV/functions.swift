@@ -92,8 +92,11 @@ extension Date
         let dateStringFormatter = DateFormatter()
         dateStringFormatter.dateFormat = "MM/dd/yyyy"
         dateStringFormatter.locale = Locale(identifier: "en_US_POSIX")
-        let d = dateStringFormatter.date(from: dateString)!
-        self = Date(timeInterval:0, since:d)
+        if let d = dateStringFormatter.date(from: dateString) {
+            self = Date(timeInterval:0, since:d)
+        } else {
+            self = Date()
+        }
     }
     
     func isNewerThanDate(_ dateToCompare : Date) -> Bool
@@ -180,9 +183,13 @@ func cachesURL() -> URL?
 
 func sortSeries(_ series:[Series]?,sorting:String?) -> [Series]?
 {
+    guard let sorting = sorting else {
+        return nil
+    }
+    
     var results:[Series]?
     
-    switch sorting! {
+    switch sorting {
     case Constants.Sorting.Title_AZ:
         results = series?.sorted() { $0.titleSort < $1.titleSort }
         break
@@ -246,9 +253,6 @@ func bookNumberInBible(_ book:String?) -> Int?
 
 func booksFromSeries(_ series:[Series]?) -> [String]?
 {
-//    var bookSet = Set<String>()
-//    var bookArray = [String]()
-    
     guard let series = series else {
         return nil
     }

@@ -8,7 +8,6 @@
 
 import Foundation
 import MediaPlayer
-//import CloudKit
 
 enum Showing {
     case all
@@ -38,17 +37,19 @@ class Globals : NSObject
             
         }
         didSet {
-            if sorting != oldValue {
-                activeSeries = sortSeries(activeSeries,sorting: sorting)
-                
-                let defaults = UserDefaults.standard
-                if (sorting != nil) {
-                    defaults.set(sorting,forKey: Constants.SORTING)
-                } else {
-                    defaults.removeObject(forKey: Constants.SORTING)
-                }
-                defaults.synchronize()
+            guard sorting != oldValue else {
+                return
             }
+
+            activeSeries = sortSeries(activeSeries,sorting: sorting)
+            
+            let defaults = UserDefaults.standard
+            if (sorting != nil) {
+                defaults.set(sorting,forKey: Constants.SORTING)
+            } else {
+                defaults.removeObject(forKey: Constants.SORTING)
+            }
+            defaults.synchronize()
         }
     }
     
@@ -57,29 +58,31 @@ class Globals : NSObject
             
         }
         didSet {
-            if filter != oldValue {
-                if (filter != nil) {
-                    showing = .filtered
-                    filteredSeries = series?.filter({ (series:Series) -> Bool in
-                        return series.book == filter
-                    })
-                } else {
-                    showing = .all
-                    filteredSeries = nil
-                }
-                
-                updateSearchResults()
-                
-                activeSeries = sortSeries(activeSeries,sorting: sorting)
-
-                let defaults = UserDefaults.standard
-                if (filter != nil) {
-                    defaults.set(filter,forKey: Constants.FILTER)
-                } else {
-                    defaults.removeObject(forKey: Constants.FILTER)
-                }
-                defaults.synchronize()
+            guard filter != oldValue else {
+                return
             }
+            
+            if (filter != nil) {
+                showing = .filtered
+                filteredSeries = series?.filter({ (series:Series) -> Bool in
+                    return series.book == filter
+                })
+            } else {
+                showing = .all
+                filteredSeries = nil
+            }
+            
+            updateSearchResults()
+            
+            activeSeries = sortSeries(activeSeries,sorting: sorting)
+            
+            let defaults = UserDefaults.standard
+            if (filter != nil) {
+                defaults.set(filter,forKey: Constants.FILTER)
+            } else {
+                defaults.removeObject(forKey: Constants.FILTER)
+            }
+            defaults.synchronize()
         }
     }
     
@@ -99,10 +102,12 @@ class Globals : NSObject
             
         }
         didSet {
-            if !searchActive {
-                searchText = nil
-                activeSeries = sortSeries(activeSeries,sorting: sorting)
+            guard !searchActive else {
+                return
             }
+            
+            searchText = nil
+            activeSeries = sortSeries(activeSeries,sorting: sorting)
         }
     }
     
@@ -117,9 +122,11 @@ class Globals : NSObject
     var searchText:String?
     {
         didSet {
-            if searchText != oldValue {
-                updateSearchResults()
+            guard searchText != oldValue else {
+                return
             }
+            
+            updateSearchResults()
         }
     }
 
@@ -210,32 +217,33 @@ class Globals : NSObject
 
     func updateSearchResults()
     {
-        if searchActive { //  && (searchText != nil) && (searchText != Constants.EMPTY_STRING)
-            searchSeries = seriesToSearch?.filter({ (series:Series) -> Bool in
-                guard let searchText = searchText else {
-                    return false
-                }
-                
-                var seriesResult = false
-                
-                if let string = series.title  {
-                    seriesResult = seriesResult || ((string.range(of: searchText, options: NSString.CompareOptions.caseInsensitive, range: nil, locale: nil)) != nil)
-                }
-                
-                if let string = series.scripture {
-                    seriesResult = seriesResult || ((string.range(of: searchText, options: NSString.CompareOptions.caseInsensitive, range: nil, locale: nil)) != nil)
-                }
-                
-                return seriesResult
-            })
-            
-            // Filter will return an empty array and we don't want that.
-            
-            if searchSeries?.count == 0 {
-                searchSeries = nil
-            }
-        } else {
+        guard searchActive else {
             searchSeries = seriesToSearch
+            return
+        }
+
+        searchSeries = seriesToSearch?.filter({ (series:Series) -> Bool in
+            guard let searchText = searchText else {
+                return false
+            }
+            
+            var seriesResult = false
+            
+            if let string = series.title  {
+                seriesResult = seriesResult || ((string.range(of: searchText, options: NSString.CompareOptions.caseInsensitive, range: nil, locale: nil)) != nil)
+            }
+            
+            if let string = series.scripture {
+                seriesResult = seriesResult || ((string.range(of: searchText, options: NSString.CompareOptions.caseInsensitive, range: nil, locale: nil)) != nil)
+            }
+            
+            return seriesResult
+        })
+        
+        // Filter will return an empty array and we don't want that.
+        
+        if searchSeries?.count == 0 {
+            searchSeries = nil
         }
     }
     
@@ -251,7 +259,7 @@ class Globals : NSObject
     {
         print("saveSermonSettings")
         let defaults = UserDefaults.standard
-        //    print("\(sermonSettings)")
+
         defaults.set(seriesSettings,forKey: Constants.SETTINGS.KEY.SERIES)
         defaults.set(sermonSettings,forKey: Constants.SETTINGS.KEY.SERMON)
         defaults.synchronize()
@@ -262,12 +270,10 @@ class Globals : NSObject
         let defaults = UserDefaults.standard
         
         if let settingsDictionary = defaults.dictionary(forKey: Constants.SETTINGS.KEY.SERIES) {
-            //        print("\(settingsDictionary)")
             seriesSettings = settingsDictionary as? [String:[String:String]]
         }
         
         if let settingsDictionary = defaults.dictionary(forKey: Constants.SETTINGS.KEY.SERMON) {
-            //        print("\(settingsDictionary)")
             sermonSettings = settingsDictionary as? [String:[String:String]]
         }
         
@@ -306,20 +312,9 @@ class Globals : NSObject
                 }
             }
         }
-
-        //    print("\(sermonSettings)")
     }
     
     var autoAdvance:Bool = false
-//    {
-//        get {
-//            return UserDefaults.standard.bool(forKey: Constants.AUTO_ADVANCE)
-//        }
-//        set {
-//            UserDefaults.standard.set(newValue, forKey: Constants.AUTO_ADVANCE)
-//            UserDefaults.standard.synchronize()
-//        }
-//    }
     
     func addAccessoryEvents()
     {

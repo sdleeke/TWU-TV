@@ -21,13 +21,11 @@ extension MediaCollectionViewController : UICollectionViewDataSource
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //#warning Incomplete method implementation -- Return the number of items in the section
-        //return series[section].count
-        return globals.activeSeries != nil ? globals.activeSeries!.count : 0
+        return globals.activeSeries?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.IDENTIFIER.SERIES_CELL, for: indexPath) as! MediaCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.IDENTIFIER.SERIES_CELL, for: indexPath) as? MediaCollectionViewCell ?? MediaCollectionViewCell()
         
         // Configure the cell
         cell.series = globals.activeSeries?[(indexPath as NSIndexPath).row]
@@ -74,60 +72,6 @@ extension MediaCollectionViewController : UICollectionViewDelegate
             
         }
     }
-    
-//    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-//        //        print("didDeselect")
-//        
-//        //        if let cell: MediaCollectionViewCell = collectionView.cellForItemAtIndexPath(indexPath) as? MediaCollectionViewCell {
-//        //
-//        //        } else {
-//        //
-//        //        }
-//    }
-    
-    /*
-     // Uncomment this method to specify if the specified item should be highlighted during tracking
-     */
-//    func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
-//        //        print("shouldHighlight")
-//        return true
-//    }
-//    
-//    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
-//        //        print("Highlighted")
-//    }
-//    
-//    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
-//        //        print("Unhighlighted")
-//    }
-    
-    /*
-     // Uncomment this method to specify if the specified item should be selected
-     */
-//    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-//        //        print("shouldSelect")
-//        return true
-//    }
-//    
-//    func collectionView(_ collectionView: UICollectionView, shouldDeselectItemAt indexPath: IndexPath) -> Bool {
-//        //        print("shouldDeselect")
-//        return true
-//    }
-    
-    /*
-     // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-     override func collectionView(collectionView: UICollectionView, shouldShowMenuForItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-     return false
-     }
-     
-     override func collectionView(collectionView: UICollectionView, canPerformAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) -> Bool {
-     return false
-     }
-     
-     override func collectionView(collectionView: UICollectionView, performAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) {
-     
-     }
-     */
 }
 
 extension MediaCollectionViewController : PopoverTableViewControllerDelegate
@@ -156,19 +100,21 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
             break
             
         case .selectingFiltering:
-            if (globals.filter != string) {
-                if (string == Constants.All) {
-                    globals.showing = .all
-                    globals.filter = nil
-                } else {
-                    globals.showing = .filtered
-                    globals.filter = string
-                }
-                
-                self.collectionView.reloadData()
-
-                scrollToSeries(seriesSelected)
+            guard (globals.filter != string) else {
+                break
             }
+            
+            if (string == Constants.All) {
+                globals.showing = .all
+                globals.filter = nil
+            } else {
+                globals.showing = .filtered
+                globals.filter = string
+            }
+            
+            self.collectionView.reloadData()
+            
+            scrollToSeries(seriesSelected)
             break
             
         case .selectingMenu:
@@ -248,10 +194,9 @@ extension MediaCollectionViewController : UITableViewDelegate
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.IDENTIFIER.SERMON_CELL, for: indexPath) as! MediaTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.IDENTIFIER.SERMON_CELL, for: indexPath) as? MediaTableViewCell ?? MediaTableViewCell()
         
         // Configure the cell...
-        print(indexPath.row)
         if indexPath.row < seriesSelected?.sermons?.count {
             cell.sermon = seriesSelected?.sermons?[indexPath.row]
         }
@@ -265,20 +210,22 @@ class MediaCollectionViewController: UIViewController
     var preferredFocusView:UIView?
     {
         didSet {
-            if (preferredFocusView != nil) {
-                DispatchQueue.main.async(execute: { () -> Void in
-                    self.setNeedsFocusUpdate()
-                })
+            guard (preferredFocusView != nil) else {
+                return
             }
+            
+            DispatchQueue.main.async(execute: { () -> Void in
+                self.setNeedsFocusUpdate()
+            })
         }
     }
     
     override var preferredFocusEnvironments : [UIFocusEnvironment]
     {
-        if preferredFocusView != nil {
-            return [preferredFocusView!]
+        if let preferredFocusView = preferredFocusView {
+            return [preferredFocusView]
         } else {
-            return [] // collectionView
+            return []
         }
     }
     
@@ -338,12 +285,12 @@ class MediaCollectionViewController: UIViewController
     @IBOutlet weak var playPauseButton: UIButton!
     @IBAction func playPause(_ sender: UIButton)
     {
-        guard (globals.mediaPlayer.state != nil) && (globals.mediaPlayer.playing == sermonSelected) && (globals.mediaPlayer.player != nil) else {
+        guard let state = globals.mediaPlayer.state, globals.mediaPlayer.playing == sermonSelected, globals.mediaPlayer.player != nil else {
             playNewSermon(sermonSelected)
             return
         }
         
-        switch globals.mediaPlayer.state! {
+        switch state {
         case .none:
             print("none")
             break
@@ -430,9 +377,8 @@ class MediaCollectionViewController: UIViewController
             let status: AVPlayerItemStatus
             
             // Get the status change from the change dictionary
-            if let statusNumber = change?[.newKey] as? NSNumber {
-                //                print(statusNumber.intValue)
-                status = AVPlayerItemStatus(rawValue: statusNumber.intValue)!
+            if let statusNumber = change?[.newKey] as? NSNumber, let itemStatus = AVPlayerItemStatus(rawValue: statusNumber.intValue) {
+                status = itemStatus
             } else {
                 status = .unknown
             }
@@ -441,16 +387,9 @@ class MediaCollectionViewController: UIViewController
             switch status {
             case .readyToPlay:
                 // Player item is ready to play.
-                //                print(player?.currentItem?.duration.value)
-                //                print(player?.currentItem?.duration.timescale)
-                //                print(player?.currentItem?.duration.seconds)
                 
                 if let currentTime = sermonSelected?.currentTime, let timeNow = Double(currentTime), let length = player?.currentItem?.duration.seconds {
                     let progress = timeNow / length
-                    
-                    //                    print("timeNow",timeNow)
-                    //                    print("progress",progress)
-                    //                    print("length",length)
                     
                     progressView.progress = Float(progress)
                     setTimes(timeNow: timeNow,length: length)
@@ -521,7 +460,6 @@ class MediaCollectionViewController: UIViewController
             
         }
         didSet {
-            //            globals.seriesSelected = seriesSelected
             if (seriesSelected != nil) {
                 globals.showingAbout = false
                 
@@ -569,10 +507,7 @@ class MediaCollectionViewController: UIViewController
                 return
             }
             
-            //            print(sermonSelected)
             if (sermonSelected != oldValue) {
-                //                print("\(sermonSelected)")
-                
                 if sermonSelected != globals.mediaPlayer.playing, let playingURL = sermonSelected?.playingURL {
                     globals.mediaPlayer.stop()
                     removeProgressObserver()
@@ -583,14 +518,11 @@ class MediaCollectionViewController: UIViewController
                     addProgressObserver()
                 }
             } else {
-                //                print("MediaViewController:sermonSelected nil")
                 preferredFocusView = playPauseButton
             }
         }
     }
     
-//    var refreshControl:UIRefreshControl?
-
     func setupPlayPauseButton()
     {
         guard (sermonSelected != nil) else {
@@ -613,19 +545,19 @@ class MediaCollectionViewController: UIViewController
         if (sermonSelected == globals.mediaPlayer.playing) {
             playPauseButton.isEnabled = globals.mediaPlayer.loaded || globals.mediaPlayer.loadFailed
 
-            switch globals.mediaPlayer.state! {
-            case .playing:
-                //                    print("Pause")
-                playPauseButton.setTitle(Constants.FA.PAUSE, for: UIControlState())
-                break
-                
-            case .paused:
-                //                    print("Play")
-                playPauseButton.setTitle(Constants.FA.PLAY, for: UIControlState())
-                break
-                
-            default:
-                break
+            if let state = globals.mediaPlayer.state {
+                switch state {
+                case .playing:
+                    playPauseButton.setTitle(Constants.FA.PAUSE, for: UIControlState())
+                    break
+                    
+                case .paused:
+                    playPauseButton.setTitle(Constants.FA.PLAY, for: UIControlState())
+                    break
+                    
+                default:
+                    break
+                }
             }
             
             restartButton.isEnabled = globals.mediaPlayer.loaded
@@ -671,19 +603,6 @@ class MediaCollectionViewController: UIViewController
             
             seriesLabel.text = description.replacingOccurrences(of: "<br/>", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
             
-//            let text = description.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
-
-//            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
-//                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
-//                                                                     documentAttributes: nil) {
-//                
-//                attributedString.addAttributes([NSFontAttributeName:UIFont.preferredFont(forTextStyle: UIFontTextStyle.footnote)],
-//                                               range: NSMakeRange(0, attributedString.length))
-//                
-//                
-//                seriesLabel.attributedText = attributedString
-//            }
-
             return
         }
         
@@ -692,27 +611,10 @@ class MediaCollectionViewController: UIViewController
 
         backgroundLogo.isHidden = false
 
-        //            print(seriesSelected?.text)
-
         seriesLabel.text = seriesSelected?.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
-        
-        //?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...")
 
         if let _ = seriesSelected?.text?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...") {
             
-//            if let attributedString = try? NSMutableAttributedString(data: text.data(using: String.Encoding.utf8, allowLossyConversion: false)!,
-//                                                                     options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
-//                                                                     documentAttributes: nil) {
-//                
-//                // preferredFont(forTextStyle: UIFontTextStyle.footnote)
-//                
-//                attributedString.addAttributes([NSFontAttributeName:UIFont.systemFont(ofSize: 30.0)],
-//                                               range: NSMakeRange(0, attributedString.length))
-//                
-//                
-//                seriesDescription.attributedText = nil
-//                seriesLabel.attributedText = attributedString
-//            }
         }
         
         if let series = self.seriesSelected {
@@ -820,14 +722,9 @@ class MediaCollectionViewController: UIViewController
             }
         }
         
-        //            print("\(tableView.bounds)")
-        
         if (select) {
-            //                print(indexPath)
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: position)
         }
-        
-        //            print("Row: \(indexPath.row) Section: \(indexPath.section)")
         
         tableView.scrollToRow(at: indexPath, at: position, animated: false)
     }
@@ -895,29 +792,19 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard (globals.mediaPlayer.state != nil) else {
+        guard let state = globals.mediaPlayer.state else {
             return
         }
         
         var progress = -1.0
         
-        //            print("currentTime",selectedSermon?.currentTime)
-        //            print("timeNow",timeNow)
-        //            print("progress",progress)
-        //            print("length",length)
-        
         if (length > 0) {
-            switch globals.mediaPlayer.state! {
+            switch state {
             case .playing:
                 if playingCurrentTime >= 0, let duration = globals.mediaPlayer.duration, playerCurrentTime <= duration.seconds {
                     progress = playerCurrentTime / length
                     
-                    //                        print("playing")
-                    //                        print("timeNow",timeNow)
-                    //                        print("progress",progress)
-                    //                        print("length",length)
-                    
-                    if globals.mediaPlayer.loaded { // !sliding &&
+                    if globals.mediaPlayer.loaded {
                         if playerCurrentTime == 0 {
                             progress = playingCurrentTime / length
                             progressView.progress = Float(progress)
@@ -937,11 +824,6 @@ class MediaCollectionViewController: UIViewController
             case .paused:
                 progress = playingCurrentTime / length
                 
-                //                        print("paused")
-                //                        print("timeNow",timeNow)
-                //                        print("progress",progress)
-                //                        print("length",length)
-                
                 progressView.progress = Float(progress)
                 setTimes(timeNow: playingCurrentTime,length: length)
                 
@@ -952,11 +834,6 @@ class MediaCollectionViewController: UIViewController
                 
             case .stopped:
                 progress = playingCurrentTime / length
-                
-                //                        print("stopped")
-                //                        print("timeNow",timeNow)
-                //                        print("progress",progress)
-                //                        print("length",length)
                 
                 progressView.progress = Float(progress)
                 setTimes(timeNow: playingCurrentTime,length: length)
@@ -972,11 +849,6 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-//    override var canBecomeFirstResponder : Bool
-//    {
-//        return true
-//    }
-
     func selectSermon(_ sermon:Sermon?)
     {
         guard (sermon != nil) else {
@@ -992,8 +864,6 @@ class MediaCollectionViewController: UIViewController
         }
         
         setupPlayPauseButton()
-        
-        //            print("\(seriesSelected!.title)")
         
         //Without this background/main dispatching there isn't time to scroll correctly after a reload.
         DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
@@ -1017,7 +887,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard (globals.mediaPlayer.state != nil) else {
+        guard let state = globals.mediaPlayer.state else {
             return
         }
         
@@ -1038,7 +908,7 @@ class MediaCollectionViewController: UIViewController
             }
         }
         
-        switch globals.mediaPlayer.state! {
+        switch state {
         case .none:
             print("none")
             break
@@ -1209,16 +1079,11 @@ class MediaCollectionViewController: UIViewController
                 progressView.isHidden = true
             }
         } else {
-            //            print(player?.currentItem?.status.rawValue)
             if  player?.currentItem?.status == .readyToPlay,
                 let length = player?.currentItem?.duration.seconds,
                 let currentTime = sermonSelected?.currentTime,
                 let timeNow = Double(currentTime) {
                 let progress = timeNow / length
-                
-                //                        print("timeNow",timeNow)
-                //                        print("progress",progress)
-                //                        print("length",length)
                 
                 progressView.progress = Float(progress)
                 setTimes(timeNow: timeNow,length: length)
@@ -1239,7 +1104,6 @@ class MediaCollectionViewController: UIViewController
         if let navigationController = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController {
             if let popover = navigationController.viewControllers[0] as? PopoverTableViewController {
                 navigationController.modalPresentationStyle = .fullScreen
-                //            popover?.preferredContentSize = CGSizeMake(300, 500)
                 
                 popover.navigationItem.title = Constants.Sorting_Options_Title
                 
@@ -1359,11 +1223,8 @@ class MediaCollectionViewController: UIViewController
     
     func jsonFromURL(url:String,filename:String) -> Any?
     {
-        guard globals.reachability.isReachable else { // currentReachabilityStatus != .notReachable
+        guard globals.reachability.isReachable else {
             print("json not reachable.")
-            
-            //            globals.alert(title:"Network Error",message:"Newtork not available, attempting to load last available media list.")
-            
             return jsonFromFileSystem(filename: filename)
         }
         
@@ -1376,19 +1237,17 @@ class MediaCollectionViewController: UIViewController
         }
         
         do {
-            let data = try Data(contentsOf: url) // , options: NSData.ReadingOptions.mappedIfSafe
+            let data = try Data(contentsOf: url)
             print("able to read json from the URL.")
             
             do {
                 let json = try JSONSerialization.jsonObject(with: data, options: [])
                 
                 do {
-                    try data.write(to: jsonFileSystemURL)//, options: NSData.WritingOptions.atomic)
-                    
+                    try data.write(to: jsonFileSystemURL)
                     print("able to write json to the file system")
                 } catch let error as NSError {
                     print("unable to write json to the file system.")
-                    
                     NSLog(error.localizedDescription)
                 }
                 
@@ -1403,51 +1262,6 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-//    func jsonFromURL() -> JSON
-//    {
-//        let jsonFileSystemURL = cachesURL()?.appendingPathComponent(Constants.JSON.SERIES)
-//        
-//        do {
-//            let data = try Data(contentsOf: URL(string: Constants.JSON.URL)!) // , options: NSData.ReadingOptions.mappedIfSafe
-//            
-//            let json = JSON(data: data)
-//            
-//            if json != JSON.null {
-//                try data.write(to: jsonFileSystemURL!, options: NSData.WritingOptions.atomicWrite)
-//                
-//                print(json)
-//                
-//                return json
-//            } else {
-//                print("could not get json from file, make sure that file contains valid json.")
-//                
-//                let data = try Data(contentsOf: jsonFileSystemURL!) // , options: NSData.ReadingOptions.mappedIfSafe
-//                
-//                let json = JSON(data: data)
-//                if json != JSON.null {
-//                    print(json)
-//                    return json
-//                }
-//            }
-//        } catch let error as NSError {
-//            NSLog(error.localizedDescription)
-//            
-//            do {
-//                let data = try Data(contentsOf: jsonFileSystemURL!) // , options: NSData.ReadingOptions.mappedIfSafe
-//                
-//                let json = JSON(data: data)
-//                if json != JSON.null {
-//                    print(json)
-//                    return json
-//                }
-//            } catch let error as NSError {
-//                NSLog(error.localizedDescription)
-//            }
-//        }
-//
-//        return nil
-//    }
-    
     func loadSeriesDicts() -> [[String:String]]?
     {
         if let json = jsonFromURL(url: Constants.JSON.URL,filename: Constants.JSON.SERIES) as? [String:Any] {
@@ -1455,8 +1269,6 @@ class MediaCollectionViewController: UIViewController
             
             if let series = json[Constants.JSON.ARRAY_KEY] as? [[String:String]] {
                 for i in 0..<series.count {
-                    //                    print("sermon: \(series[i])")
-                    
                     var dict = [String:String]()
                     
                     for (key,value) in series[i] {
@@ -1471,32 +1283,6 @@ class MediaCollectionViewController: UIViewController
         } else {
             print("could not get json from file, make sure that file contains valid json.")
         }
-
-//        let json = jsonFromURL(url:Constants.JSON.URL,filename: Constants.JSON.SERIES)
-//        
-//        if json != nil {
-////            print("json:\(json)")
-//            
-//            var seriesDicts = [[String:String]]()
-//            
-//            let series = json[Constants.JSON.ARRAY_KEY]
-//            
-//            for i in 0..<series.count {
-//                //                    print("sermon: \(series[i])")
-//                
-//                var dict = [String:String]()
-//                
-//                for (key,value) in series[i] {
-//                    dict["\(key)"] = "\(value)"
-//                }
-//                
-//                seriesDicts.append(dict)
-//            }
-//            
-//            return seriesDicts.count > 0 ? seriesDicts : nil
-//        } else {
-//            print("could not get json from file, make sure that file contains valid json.")
-//        }
         
         return nil
     }
@@ -1548,10 +1334,12 @@ class MediaCollectionViewController: UIViewController
     
     func enableBarButtons()
     {
-        if (globals.series != nil) {
-            navigationItem.leftBarButtonItem?.isEnabled = true
-            navigationItem.rightBarButtonItem?.isEnabled = true
+        guard (globals.series != nil) else {
+            return
         }
+
+        navigationItem.leftBarButtonItem?.isEnabled = true
+        navigationItem.rightBarButtonItem?.isEnabled = true
     }
     
     func playPauseButtonAction(tap:UITapGestureRecognizer)
@@ -1592,8 +1380,8 @@ class MediaCollectionViewController: UIViewController
 
         globals.popoverNavCon = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController
         
-        if globals.popoverNavCon != nil, let popover = globals.popoverNavCon?.viewControllers[0] as? PopoverTableViewController {
-            globals.popoverNavCon?.modalPresentationStyle = .fullScreen
+        if let popoverNavCon = globals.popoverNavCon, let popover = popoverNavCon.viewControllers[0] as? PopoverTableViewController {
+            popoverNavCon.modalPresentationStyle = .fullScreen
             
             popover.navigationItem.title = "Menu Options"
             
@@ -1612,7 +1400,7 @@ class MediaCollectionViewController: UIViewController
             popover.purpose = .selectingMenu
             popover.section.strings = strings
             
-            present(globals.popoverNavCon!, animated: true, completion: nil )
+            present(popoverNavCon, animated: true, completion: nil)
         }
     }
     
@@ -1656,27 +1444,7 @@ class MediaCollectionViewController: UIViewController
             // Fallback on earlier versions
         }
         
-        // Happens in didBecomeActive
-//        if globals.series == nil {
-//            loadSeries()
-//                {
-//                    if globals.series == nil {
-//                        let alert = UIAlertController(title: "No media available.",
-//                                                      message: "Please check your network connection and try again.",
-//                                                      preferredStyle: UIAlertControllerStyle.alert)
-//                        
-//                        let action = UIAlertAction(title: Constants.Cancel, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
-//                            
-//                        })
-//                        alert.addAction(action)
-//                        
-//                        self.present(alert, animated: true, completion: nil)
-//                    } else {
-//                        self.collectionView.reloadData()
-//                        self.scrollToSeries(self.seriesSelected)
-//                    }
-//            }
-//        }
+        // globals.series load happens in didBecomeActive
     }
     
     func readyToPlay()
