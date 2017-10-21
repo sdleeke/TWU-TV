@@ -9,6 +9,19 @@
 import Foundation
 import MediaPlayer
 
+extension Thread {
+    static func onMainThread(block:(()->(Void))?)
+    {
+        if Thread.isMainThread {
+            block?()
+        } else {
+            DispatchQueue.main.async(execute: { () -> Void in
+                block?()
+            })
+        }
+    }
+}
+
 enum Showing {
     case all
     case filtered
@@ -21,7 +34,7 @@ class Globals : NSObject
     func freeMemory()
     {
         // Free memory in classes
-        DispatchQueue.main.async {
+        Thread.onMainThread {
             NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.FREE_MEMORY), object: nil)
         }
         

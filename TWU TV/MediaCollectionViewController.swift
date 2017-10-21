@@ -214,9 +214,9 @@ class MediaCollectionViewController: UIViewController
                 return
             }
             
-            DispatchQueue.main.async(execute: { () -> Void in
+            Thread.onMainThread {
                 self.setNeedsFocusUpdate()
-            })
+            }
         }
     }
     
@@ -591,7 +591,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard seriesSelected != nil else {
+        guard let seriesSelected = seriesSelected else {
             seriesArt.isHidden = true
             
             logo.isHidden = globals.showingAbout
@@ -611,28 +611,36 @@ class MediaCollectionViewController: UIViewController
 
         backgroundLogo.isHidden = false
 
-        seriesLabel.text = seriesSelected?.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
-
-        if let _ = seriesSelected?.text?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...") {
-            
-        }
+        seriesLabel.text = seriesSelected.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "&ndash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
         
-        if let series = self.seriesSelected {
-            if let image = series.loadArt() {
-                seriesArt.image = image
-            } else {
-                DispatchQueue.global(qos: .background).async { () -> Void in
-                    if let image = series.fetchArt() {
-                        if self.seriesSelected == series {
-                            DispatchQueue.main.async {
-                                self.seriesArt.image = image
-                            }
+//        seriesLabel.text = nil
+
+//        if let text = seriesSelected.text?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...") {
+//            if  let data = text.data(using: String.Encoding.utf8, allowLossyConversion: false),
+//                let attributedString = try? NSMutableAttributedString(data: data,
+//                                                                      options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
+//                                                                      documentAttributes: nil) {
+//                attributedString.addAttributes([NSFontAttributeName:UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1)],
+//                                               range: NSMakeRange(0, attributedString.length))
+//
+//                seriesDescription.attributedText = attributedString
+//            }
+//        }
+        
+        if let image = seriesSelected.loadArt() {
+            seriesArt.image = image
+        } else {
+            DispatchQueue.global(qos: .background).async { () -> Void in
+                if let image = seriesSelected.fetchArt() {
+                    if self.seriesSelected == seriesSelected {
+                        Thread.onMainThread {
+                            self.seriesArt.image = image
                         }
                     }
                 }
             }
         }
-        
+
         seriesArt.isHidden = false
         seriesDescription.isHidden = false
     }
@@ -867,9 +875,9 @@ class MediaCollectionViewController: UIViewController
         
         //Without this background/main dispatching there isn't time to scroll correctly after a reload.
         DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
-            DispatchQueue.main.async(execute: { () -> Void in
+            Thread.onMainThread {
                 self.scrollToSermon(sermon, select: true, position: UITableViewScrollPosition.none)
-            })
+            }
         })
     }
     
@@ -1292,20 +1300,20 @@ class MediaCollectionViewController: UIViewController
         globals.isLoading = true
         
         DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
-            DispatchQueue.main.async(execute: { () -> Void in
+            Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Loading_Series
-            })
+            }
             
             if let seriesDicts = self.loadSeriesDicts() {
                 globals.series = self.seriesFromSeriesDicts(seriesDicts)
             }
             
-            DispatchQueue.main.async(execute: { () -> Void in
+            Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Loading_Settings
-            })
+            }
             globals.loadSettings()
 
-            DispatchQueue.main.async(execute: { () -> Void in
+            Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Setting_up_Player
                 if (globals.mediaPlayer.playing != nil) {
                     globals.mediaPlayer.playOnLoad = false
@@ -1320,7 +1328,7 @@ class MediaCollectionViewController: UIViewController
                 self.updateUI()
 
                 completion?()
-            })
+            }
 
             globals.isLoading = false
         })

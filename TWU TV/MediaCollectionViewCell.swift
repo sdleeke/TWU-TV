@@ -48,7 +48,7 @@ class MediaCollectionViewCell: UICollectionViewCell {
                 DispatchQueue.global(qos: .background).async { () -> Void in
                     if let image = series.fetchArt() {
                         if self.series == series {
-                            DispatchQueue.main.async {
+                            Thread.onMainThread {
                                 self.seriesArt.image = image
                             }
                         }

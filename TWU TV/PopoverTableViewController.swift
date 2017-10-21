@@ -268,7 +268,7 @@ class PopoverTableViewController : UIViewController {
                 let row = index - base
                 
                 if self.section.strings?.count > 0 {
-                    DispatchQueue.main.async(execute: { () -> Void in
+                    Thread.onMainThread {
                         if section < self.tableView.numberOfSections, row < self.tableView.numberOfRows(inSection: section) {
                             let indexPath = IndexPath(row: row,section: section)
                             if scroll {
@@ -280,7 +280,7 @@ class PopoverTableViewController : UIViewController {
                         } else {
                             userAlert(title:"String not found!",message:"THIS SHOULD NOT HAPPEN.")
                         }
-                    })
+                    }
                 }
             }
         } else {

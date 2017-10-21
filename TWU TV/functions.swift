@@ -23,9 +23,9 @@ func userAlert(title:String?,message:String?)
         })
         alert.addAction(action)
         
-        DispatchQueue.main.async(execute: { () -> Void in
+        Thread.onMainThread {
             UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true, completion: nil)
-        })
+        }
     }
 }
 
@@ -228,10 +228,10 @@ func alert(title:String?,message:String?)
     })
     alert.addAction(action)
     
-    DispatchQueue.main.async(execute: { () -> Void in
+    Thread.onMainThread {
         UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true, completion: nil)
         UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true, completion: nil)
-    })
+    }
 }
 
 func bookNumberInBible(_ book:String?) -> Int?
@@ -291,9 +291,9 @@ func networkUnavailable(_ message:String?)
         })
         alert.addAction(action)
         
-        DispatchQueue.main.async(execute: { () -> Void in
+        Thread.onMainThread {
             UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true, completion: nil)
-        })
+        }
     }
 }
 
