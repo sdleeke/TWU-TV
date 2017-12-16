@@ -129,7 +129,7 @@ class Sermon : NSObject {
         return sermonString
     }
     
-    struct Settings {
+    class Settings {
         weak var sermon:Sermon?
         
         init(sermon:Sermon?) {

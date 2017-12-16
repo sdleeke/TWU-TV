@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="13196" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="JX0-jU-xHg">
+<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="13771" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="JX0-jU-xHg">
     <device id="appleTV" orientation="landscape">
         <adaptation id="light"/>
     </device>
     <dependencies>
         <deployment identifier="tvOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
-        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -46,7 +45,7 @@
                                         <rect key="frame" x="20" y="20" width="205" height="310"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <prototypes>
-                                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SeriesSermon" id="GKk-76-jWU" customClass="MediaTableViewCell" customModule="TWU_TV" customModuleProvider="target">
+                                            <tableViewCell contentMode="scaleToFill" misplaced="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="SeriesSermon" id="GKk-76-jWU" customClass="MediaTableViewCell" customModule="TWU_TV" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="66" width="205" height="75"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="GKk-76-jWU" id="KuB-fO-WcR">
@@ -54,7 +53,7 @@
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="K8E-ON-x9w" userLabel="Title">
-                                                            <rect key="frame" x="18" y="8" width="179" height="59"/>
+                                                            <rect key="frame" x="18" y="23" width="77" height="29"/>
                                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
@@ -192,6 +191,10 @@
                                     <constraint firstAttribute="height" constant="800" id="qiJ-Pe-Day"/>
                                 </constraints>
                             </imageView>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="MNz-WX-2kJ">
+                                <rect key="frame" x="60" y="345" width="1800" height="390"/>
+                                <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </activityIndicatorView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="psR-hz-CgZ">
                                 <rect key="frame" x="60" y="630" width="1800" height="390"/>
                                 <constraints>
@@ -220,7 +223,7 @@
                                             </subviews>
                                         </view>
                                         <constraints>
-                                            <constraint firstItem="wna-wx-eNM" firstAttribute="centerY" secondItem="c4P-db-XfR" secondAttribute="centerYWithinMargins" id="1OS-Ti-fbc"/>
+                                            <constraint firstItem="wna-wx-eNM" firstAttribute="centerY" secondItem="c4P-db-XfR" secondAttribute="centerY" id="1OS-Ti-fbc"/>
                                             <constraint firstAttribute="trailing" secondItem="wna-wx-eNM" secondAttribute="trailing" id="26x-HA-jDe"/>
                                             <constraint firstItem="wna-wx-eNM" firstAttribute="centerX" secondItem="c4P-db-XfR" secondAttribute="centerX" id="7HQ-Zj-Rqr"/>
                                             <constraint firstItem="wna-wx-eNM" firstAttribute="leading" secondItem="c4P-db-XfR" secondAttribute="leading" id="Vwm-o1-Bce"/>
@@ -294,8 +297,10 @@
                             <constraint firstItem="FcM-Py-mbJ" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" id="V8Z-fg-fdw"/>
                             <constraint firstItem="v9q-Nr-bjf" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" constant="-100" id="VZd-ve-Bn7"/>
                             <constraint firstAttribute="trailing" secondItem="sR3-ut-2yq" secondAttribute="trailing" id="XiZ-wq-qBF"/>
+                            <constraint firstItem="MNz-WX-2kJ" firstAttribute="centerX" secondItem="psR-hz-CgZ" secondAttribute="centerX" id="Zsv-Hx-wEH"/>
                             <constraint firstAttribute="trailing" secondItem="psR-hz-CgZ" secondAttribute="trailing" constant="60" id="Zt0-9i-i0t"/>
                             <constraint firstItem="psR-hz-CgZ" firstAttribute="top" secondItem="yAL-Yv-ZQQ" secondAttribute="bottom" id="f9M-pd-WXZ"/>
+                            <constraint firstItem="MNz-WX-2kJ" firstAttribute="centerY" secondItem="psR-hz-CgZ" secondAttribute="centerY" id="fxE-3u-3BA"/>
                             <constraint firstItem="tru-qh-qDs" firstAttribute="trailing" secondItem="CQk-b9-wlF" secondAttribute="trailing" id="hnq-fY-pOS"/>
                             <constraint firstItem="tru-qh-qDs" firstAttribute="leading" secondItem="CQk-b9-wlF" secondAttribute="leading" constant="20" id="ivI-oj-fua"/>
                             <constraint firstItem="HAj-xq-8Cj" firstAttribute="centerY" secondItem="HDk-zs-0nf" secondAttribute="centerY" id="lPx-kk-vjf"/>
@@ -318,6 +323,7 @@
                     <extendedEdge key="edgesForExtendedLayout"/>
                     <navigationItem key="navigationItem" id="rdg-5S-JBl"/>
                     <connections>
+                        <outlet property="activityIndicator" destination="MNz-WX-2kJ" id="ULf-VK-fB2"/>
                         <outlet property="avPlayerSpinner" destination="HAj-xq-8Cj" id="Yay-8e-Ba2"/>
                         <outlet property="backgroundLogo" destination="Rqp-hy-0eC" id="bVn-nz-8eh"/>
                         <outlet property="collectionView" destination="psR-hz-CgZ" id="2F4-b2-fpt"/>
@@ -370,7 +376,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iSA-ZL-TwS">
-                                                    <rect key="frame" x="8" y="8" width="1711" height="84"/>
+                                                    <rect key="frame" x="8" y="23" width="1621" height="54"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>

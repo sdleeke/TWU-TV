@@ -255,7 +255,7 @@ class Series : Equatable, CustomStringConvertible {
     
     var sermons:[Sermon]?
     
-    struct Settings {
+    class Settings {
         weak var series:Series?
         
         init(series:Series?) {

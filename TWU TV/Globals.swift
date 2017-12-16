@@ -9,6 +9,39 @@
 import Foundation
 import MediaPlayer
 
+extension UIBarButtonItem {
+    func setTitleTextAttributes(_ attributes:[String:UIFont])
+    {
+        setTitleTextAttributes(attributes, for: UIControlState.normal)
+        setTitleTextAttributes(attributes, for: UIControlState.disabled)
+        setTitleTextAttributes(attributes, for: UIControlState.selected)
+        setTitleTextAttributes(attributes, for: UIControlState.highlighted)
+        setTitleTextAttributes(attributes, for: UIControlState.focused)
+    }
+}
+
+extension UISegmentedControl {
+    func setTitleTextAttributes(_ attributes:[String:UIFont])
+    {
+        setTitleTextAttributes(attributes, for: UIControlState.normal)
+        setTitleTextAttributes(attributes, for: UIControlState.disabled)
+        setTitleTextAttributes(attributes, for: UIControlState.selected)
+        setTitleTextAttributes(attributes, for: UIControlState.highlighted)
+        setTitleTextAttributes(attributes, for: UIControlState.focused)
+    }
+}
+
+extension UIButton {
+    func setTitle(_ string:String?)
+    {
+        setTitle(string, for: UIControlState.normal)
+        setTitle(string, for: UIControlState.disabled)
+        setTitle(string, for: UIControlState.selected)
+        setTitle(string, for: UIControlState.highlighted)
+        setTitle(string, for: UIControlState.focused)
+    }
+}
+
 extension Thread {
     static func onMainThread(block:(()->(Void))?)
     {

@@ -78,6 +78,79 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
 {
     // MARK: PopoverTableViewControllerDelegate
 
+    func clearView()
+    {
+        guard Thread.isMainThread else {
+            return
+        }
+        
+        seriesSelected = nil
+        sermonSelected = nil
+        
+        tableView.reloadData()
+        
+        updateUI()
+    }
+
+    func handleRefresh()
+    {
+        guard Thread.isMainThread else {
+            return
+        }
+        
+        globals.mediaPlayer.unobserve()
+        
+        globals.mediaPlayer.pause()
+        
+        globals.searchActive = false
+        
+        clearView()
+        
+//        if let isCollapsed = splitViewController?.isCollapsed, !isCollapsed {
+//            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.CLEAR_VIEW), object: nil)
+//        }
+        
+        disableBarButtons()
+        
+        // This is ABSOLUTELY ESSENTIAL to reset all of the Media so that things load as if from a cold start.
+        globals = Globals()
+        
+        collectionView?.reloadData()
+        
+        loadSeries()
+        {
+            if globals.series == nil {
+                let alert = UIAlertController(title: "No media available.",
+                                              message: "Please check your network connection and try again.",
+                                              preferredStyle: UIAlertControllerStyle.alert)
+                
+                let action = UIAlertAction(title: Constants.Okay, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
+                    
+                })
+                alert.addAction(action)
+                
+                self.present(alert, animated: true, completion: nil)
+            } else {
+                self.collectionView.reloadData()
+                self.scrollToSeries(self.seriesSelected)
+            }
+//            guard globals.series == nil else {
+//                return
+//            }
+//
+//            let alert = UIAlertController(title: "No media available.",
+//                                          message: "Please check your network connection and try again.",
+//                                          preferredStyle: UIAlertControllerStyle.alert)
+//
+//            let action = UIAlertAction(title: Constants.Okay, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
+//
+//            })
+//            alert.addAction(action)
+//
+//            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
     func rowClickedAtIndex(_ index: Int, strings: [String]?, purpose:PopoverPurpose)
     {
         guard Thread.isMainThread else {
@@ -121,6 +194,10 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
             globals.showingAbout = false
 
             switch string {
+            case "Refresh Media":
+                handleRefresh()
+                break
+                
             case "About":
                 globals.showingAbout = true
                 seriesSelected = nil
@@ -220,6 +297,8 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
     override var preferredFocusEnvironments : [UIFocusEnvironment]
     {
         if let preferredFocusView = preferredFocusView {
@@ -244,7 +323,7 @@ class MediaCollectionViewController: UIViewController
     @IBOutlet weak var restartButton: UIButton!
     {
         didSet {
-            restartButton.setTitle(Constants.FA.RESTART, for: UIControlState.normal)
+            restartButton.setTitle(Constants.FA.RESTART)
         }
     }
     @IBAction func restart(_ sender: UIButton)
@@ -255,7 +334,7 @@ class MediaCollectionViewController: UIViewController
     @IBOutlet weak var skipBackwardsButton: UIButton!
     {
         didSet {
-            skipBackwardsButton.setTitle(Constants.FA.REWIND, for: UIControlState.normal)
+            skipBackwardsButton.setTitle(Constants.FA.REWIND)
         }
     }
     @IBAction func skipBackwards(_ sender: UIButton)
@@ -270,7 +349,7 @@ class MediaCollectionViewController: UIViewController
     @IBOutlet weak var skipForwardsButton: UIButton!
     {
         didSet {
-            skipForwardsButton.setTitle(Constants.FA.FF, for: UIControlState.normal)
+            skipForwardsButton.setTitle(Constants.FA.FF)
         }
     }
     @IBAction func skipForwards(_ sender: UIButton)
@@ -548,11 +627,11 @@ class MediaCollectionViewController: UIViewController
             if let state = globals.mediaPlayer.state {
                 switch state {
                 case .playing:
-                    playPauseButton.setTitle(Constants.FA.PAUSE, for: UIControlState())
+                    playPauseButton.setTitle(Constants.FA.PAUSE)
                     break
                     
                 case .paused:
-                    playPauseButton.setTitle(Constants.FA.PLAY, for: UIControlState())
+                    playPauseButton.setTitle(Constants.FA.PLAY)
                     break
                     
                 default:
@@ -569,7 +648,7 @@ class MediaCollectionViewController: UIViewController
             skipForwardsButton.isHidden = false
         } else {
             playPauseButton.isEnabled = true
-            playPauseButton.setTitle(Constants.FA.PLAY, for: UIControlState())
+            playPauseButton.setTitle(Constants.FA.PLAY)
             
             restartButton.isEnabled = false
             skipBackwardsButton.isEnabled = false
@@ -709,6 +788,8 @@ class MediaCollectionViewController: UIViewController
         setupPlayPauseButton()
         setupSpinner()
         setupProgressView()
+        
+        collectionView.reloadData()
     }
     
     func scrollToSermon(_ sermon:Sermon?,select:Bool,position:UITableViewScrollPosition)
@@ -1231,17 +1312,8 @@ class MediaCollectionViewController: UIViewController
     
     func jsonFromURL(url:String,filename:String) -> Any?
     {
-        guard globals.reachability.isReachable else {
-            print("json not reachable.")
+        guard globals.reachability.isReachable, let url = URL(string: url) else {
             return jsonFromFileSystem(filename: filename)
-        }
-        
-        guard let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) else {
-            return nil
-        }
-        
-        guard let url = URL(string: url) else {
-            return nil
         }
         
         do {
@@ -1252,7 +1324,9 @@ class MediaCollectionViewController: UIViewController
                 let json = try JSONSerialization.jsonObject(with: data, options: [])
                 
                 do {
-                    try data.write(to: jsonFileSystemURL)
+                    if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
+                        try data.write(to: jsonFileSystemURL)
+                    }
                     print("able to write json to the file system")
                 } catch let error as NSError {
                     print("unable to write json to the file system.")
@@ -1299,6 +1373,10 @@ class MediaCollectionViewController: UIViewController
     {
         globals.isLoading = true
         
+        Thread.onMainThread {
+            self.activityIndicator.startAnimating()
+        }
+        
         DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
             Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Loading_Series
@@ -1328,6 +1406,8 @@ class MediaCollectionViewController: UIViewController
                 self.updateUI()
 
                 completion?()
+
+                self.activityIndicator.stopAnimating()
             }
 
             globals.isLoading = false
@@ -1399,6 +1479,7 @@ class MediaCollectionViewController: UIViewController
             
             var strings = [String]()
             
+            strings.append("Refresh Media")
             if !globals.showingAbout {
                 strings.append("About")
             }
@@ -1501,22 +1582,22 @@ class MediaCollectionViewController: UIViewController
         }
 
         loadSeries()
-            {
-                if globals.series == nil {
-                    let alert = UIAlertController(title: "No media available.",
-                                                  message: "Please check your network connection and try again.",
-                                                  preferredStyle: UIAlertControllerStyle.alert)
+        {
+            if globals.series == nil {
+                let alert = UIAlertController(title: "No media available.",
+                                              message: "Please check your network connection and try again.",
+                                              preferredStyle: UIAlertControllerStyle.alert)
+                
+                let action = UIAlertAction(title: Constants.Okay, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
                     
-                    let action = UIAlertAction(title: Constants.Cancel, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
-                        
-                    })
-                    alert.addAction(action)
-                    
-                    self.present(alert, animated: true, completion: nil)
-                } else {
-                    self.collectionView.reloadData()
-                    self.scrollToSeries(self.seriesSelected)
-                }
+                })
+                alert.addAction(action)
+                
+                self.present(alert, animated: true, completion: nil)
+            } else {
+                self.collectionView.reloadData()
+                self.scrollToSeries(self.seriesSelected)
+            }
         }
     }
     
