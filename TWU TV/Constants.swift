@@ -134,18 +134,18 @@ enum Constants {
         static let bold = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
         
         enum Attributes {
-            static let normal = [ NSFontAttributeName: Fonts.body ]
+            static let normal = [ NSAttributedStringKey.font: Fonts.body ]
             
-            static let bold = [ NSFontAttributeName: Fonts.bold ]
+            static let bold = [ NSAttributedStringKey.font: Fonts.bold ]
             
-            static let boldGrey = [ NSForegroundColorAttributeName: UIColor.gray,
-                                    NSFontAttributeName: Fonts.bold ]
+            static let boldGrey = [ NSAttributedStringKey.foregroundColor: UIColor.gray,
+                                    NSAttributedStringKey.font: Fonts.bold ]
             
-            static let highlighted = [ NSBackgroundColorAttributeName: UIColor.yellow,
-                                       NSFontAttributeName: Fonts.body ]
+            static let highlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                       NSAttributedStringKey.font: Fonts.body ]
             
-            static let boldHighlighted = [ NSBackgroundColorAttributeName: UIColor.yellow,
-                                           NSFontAttributeName: Fonts.bold ]
+            static let boldHighlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                           NSAttributedStringKey.font: Fonts.bold ]
         }
     }
     

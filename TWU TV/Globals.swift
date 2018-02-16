@@ -10,7 +10,7 @@ import Foundation
 import MediaPlayer
 
 extension UIBarButtonItem {
-    func setTitleTextAttributes(_ attributes:[String:UIFont])
+    func setTitleTextAttributes(_ attributes:[NSAttributedStringKey:UIFont])
     {
         setTitleTextAttributes(attributes, for: UIControlState.normal)
         setTitleTextAttributes(attributes, for: UIControlState.disabled)

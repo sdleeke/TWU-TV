@@ -602,7 +602,7 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    func setupPlayPauseButton()
+    @objc func setupPlayPauseButton()
     {
         guard (sermonSelected != nil) else {
             playPauseButton.isEnabled = false
@@ -776,7 +776,7 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    func updateUI()
+    @objc func updateUI()
     {
         guard Thread.isMainThread else {
             return
@@ -1430,7 +1430,7 @@ class MediaCollectionViewController: UIViewController
         navigationItem.rightBarButtonItem?.isEnabled = true
     }
     
-    func playPauseButtonAction(tap:UITapGestureRecognizer)
+    @objc func playPauseButtonAction(tap:UITapGestureRecognizer)
     {
         print("play pause button pressed")
         
@@ -1458,7 +1458,7 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    func menuButtonAction(tap:UITapGestureRecognizer)
+    @objc func menuButtonAction(tap:UITapGestureRecognizer)
     {
         print("MTVC menu button pressed")
         
@@ -1536,14 +1536,14 @@ class MediaCollectionViewController: UIViewController
         // globals.series load happens in didBecomeActive
     }
     
-    func readyToPlay()
+    @objc func readyToPlay()
     {
         updateUI()
 
         preferredFocusView = playPauseButton
     }
     
-    func showPlaying()
+    @objc func showPlaying()
     {
         guard Thread.isMainThread else {
             return
@@ -1563,19 +1563,19 @@ class MediaCollectionViewController: UIViewController
         updateUI()
     }
     
-    func doneSeeking()
+    @objc func doneSeeking()
     {
         print("DONE SEEKING")
         
         globals.mediaPlayer.checkPlayToEnd()
     }
     
-    func willEnterForeground()
+    @objc func willEnterForeground()
     {
         
     }
     
-    func didBecomeActive()
+    @objc func didBecomeActive()
     {
         guard !globals.isLoading, globals.series == nil else {
             return

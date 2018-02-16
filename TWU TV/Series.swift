@@ -141,14 +141,17 @@ class Series : Equatable, CustomStringConvertible {
     
     var book:String? {
         get {
+            guard let scripture = scripture else {
+                return nil
+            }
+            
             if (dict?[Constants.FIELDS.BOOK] == nil) {
                 if (scripture == Constants.Selected_Scriptures) {
                     dict?[Constants.FIELDS.BOOK] = Constants.Selected_Scriptures
                 } else {
                     if (dict?[Constants.FIELDS.BOOK] == nil) {
                         for bookTitle in Constants.TESTAMENT.OLD {
-                            if (scripture?.endIndex >= bookTitle.endIndex) &&
-                                (scripture?.substring(to: bookTitle.endIndex) == bookTitle) {
+                            if scripture.endIndex >= bookTitle.endIndex, String(scripture[..<bookTitle.endIndex]) == bookTitle {
                                     dict?[Constants.FIELDS.BOOK] = bookTitle
                                     break
                             }
@@ -156,8 +159,7 @@ class Series : Equatable, CustomStringConvertible {
                     }
                     if (dict?[Constants.FIELDS.BOOK] == nil) {
                         for bookTitle in Constants.TESTAMENT.NEW {
-                            if (scripture?.endIndex >= bookTitle.endIndex) &&
-                                (scripture?.substring(to: bookTitle.endIndex) == bookTitle) {
+                            if scripture.endIndex >= bookTitle.endIndex, String(scripture[..<bookTitle.endIndex]) == bookTitle {
                                     dict?[Constants.FIELDS.BOOK] = bookTitle
                                     break
                             }
@@ -313,7 +315,7 @@ class Series : Equatable, CustomStringConvertible {
         get {
             if  let sermonID = settings?[Constants.SETTINGS.SELECTED.SERMON],
                 let range = sermonID.range(of: Constants.COLON),
-                let num = Int(sermonID.substring(from: range.upperBound)),
+                let num = Int(String(sermonID[range.upperBound...])),
                 let startingIndex = startingIndex {
                 return sermons?[num - startingIndex]
             } else {
