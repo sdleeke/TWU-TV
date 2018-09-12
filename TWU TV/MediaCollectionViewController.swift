@@ -21,14 +21,14 @@ extension MediaCollectionViewController : UICollectionViewDataSource
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return globals.activeSeries?.count ?? 0
+        return Globals.shared.activeSeries?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.IDENTIFIER.SERIES_CELL, for: indexPath) as? MediaCollectionViewCell ?? MediaCollectionViewCell()
         
         // Configure the cell
-        cell.series = globals.activeSeries?[(indexPath as NSIndexPath).row]
+        cell.series = Globals.shared.activeSeries?[(indexPath as NSIndexPath).row]
         
         return cell
     }
@@ -98,11 +98,11 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
             return
         }
         
-        globals.mediaPlayer.unobserve()
+        Globals.shared.mediaPlayer.unobserve()
         
-        globals.mediaPlayer.pause()
+        Globals.shared.mediaPlayer.pause()
         
-        globals.searchActive = false
+        Globals.shared.searchActive = false
         
         clearView()
         
@@ -113,13 +113,15 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
         disableBarButtons()
         
         // This is ABSOLUTELY ESSENTIAL to reset all of the Media so that things load as if from a cold start.
-        globals = Globals()
+//        globals = Globals()
+        
+        Globals.shared.series = nil
         
         collectionView?.reloadData()
         
         loadSeries()
         {
-            if globals.series == nil {
+            if Globals.shared.series == nil {
                 let alert = UIAlertController(title: "No media available.",
                                               message: "Please check your network connection and try again.",
                                               preferredStyle: UIAlertControllerStyle.alert)
@@ -134,7 +136,7 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
                 self.collectionView.reloadData()
                 self.scrollToSeries(self.seriesSelected)
             }
-//            guard globals.series == nil else {
+//            guard Globals.shared.series == nil else {
 //                return
 //            }
 //
@@ -167,22 +169,22 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
         
         switch purpose {
         case .selectingSorting:
-            globals.sorting = string
+            Globals.shared.sorting = string
             collectionView.reloadData()
             scrollToSeries(seriesSelected)
             break
             
         case .selectingFiltering:
-            guard (globals.filter != string) else {
+            guard (Globals.shared.filter != string) else {
                 break
             }
             
             if (string == Constants.All) {
-                globals.showing = .all
-                globals.filter = nil
+                Globals.shared.showing = .all
+                Globals.shared.filter = nil
             } else {
-                globals.showing = .filtered
-                globals.filter = string
+                Globals.shared.showing = .filtered
+                Globals.shared.filter = string
             }
             
             self.collectionView.reloadData()
@@ -191,7 +193,7 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
             break
             
         case .selectingMenu:
-//            globals.showingAbout = false
+//            Globals.shared.showingAbout = false
 
             switch string {
             case "Refresh Media":
@@ -199,7 +201,7 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
                 break
                 
             case "About":
-                globals.showingAbout = true
+                Globals.shared.showingAbout = true
                 seriesSelected = nil
                 break
                 
@@ -262,7 +264,7 @@ extension MediaCollectionViewController : UITableViewDelegate
     {
         sermonSelected = seriesSelected?.sermons?[(indexPath as NSIndexPath).row]
 
-        if (sermonSelected?.series == seriesSelected) && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
+        if (sermonSelected?.series == seriesSelected) && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
             addProgressObserver()
         }
         
@@ -328,7 +330,7 @@ class MediaCollectionViewController: UIViewController
     }
     @IBAction func restart(_ sender: UIButton)
     {
-        globals.mediaPlayer.seek(to: 0)
+        Globals.shared.mediaPlayer.seek(to: 0)
     }
     
     @IBOutlet weak var skipBackwardsButton: UIButton!
@@ -339,11 +341,11 @@ class MediaCollectionViewController: UIViewController
     }
     @IBAction func skipBackwards(_ sender: UIButton)
     {
-        guard let currentTime = globals.mediaPlayer.currentTime else {
+        guard let currentTime = Globals.shared.mediaPlayer.currentTime else {
             return
         }
         
-        globals.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVAL.SKIP_TIME)
+        Globals.shared.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVAL.SKIP_TIME)
     }
     
     @IBOutlet weak var skipForwardsButton: UIButton!
@@ -354,17 +356,17 @@ class MediaCollectionViewController: UIViewController
     }
     @IBAction func skipForwards(_ sender: UIButton)
     {
-        guard let currentTime = globals.mediaPlayer.currentTime else {
+        guard let currentTime = Globals.shared.mediaPlayer.currentTime else {
             return
         }
         
-        globals.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVAL.SKIP_TIME)
+        Globals.shared.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVAL.SKIP_TIME)
     }
     
     @IBOutlet weak var playPauseButton: UIButton!
     @IBAction func playPause(_ sender: UIButton)
     {
-        guard let state = globals.mediaPlayer.state, globals.mediaPlayer.playing == sermonSelected, globals.mediaPlayer.player != nil else {
+        guard let state = Globals.shared.mediaPlayer.state, Globals.shared.mediaPlayer.playing == sermonSelected, Globals.shared.mediaPlayer.player != nil else {
             playNewSermon(sermonSelected)
             return
         }
@@ -376,7 +378,7 @@ class MediaCollectionViewController: UIViewController
             
         case .playing:
             print("playing")
-            globals.mediaPlayer.pause()
+            Globals.shared.mediaPlayer.pause()
             
             setupPlayPauseButton()
             
@@ -388,7 +390,7 @@ class MediaCollectionViewController: UIViewController
             
         case .paused:
             print("paused")
-            if globals.mediaPlayer.loaded && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
+            if Globals.shared.mediaPlayer.loaded && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
                 addProgressObserver()
                 playCurrentSermon(sermonSelected)
             } else {
@@ -402,12 +404,12 @@ class MediaCollectionViewController: UIViewController
             
         case .seekingForward:
             print("seekingForward")
-            globals.mediaPlayer.pause()
+            Globals.shared.mediaPlayer.pause()
             break
             
         case .seekingBackward:
             print("seekingBackward")
-            globals.mediaPlayer.pause()
+            Globals.shared.mediaPlayer.pause()
             break
         }
     }
@@ -545,7 +547,7 @@ class MediaCollectionViewController: UIViewController
                 return
             }
             
-            globals.showingAbout = false
+            Globals.shared.showingAbout = false
             
             avPlayerSpinner.stopAnimating()
             sermonSelected = seriesSelected.sermonSelected
@@ -553,10 +555,10 @@ class MediaCollectionViewController: UIViewController
             
             preferredFocusView = tableView
             
-            if (sermonSelected?.series == seriesSelected) && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
+            if (sermonSelected?.series == seriesSelected) && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
                 addProgressObserver()
             } else {
-                globals.mediaPlayer.stop()
+                Globals.shared.mediaPlayer.stop()
             }
 
             let defaults = UserDefaults.standard
@@ -586,8 +588,8 @@ class MediaCollectionViewController: UIViewController
             }
             
             if (sermonSelected != oldValue) {
-                if sermonSelected != globals.mediaPlayer.playing, let playingURL = sermonSelected?.playingURL {
-                    globals.mediaPlayer.stop()
+                if sermonSelected != Globals.shared.mediaPlayer.playing, let playingURL = sermonSelected?.playingURL {
+                    Globals.shared.mediaPlayer.stop()
                     removeProgressObserver()
                     playerURL(url: playingURL)
                 } else {
@@ -620,10 +622,10 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if (sermonSelected == globals.mediaPlayer.playing) {
-            playPauseButton.isEnabled = globals.mediaPlayer.loaded || globals.mediaPlayer.loadFailed
+        if (sermonSelected == Globals.shared.mediaPlayer.playing) {
+            playPauseButton.isEnabled = Globals.shared.mediaPlayer.loaded || Globals.shared.mediaPlayer.loadFailed
 
-            if let state = globals.mediaPlayer.state {
+            if let state = Globals.shared.mediaPlayer.state {
                 switch state {
                 case .playing:
                     playPauseButton.setTitle(Constants.FA.PAUSE)
@@ -638,9 +640,9 @@ class MediaCollectionViewController: UIViewController
                 }
             }
             
-            restartButton.isEnabled = globals.mediaPlayer.loaded
-            skipBackwardsButton.isEnabled = globals.mediaPlayer.loaded
-            skipForwardsButton.isEnabled = globals.mediaPlayer.loaded
+            restartButton.isEnabled = Globals.shared.mediaPlayer.loaded
+            skipBackwardsButton.isEnabled = Globals.shared.mediaPlayer.loaded
+            skipForwardsButton.isEnabled = Globals.shared.mediaPlayer.loaded
             
             restartButton.isHidden = false
             skipBackwardsButton.isHidden = false
@@ -673,7 +675,7 @@ class MediaCollectionViewController: UIViewController
             seriesArt.isHidden = true
             tableView.isHidden = true
 
-            logo.isHidden = globals.showingAbout
+            logo.isHidden = Globals.shared.showingAbout
             
             backgroundLogo.isHidden = !logo.isHidden
             tomPennington.isHidden = !logo.isHidden
@@ -742,7 +744,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if (!globals.isLoading) {
+        if (!Globals.shared.isLoading) {
             self.navigationItem.title = Constants.TWU.LONG
         }
         
@@ -755,7 +757,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard (sermonSelected != nil) && (sermonSelected == globals.mediaPlayer.playing) else {
+        guard (sermonSelected != nil) && (sermonSelected == Globals.shared.mediaPlayer.playing) else {
             if spinner.isAnimating {
                 spinner.stopAnimating()
                 spinner.isHidden = true
@@ -763,21 +765,21 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if !globals.mediaPlayer.loaded && !globals.mediaPlayer.loadFailed {
+        if !Globals.shared.mediaPlayer.loaded && !Globals.shared.mediaPlayer.loadFailed {
             if !spinner.isAnimating {
                 spinner.isHidden = false
                 spinner.startAnimating()
             }
         } else {
-            if globals.mediaPlayer.isPaused {
+            if Globals.shared.mediaPlayer.isPaused {
                 if spinner.isAnimating {
                     spinner.isHidden = true
                     spinner.stopAnimating()
                 }
             }
             
-            if globals.mediaPlayer.isPlaying {
-                if let currentTime = globals.mediaPlayer.playing?.currentTime, globals.mediaPlayer.currentTime?.seconds > Double(currentTime) {
+            if Globals.shared.mediaPlayer.isPlaying {
+                if let currentTime = Globals.shared.mediaPlayer.playing?.currentTime, Globals.shared.mediaPlayer.currentTime?.seconds > Double(currentTime) {
                     spinner.isHidden = true
                     spinner.stopAnimating()
                 } else {
@@ -873,7 +875,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard let length = globals.mediaPlayer.duration?.seconds else {
+        guard let length = Globals.shared.mediaPlayer.duration?.seconds else {
             return
         }
         
@@ -881,7 +883,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard let currentTime = globals.mediaPlayer.playing?.currentTime else {
+        guard let currentTime = Globals.shared.mediaPlayer.playing?.currentTime else {
             return
         }
         
@@ -889,11 +891,11 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard let playerCurrentTime = globals.mediaPlayer.currentTime?.seconds else {
+        guard let playerCurrentTime = Globals.shared.mediaPlayer.currentTime?.seconds else {
             return
         }
         
-        guard let state = globals.mediaPlayer.state else {
+        guard let state = Globals.shared.mediaPlayer.state else {
             return
         }
         
@@ -902,10 +904,10 @@ class MediaCollectionViewController: UIViewController
         if (length > 0) {
             switch state {
             case .playing:
-                if playingCurrentTime >= 0, let duration = globals.mediaPlayer.duration, playerCurrentTime <= duration.seconds {
+                if playingCurrentTime >= 0, let duration = Globals.shared.mediaPlayer.duration, playerCurrentTime <= duration.seconds {
                     progress = playerCurrentTime / length
                     
-                    if globals.mediaPlayer.loaded {
+                    if Globals.shared.mediaPlayer.loaded {
                         if playerCurrentTime == 0 {
                             progress = playingCurrentTime / length
                             progressView.progress = Float(progress)
@@ -984,25 +986,25 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard (sermonSelected == globals.mediaPlayer.playing) else {
+        guard (sermonSelected == Globals.shared.mediaPlayer.playing) else {
             return
         }
         
-        guard let state = globals.mediaPlayer.state else {
+        guard let state = Globals.shared.mediaPlayer.state else {
             return
         }
         
-        guard (globals.mediaPlayer.startTime != nil) else {
+        guard (Globals.shared.mediaPlayer.startTime != nil) else {
             return
         }
         
-        guard (globals.mediaPlayer.currentTime != nil) else {
+        guard (Globals.shared.mediaPlayer.currentTime != nil) else {
             return
         }
         
         setupPlayPauseButton()
         
-        if (!globals.mediaPlayer.loaded) {
+        if (!Globals.shared.mediaPlayer.loaded) {
             if (!spinner.isAnimating) {
                 spinner.isHidden = false
                 spinner.startAnimating()
@@ -1018,13 +1020,13 @@ class MediaCollectionViewController: UIViewController
             print("playing")
             setProgressAndTimesToAudio()
             
-            if (!globals.mediaPlayer.loaded) {
+            if (!Globals.shared.mediaPlayer.loaded) {
                 if (!spinner.isAnimating) {
                     spinner.isHidden = false
                     spinner.startAnimating()
                 }
             } else {
-                if globals.mediaPlayer.rate > 0, let startTime = globals.mediaPlayer.startTime, globals.mediaPlayer.currentTime?.seconds > Double(startTime) {
+                if Globals.shared.mediaPlayer.rate > 0, let startTime = Globals.shared.mediaPlayer.startTime, Globals.shared.mediaPlayer.currentTime?.seconds > Double(startTime) {
                     if spinner.isAnimating {
                         spinner.isHidden = true
                         spinner.stopAnimating()
@@ -1041,11 +1043,11 @@ class MediaCollectionViewController: UIViewController
         case .paused:
             print("paused")
             
-            if globals.mediaPlayer.loaded {
+            if Globals.shared.mediaPlayer.loaded {
                 setProgressAndTimesToAudio()
             }
             
-            if globals.mediaPlayer.loaded || globals.mediaPlayer.loadFailed {
+            if Globals.shared.mediaPlayer.loaded || Globals.shared.mediaPlayer.loadFailed {
                 if spinner.isAnimating {
                     spinner.stopAnimating()
                     spinner.isHidden = true
@@ -1085,8 +1087,8 @@ class MediaCollectionViewController: UIViewController
         
         if let hasCurrentTime = sermonSelected?.hasCurrentTime, hasCurrentTime {
             if sermon.atEnd {
-                NSLog("playPause globals.mediaPlayer.currentTime and globals.player.playing!.currentTime reset to 0!")
-                globals.mediaPlayer.playing?.currentTime = Constants.ZERO
+                NSLog("playPause Globals.shared.mediaPlayer.currentTime and Globals.shared.player.playing!.currentTime reset to 0!")
+                Globals.shared.mediaPlayer.playing?.currentTime = Constants.ZERO
                 seekToTime = CMTimeMakeWithSeconds(0,Constants.CMTime_Resolution)
                 sermon.atEnd = false
             } else {
@@ -1101,18 +1103,18 @@ class MediaCollectionViewController: UIViewController
         }
         
         if let seekToTime = seekToTime {
-            let loadedTimeRanges = (globals.mediaPlayer.player?.currentItem?.loadedTimeRanges as? [CMTimeRange])?.filter({ (cmTimeRange:CMTimeRange) -> Bool in
+            let loadedTimeRanges = (Globals.shared.mediaPlayer.player?.currentItem?.loadedTimeRanges as? [CMTimeRange])?.filter({ (cmTimeRange:CMTimeRange) -> Bool in
                 return cmTimeRange.containsTime(seekToTime)
             })
             
-            let seekableTimeRanges = (globals.mediaPlayer.player?.currentItem?.seekableTimeRanges as? [CMTimeRange])?.filter({ (cmTimeRange:CMTimeRange) -> Bool in
+            let seekableTimeRanges = (Globals.shared.mediaPlayer.player?.currentItem?.seekableTimeRanges as? [CMTimeRange])?.filter({ (cmTimeRange:CMTimeRange) -> Bool in
                 return cmTimeRange.containsTime(seekToTime)
             })
             
             if (loadedTimeRanges != nil) || (seekableTimeRanges != nil) {
-                globals.mediaPlayer.seek(to: seekToTime.seconds)
+                Globals.shared.mediaPlayer.seek(to: seekToTime.seconds)
                 
-                globals.mediaPlayer.play()
+                Globals.shared.mediaPlayer.play()
                 
                 setupPlayPauseButton()
             } else {
@@ -1123,15 +1125,15 @@ class MediaCollectionViewController: UIViewController
     
     fileprivate func reloadCurrentSermon(_ sermon:Sermon?) {
         //This guarantees a fresh start.
-        globals.mediaPlayer.playOnLoad = true
-        globals.mediaPlayer.reload(sermon)
+        Globals.shared.mediaPlayer.playOnLoad = true
+        Globals.shared.mediaPlayer.reload(sermon)
         addProgressObserver()
         setupPlayPauseButton()
     }
     
     fileprivate func playNewSermon(_ sermon:Sermon?)
     {
-        globals.mediaPlayer.pauseIfPlaying()
+        Globals.shared.mediaPlayer.pauseIfPlaying()
         
         guard (sermon != nil) else {
             return
@@ -1142,13 +1144,13 @@ class MediaCollectionViewController: UIViewController
             spinner.startAnimating()
         }
         
-        globals.mediaPlayer.playing = sermon
+        Globals.shared.mediaPlayer.playing = sermon
         
         removeProgressObserver()
         
         //This guarantees a fresh start.
-        globals.mediaPlayer.playOnLoad = true
-        globals.mediaPlayer.setup(sermon)
+        Globals.shared.mediaPlayer.playOnLoad = true
+        Globals.shared.mediaPlayer.setup(sermon)
         
         addProgressObserver()
         
@@ -1171,8 +1173,8 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if (globals.mediaPlayer.playing != nil) && (globals.mediaPlayer.playing == sermonSelected) {
-            if !globals.mediaPlayer.loadFailed {
+        if (Globals.shared.mediaPlayer.playing != nil) && (Globals.shared.mediaPlayer.playing == sermonSelected) {
+            if !Globals.shared.mediaPlayer.loadFailed {
                 setProgressAndTimesToAudio()
             } else {
                 elapsed.isHidden = true
@@ -1229,7 +1231,7 @@ class MediaCollectionViewController: UIViewController
             popover.delegate = self
             
             popover.purpose = .selectingFiltering
-            popover.section.strings = booksFromSeries(globals.series)
+            popover.section.strings = booksFromSeries(Globals.shared.series)
             popover.section.strings?.insert(Constants.All, at: 0)
             
             present(navigationController, animated: true, completion: nil)
@@ -1262,7 +1264,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        guard let index = globals.activeSeries?.index(of: series) else {
+        guard let index = Globals.shared.activeSeries?.index(of: series) else {
             preferredFocusView = playPauseButton
             return
         }
@@ -1298,7 +1300,7 @@ class MediaCollectionViewController: UIViewController
                         return
                     }
                     
-                    globals.images[name] = image
+                    Globals.shared.images[name] = image
                 }
             }
             
@@ -1344,11 +1346,11 @@ class MediaCollectionViewController: UIViewController
     
     func jsonFromURL(urlString:String,filename:String) -> Any?
     {
-        guard globals.reachability.isReachable, let url = URL(string: urlString) else {
+        guard Globals.shared.reachability.isReachable, let url = URL(string: urlString) else {
             return jsonFromFileSystem(filename: filename)
         }
         
-        if globals.format == Constants.JSON.URL, let json = jsonFromFileSystem(filename: filename) {
+        if Globals.shared.format == Constants.JSON.URL, let json = jsonFromFileSystem(filename: filename) {
             operationQueue.addOperation {
                 do {
                     let data = try Data(contentsOf: url)
@@ -1358,7 +1360,7 @@ class MediaCollectionViewController: UIViewController
                         if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
                             try data.write(to: jsonFileSystemURL)
                         }
-                        globals.format = Constants.JSON.URL
+                        Globals.shared.format = Constants.JSON.URL
                         print("able to write json to the file system")
                     } catch let error as NSError {
                         print("unable to write json to the file system.")
@@ -1382,7 +1384,7 @@ class MediaCollectionViewController: UIViewController
                         if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
                             try data.write(to: jsonFileSystemURL)
                         }
-                        globals.format = Constants.JSON.URL
+                        Globals.shared.format = Constants.JSON.URL
                         print("able to write json to the file system")
                     } catch let error as NSError {
                         print("unable to write json to the file system.")
@@ -1410,7 +1412,7 @@ class MediaCollectionViewController: UIViewController
         }
         
         if let meta = json[Constants.JSON.KEYS.META] as? [String:Any] {
-            globals.meta = meta
+            Globals.shared.meta = meta
         }
         
         var seriesDicts = [[String:Any]]()
@@ -1444,7 +1446,7 @@ class MediaCollectionViewController: UIViewController
     
     func loadSeries(_ completion: (() -> Void)?)
     {
-        globals.isLoading = true
+        Globals.shared.isLoading = true
         
         Thread.onMainThread {
             self.activityIndicator.startAnimating()
@@ -1456,25 +1458,25 @@ class MediaCollectionViewController: UIViewController
             }
             
             if let seriesDicts = self.loadSeriesDicts() {
-                globals.series = self.seriesFromSeriesDicts(seriesDicts)
+                Globals.shared.series = self.seriesFromSeriesDicts(seriesDicts)
             }
             
             Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Loading_Settings
             }
-            globals.loadSettings()
+            Globals.shared.loadSettings()
 
             Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Setting_up_Player
-                if (globals.mediaPlayer.playing != nil) {
-                    globals.mediaPlayer.playOnLoad = false
-                    globals.mediaPlayer.setup(globals.mediaPlayer.playing)
+                if (Globals.shared.mediaPlayer.playing != nil) {
+                    Globals.shared.mediaPlayer.playOnLoad = false
+                    Globals.shared.mediaPlayer.setup(Globals.shared.mediaPlayer.playing)
                 }
 
                 self.navigationItem.title = Constants.TWU.LONG
 
-                self.seriesSelected = globals.seriesSelected
-                self.sermonSelected = globals.seriesSelected?.sermonSelected
+                self.seriesSelected = Globals.shared.seriesSelected
+                self.sermonSelected = Globals.shared.seriesSelected?.sermonSelected
                 
                 self.updateUI()
 
@@ -1483,7 +1485,7 @@ class MediaCollectionViewController: UIViewController
                 self.activityIndicator.stopAnimating()
             }
 
-            globals.isLoading = false
+            Globals.shared.isLoading = false
         })
     }
     
@@ -1495,7 +1497,7 @@ class MediaCollectionViewController: UIViewController
     
     func enableBarButtons()
     {
-        guard (globals.series != nil) else {
+        guard (Globals.shared.series != nil) else {
             return
         }
 
@@ -1507,16 +1509,16 @@ class MediaCollectionViewController: UIViewController
     {
         print("play pause button pressed")
         
-        if let state = globals.mediaPlayer.state {
+        if let state = Globals.shared.mediaPlayer.state {
             switch state {
             case .playing:
-                globals.mediaPlayer.pause()
+                Globals.shared.mediaPlayer.pause()
                 
             case .paused:
-                if globals.mediaPlayer.url == sermonSelected?.playingURL {
+                if Globals.shared.mediaPlayer.url == sermonSelected?.playingURL {
                     addProgressObserver()
                 }
-                globals.mediaPlayer.play()
+                Globals.shared.mediaPlayer.play()
                 
             case .stopped:
                 print("stopped")
@@ -1539,9 +1541,9 @@ class MediaCollectionViewController: UIViewController
             print("NOT MAIN THREAD")
         }
 
-        globals.popoverNavCon = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController
+        Globals.shared.popoverNavCon = self.storyboard?.instantiateViewController(withIdentifier: Constants.IDENTIFIER.POPOVER_TABLEVIEW_NAV) as? UINavigationController
         
-        if let popoverNavCon = globals.popoverNavCon, let popover = popoverNavCon.viewControllers[0] as? PopoverTableViewController {
+        if let popoverNavCon = Globals.shared.popoverNavCon, let popover = popoverNavCon.viewControllers[0] as? PopoverTableViewController {
             popoverNavCon.modalPresentationStyle = .fullScreen
             
             popover.navigationItem.title = "Menu Options"
@@ -1553,7 +1555,7 @@ class MediaCollectionViewController: UIViewController
             var strings = [String]()
             
             strings.append("Refresh Media")
-            if !globals.showingAbout {
+            if !Globals.shared.showingAbout {
                 strings.append("About")
             }
             strings.append("Sorting")
@@ -1606,7 +1608,7 @@ class MediaCollectionViewController: UIViewController
             // Fallback on earlier versions
         }
         
-        // globals.series load happens in didBecomeActive
+        // Globals.shared.series load happens in didBecomeActive
     }
     
     @objc func readyToPlay()
@@ -1622,7 +1624,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if let playing = globals.mediaPlayer.playing, seriesSelected?.sermons?.index(of: playing) != nil {
+        if let playing = Globals.shared.mediaPlayer.playing, seriesSelected?.sermons?.index(of: playing) != nil {
             sermonSelected = playing
             scrollToSermon(sermonSelected, select: true, position: UITableViewScrollPosition.none)
         } else {
@@ -1640,7 +1642,7 @@ class MediaCollectionViewController: UIViewController
     {
         print("DONE SEEKING")
         
-        globals.mediaPlayer.checkPlayToEnd()
+        Globals.shared.mediaPlayer.checkPlayToEnd()
     }
     
     @objc func willEnterForeground()
@@ -1650,13 +1652,13 @@ class MediaCollectionViewController: UIViewController
     
     @objc func didBecomeActive()
     {
-        guard !globals.isLoading, globals.series == nil else {
+        guard !Globals.shared.isLoading, Globals.shared.series == nil else {
             return
         }
 
         loadSeries()
         {
-            if globals.series == nil {
+            if Globals.shared.series == nil {
                 let alert = UIAlertController(title: "No media available.",
                                               message: "Please check your network connection and try again.",
                                               preferredStyle: UIAlertControllerStyle.alert)
@@ -1695,9 +1697,9 @@ class MediaCollectionViewController: UIViewController
     }
     
     func removeProgressObserver() {
-        if globals.mediaPlayer.progressTimerReturn != nil {
-            globals.mediaPlayer.player?.removeTimeObserver(globals.mediaPlayer.progressTimerReturn!)
-            globals.mediaPlayer.progressTimerReturn = nil
+        if Globals.shared.mediaPlayer.progressTimerReturn != nil {
+            Globals.shared.mediaPlayer.player?.removeTimeObserver(Globals.shared.mediaPlayer.progressTimerReturn!)
+            Globals.shared.mediaPlayer.progressTimerReturn = nil
         }
     }
     
@@ -1705,7 +1707,7 @@ class MediaCollectionViewController: UIViewController
     {
         removeProgressObserver()
         
-        globals.mediaPlayer.progressTimerReturn = globals.mediaPlayer.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak self] (CMTime) in
+        Globals.shared.mediaPlayer.progressTimerReturn = Globals.shared.mediaPlayer.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(0.1,Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { [weak self] (CMTime) in
             self?.progressTimer()
         })
     }

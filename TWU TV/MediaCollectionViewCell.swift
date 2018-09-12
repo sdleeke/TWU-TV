@@ -50,7 +50,7 @@ class MediaCollectionViewCell: UICollectionViewCell {
             return
         }
         
-        if let image = globals.images[name] {
+        if let image = Globals.shared.images[name] {
             self.seriesArt.image = image
         } else {
             DispatchQueue.global(qos: .userInteractive).async { () -> Void in
@@ -58,7 +58,7 @@ class MediaCollectionViewCell: UICollectionViewCell {
                     Thread.onMainThread {
                         if let image = image {
                             if self.series == series {
-                                globals.images[name] = image
+                                Globals.shared.images[name] = image
                                 self.seriesArt.image = image
                             }
                         } else {

@@ -293,7 +293,7 @@ class Series : Equatable, CustomStringConvertible {
                 return nil
             }
             
-            guard let imageURL = globals.imageURL else {
+            guard let imageURL = Globals.shared.imageURL else {
                 return nil
             }
             
@@ -301,7 +301,7 @@ class Series : Equatable, CustomStringConvertible {
                 return nil
             }
             
-            guard let squareSuffix = globals.squareSuffix else {
+            guard let squareSuffix = Globals.shared.squareSuffix else {
                 return nil
             }
             
@@ -463,7 +463,7 @@ class Series : Equatable, CustomStringConvertible {
             get {
                 var value:String?
                 if let name = self.series?.name {
-                    value = globals.seriesSettings?[name]?[key]
+                    value = Globals.shared.seriesSettings?[name]?[key]
                 }
                 return value
             }
@@ -483,18 +483,18 @@ class Series : Equatable, CustomStringConvertible {
                     return
                 }
                 
-                if (globals.seriesSettings == nil) {
-                    globals.seriesSettings = [String:[String:String]]()
+                if (Globals.shared.seriesSettings == nil) {
+                    Globals.shared.seriesSettings = [String:[String:String]]()
                 }
                 
-                if (globals.seriesSettings?[name] == nil) {
-                    globals.seriesSettings?[name] = [String:String]()
+                if (Globals.shared.seriesSettings?[name] == nil) {
+                    Globals.shared.seriesSettings?[name] = [String:String]()
                 }
                 
-                globals.seriesSettings?[name]?[key] = newValue
+                Globals.shared.seriesSettings?[name]?[key] = newValue
                 
                 // For a high volume of activity this can be very expensive.
-                globals.saveSettingsBackground()
+                Globals.shared.saveSettingsBackground()
             }
         }
     }

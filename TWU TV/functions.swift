@@ -131,8 +131,8 @@ extension URL {
     //    var image : UIImage?
     //    {
     //        get {
-    //            guard globals.images[self.lastPathComponent] == nil else {
-    //                return globals.images[self.lastPathComponent]
+    //            guard Globals.shared.images[self.lastPathComponent] == nil else {
+    //                return Globals.shared.images[self.lastPathComponent]
     //            }
     //
     //            guard let imageURL = cachesURL()?.appendingPathComponent(self.lastPathComponent) else {

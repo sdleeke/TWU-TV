@@ -65,7 +65,7 @@ class Sermon : NSObject {
 
     var audioURL:URL? {
         get {
-            guard let audioURL = globals.audioURL else {
+            guard let audioURL = Globals.shared.audioURL else {
                 return nil
             }
             
@@ -192,7 +192,7 @@ class Sermon : NSObject {
             get {
                 var value:String?
                 if let sermonID = sermon?.sermonID {
-                    value = globals.sermonSettings?[sermonID]?[key]
+                    value = Globals.shared.sermonSettings?[sermonID]?[key]
                 }
                 return value
             }
@@ -212,19 +212,19 @@ class Sermon : NSObject {
                     return
                 }
                 
-                if (globals.sermonSettings == nil) {
-                    globals.sermonSettings = [String:[String:String]]()
+                if (Globals.shared.sermonSettings == nil) {
+                    Globals.shared.sermonSettings = [String:[String:String]]()
                 }
                 
-                if (globals.sermonSettings?[sermonID] == nil) {
-                    globals.sermonSettings?[sermonID] = [String:String]()
+                if (Globals.shared.sermonSettings?[sermonID] == nil) {
+                    Globals.shared.sermonSettings?[sermonID] = [String:String]()
                 }
                 
-                if (globals.sermonSettings?[sermonID]?[key] != newValue) {
-                    globals.sermonSettings?[sermonID]?[key] = newValue
+                if (Globals.shared.sermonSettings?[sermonID]?[key] != newValue) {
+                    Globals.shared.sermonSettings?[sermonID]?[key] = newValue
                     
                     // For a high volume of activity this can be very expensive.
-                    globals.saveSettingsBackground()
+                    Globals.shared.saveSettingsBackground()
                 }
             }
         }

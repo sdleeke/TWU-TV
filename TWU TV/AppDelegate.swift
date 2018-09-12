@@ -23,9 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Override point for customization after application launch.
         
-        globals = Globals()
+//        globals = Globals()
         
-        globals.addAccessoryEvents()
+        Globals.shared.addAccessoryEvents()
         
         startAudio()
         
@@ -56,20 +56,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
         
-        if (globals.mediaPlayer.rate == 0) {
+        if (Globals.shared.mediaPlayer.rate == 0) {
             //It is paused, possibly not by us, but by the system
-            if globals.mediaPlayer.isPlaying {
-                globals.mediaPlayer.pause()
+            if Globals.shared.mediaPlayer.isPlaying {
+                Globals.shared.mediaPlayer.pause()
             }
         }
         
-        if (globals.mediaPlayer.rate != 0) {
-            if globals.mediaPlayer.isPaused {
-                globals.mediaPlayer.play()
+        if (Globals.shared.mediaPlayer.rate != 0) {
+            if Globals.shared.mediaPlayer.isPaused {
+                Globals.shared.mediaPlayer.play()
             }
         }
         
-        globals.mediaPlayer.setupPlayingInfoCenter()
+        Globals.shared.mediaPlayer.setupPlayingInfoCenter()
         
         Thread.onMainThread {
             NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.SERIES_UPDATE_UI), object: nil)

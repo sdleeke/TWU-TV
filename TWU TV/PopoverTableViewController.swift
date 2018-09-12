@@ -294,7 +294,7 @@ class PopoverTableViewController : UIViewController {
     override func viewWillDisappear(_ animated: Bool)
     {
         super.viewWillDisappear(animated)
-        globals.popoverNavCon = nil
+        Globals.shared.popoverNavCon = nil
     }
     
     func updateTitle()
@@ -342,7 +342,7 @@ class PopoverTableViewController : UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-        globals.freeMemory()
+        Globals.shared.freeMemory()
     }
 }
 
@@ -430,7 +430,7 @@ extension PopoverTableViewController : UITableViewDataSource
         
         switch purpose {
         case .selectingSorting:
-            if (globals.sorting == Constants.Sorting.Options[index]) {
+            if (Globals.shared.sorting == Constants.Sorting.Options[index]) {
                 cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
             } else {
                 cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
@@ -438,7 +438,7 @@ extension PopoverTableViewController : UITableViewDataSource
             break
             
         case .selectingFiltering:
-            switch globals.showing {
+            switch Globals.shared.showing {
             case .all:
                 if string == Constants.All {
                     cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
@@ -448,7 +448,7 @@ extension PopoverTableViewController : UITableViewDataSource
                 break
                 
             case .filtered:
-                if string == globals.filter {
+                if string == Globals.shared.filter {
                     cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
                 } else {
                     cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)

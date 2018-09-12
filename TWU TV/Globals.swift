@@ -60,7 +60,7 @@ enum Showing {
     case filtered
 }
 
-var globals:Globals!
+//var globals:Globals!
 
 struct CoverArt {
     var storage : [String:UIImage]?
@@ -100,6 +100,8 @@ struct CoverArt {
 
 class Globals : NSObject
 {
+    static var shared = Globals()
+    
     var images = CoverArt() // [String:UIImage]()
     
     func freeMemory()

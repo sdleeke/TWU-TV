@@ -388,7 +388,7 @@ class MediaPlayer : NSObject {
             playing?.atEnd = true
         }
         
-        if globals.autoAdvance, let playing = playing, playing.atEnd,
+        if Globals.shared.autoAdvance, let playing = playing, playing.atEnd,
             let mediaItems = playing.series?.sermons,
             let index = mediaItems.index(of: playing), index < (mediaItems.count - 1) {
             let nextMediaItem = mediaItems[index + 1]
