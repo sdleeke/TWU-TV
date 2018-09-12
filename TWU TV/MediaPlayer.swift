@@ -155,21 +155,38 @@ class MediaPlayer : NSObject {
 
         var sermonInfo = [String:AnyObject]()
         
-        sermonInfo[MPMediaItemPropertyTitle] = "\(title) (Part \(index + 1))" as AnyObject
+        // FIX
+        //            sermonInfo[MPMediaItemPropertyTitle] = "\(title) (Part \(part))" as AnyObject
+        
+//        sermonInfo[MPMediaItemPropertyTitle] = "\(title) (Part \(index + 1))" as AnyObject
         
         sermonInfo[MPMediaItemPropertyArtist] = Constants.Tom_Pennington as AnyObject
         
         sermonInfo[MPMediaItemPropertyAlbumTitle] = title as AnyObject
         
         sermonInfo[MPMediaItemPropertyAlbumArtist] = Constants.Tom_Pennington as AnyObject
-        
-        if let art = playing?.series?.loadArt() {
-            sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: art.size, requestHandler: { (CGSize) -> UIImage in
-                return art
-            })
+
+        playing?.series?.coverArt { (image:UIImage?) in
+            if let image = image {
+                if #available(iOS 10.0, *) {
+                    sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { (CGSize) -> UIImage in
+                        return image
+                    })
+                } else {
+                    // Fallback on earlier versions
+                    sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: image)
+                }
+            }
         }
         
-        sermonInfo[MPMediaItemPropertyAlbumTrackNumber] = index + 1 as AnyObject
+//        if let art = playing?.series?.loadArt() {
+//            sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: art.size, requestHandler: { (CGSize) -> UIImage in
+//                return art
+//            })
+//        }
+        
+        // FIX
+//        sermonInfo[MPMediaItemPropertyAlbumTrackNumber] = index + 1 as AnyObject
         
         if let numberOfSermons = playing?.series?.numberOfSermons {
             sermonInfo[MPMediaItemPropertyAlbumTrackCount] = numberOfSermons as AnyObject
@@ -587,7 +604,7 @@ class MediaPlayer : NSObject {
     func observe()
     {
         Thread.onMainThread {
-            self.playerObserverTimer = Timer.scheduledTimer(timeInterval: Constants.TIMER_INTERVAL.PLAYER, target: self, selector: #selector(MediaPlayer.playerObserver), userInfo: nil, repeats: true)
+            self.playerObserverTimer = Timer.scheduledTimer(timeInterval: Constants.TIMER_INTERVAL.PLAYER, target: self, selector: #selector(self.playerObserver), userInfo: nil, repeats: true)
         }
         
         unobserve()
@@ -609,7 +626,7 @@ class MediaPlayer : NSObject {
         })
         
         Thread.onMainThread {
-            NotificationCenter.default.addObserver(self, selector: #selector(MediaPlayer.didPlayToEnd), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(self.didPlayToEnd), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
         }
         
         pause()
@@ -847,15 +864,15 @@ class MediaPlayer : NSObject {
             }
             
             let defaults = UserDefaults.standard
-
-            if let id = playing?.series?.id, let index = playing?.index {
-                defaults.set("\(id)", forKey: Constants.SETTINGS.PLAYING.SERIES)
-                defaults.set("\(index)", forKey: Constants.SETTINGS.PLAYING.SERMON_INDEX)
+            if let playing = playing {
+                if let name = playing.series?.name {
+                    defaults.set(name, forKey: Constants.SETTINGS.PLAYING.SERIES)
+                }
+                defaults.set(playing.id, forKey: Constants.SETTINGS.PLAYING.SERMON)
             } else {
                 defaults.removeObject(forKey: Constants.SETTINGS.PLAYING.SERIES)
-                defaults.removeObject(forKey: Constants.SETTINGS.PLAYING.SERMON_INDEX)
+                defaults.removeObject(forKey: Constants.SETTINGS.PLAYING.SERMON)
             }
-
             defaults.synchronize()
         }
     }

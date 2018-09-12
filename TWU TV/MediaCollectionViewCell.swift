@@ -42,20 +42,47 @@ class MediaCollectionViewCell: UICollectionViewCell {
     
     fileprivate func updateUI()
     {
-        if let series = self.series {
-            if let image = series.loadArt() {
-                seriesArt.image = image
-            } else {
-                DispatchQueue.global(qos: .background).async { () -> Void in
-                    if let image = series.fetchArt() {
-                        if self.series == series {
-                            Thread.onMainThread {
+        guard let series = self.series else {
+            return
+        }
+        
+        guard let name = series.coverArtURL?.lastPathComponent else {
+            return
+        }
+        
+        if let image = globals.images[name] {
+            self.seriesArt.image = image
+        } else {
+            DispatchQueue.global(qos: .userInteractive).async { () -> Void in
+                series.coverArt { (image:UIImage?) in
+                    Thread.onMainThread {
+                        if let image = image {
+                            if self.series == series {
+                                globals.images[name] = image
                                 self.seriesArt.image = image
                             }
+                        } else {
+                            self.seriesArt.image = UIImage(named: "twu_logo_circle_r")
                         }
                     }
                 }
             }
         }
+        
+//        if let series = self.series {
+//            if let image = series.loadArt() {
+//                seriesArt.image = image
+//            } else {
+//                DispatchQueue.global(qos: .background).async { () -> Void in
+//                    if let image = series.fetchArt() {
+//                        if self.series == series {
+//                            Thread.onMainThread {
+//                                self.seriesArt.image = image
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 }

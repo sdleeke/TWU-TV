@@ -15,19 +15,39 @@ class MediaViewController : UIViewController  {
 
     var actionButton:UIBarButtonItem?
     
-    fileprivate func setupBodyHTML(_ series:Series?) -> String? {
-        var bodyString:String!
-        
-        if let url = series?.url, let title = series?.title {
-            bodyString = "I've enjoyed the sermon series "
-            bodyString = bodyString + "<a href=\"" + url.absoluteString + "\">" + title + "</a>"
-            bodyString = bodyString + " by " + "Tom Pennington"
-            bodyString = bodyString + " from <a href=\"http://www.thewordunleashed.org\">" + "The Word Unleashed" + "</a>"
-            bodyString = bodyString + " and thought you would enjoy it as well."
-            bodyString = bodyString + "</br>"
+    fileprivate func setupBodyHTML(_ series:Series?) -> String?
+    {
+        guard let title = series?.title else {
+            return nil
         }
         
+        var bodyString = "I've enjoyed the sermon series "
+        
+        if let url = series?.url {
+            bodyString = bodyString + "<a href=\"" + url.absoluteString + "\">" + title + "</a>"
+        } else {
+            bodyString = bodyString + title
+        }
+        
+        bodyString = bodyString + " by " + "Tom Pennington"
+        bodyString = bodyString + " from <a href=\"http://www.thewordunleashed.org\">" + "The Word Unleashed" + "</a>"
+        bodyString = bodyString + " and thought you would enjoy it as well."
+        bodyString = bodyString + "</br>"
+        
         return bodyString
+        
+//        var bodyString:String!
+//
+//        if let url = series?.url, let title = series?.title {
+//            bodyString = "I've enjoyed the sermon series "
+//            bodyString = bodyString + "<a href=\"" + url.absoluteString + "\">" + title + "</a>"
+//            bodyString = bodyString + " by " + "Tom Pennington"
+//            bodyString = bodyString + " from <a href=\"http://www.thewordunleashed.org\">" + "The Word Unleashed" + "</a>"
+//            bodyString = bodyString + " and thought you would enjoy it as well."
+//            bodyString = bodyString + "</br>"
+//        }
+//
+//        return bodyString
     }
     
     fileprivate func addressStringHTML() -> String

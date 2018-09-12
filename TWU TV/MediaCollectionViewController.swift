@@ -191,7 +191,7 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
             break
             
         case .selectingMenu:
-            globals.showingAbout = false
+//            globals.showingAbout = false
 
             switch string {
             case "Refresh Media":
@@ -539,30 +539,29 @@ class MediaCollectionViewController: UIViewController
             
         }
         didSet {
-            if (seriesSelected != nil) {
-                globals.showingAbout = false
-                
-                avPlayerSpinner.stopAnimating()
-                sermonSelected = seriesSelected?.sermonSelected
-                selectSermon(sermonSelected)
-                
-                preferredFocusView = tableView
-                
-                if (sermonSelected?.series == seriesSelected) && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
-                    addProgressObserver()
-                } else {
-                    globals.mediaPlayer.stop()
-                }
-
-                if let id = seriesSelected?.id {
-                    let defaults = UserDefaults.standard
-                    defaults.set("\(id)", forKey: Constants.SETTINGS.SELECTED.SERIES)
-                    defaults.synchronize()
-                }
-            } else {
+            guard let seriesSelected = seriesSelected else {
                 print("MediaCollectionViewController:seriesSelected nil")
                 sermonSelected = nil
+                return
             }
+            
+            globals.showingAbout = false
+            
+            avPlayerSpinner.stopAnimating()
+            sermonSelected = seriesSelected.sermonSelected
+            selectSermon(sermonSelected)
+            
+            preferredFocusView = tableView
+            
+            if (sermonSelected?.series == seriesSelected) && (globals.mediaPlayer.url == sermonSelected?.playingURL) {
+                addProgressObserver()
+            } else {
+                globals.mediaPlayer.stop()
+            }
+
+            let defaults = UserDefaults.standard
+            defaults.set(seriesSelected.name, forKey: Constants.SETTINGS.SELECTED.SERIES)
+            defaults.synchronize()
 
             tableView.reloadData()
 
@@ -672,7 +671,8 @@ class MediaCollectionViewController: UIViewController
         
         guard let seriesSelected = seriesSelected else {
             seriesArt.isHidden = true
-            
+            tableView.isHidden = true
+
             logo.isHidden = globals.showingAbout
             
             backgroundLogo.isHidden = !logo.isHidden
@@ -705,21 +705,33 @@ class MediaCollectionViewController: UIViewController
 //                seriesDescription.attributedText = attributedString
 //            }
 //        }
-        
-        if let image = seriesSelected.loadArt() {
-            seriesArt.image = image
-        } else {
-            DispatchQueue.global(qos: .background).async { () -> Void in
-                if let image = seriesSelected.fetchArt() {
+
+        DispatchQueue.global(qos: .background).async { () -> Void in
+            seriesSelected.coverArt { (image:UIImage?) in
+                Thread.onMainThread {
                     if self.seriesSelected == seriesSelected {
-                        Thread.onMainThread {
-                            self.seriesArt.image = image
-                        }
+                        self.seriesArt.image = image
                     }
                 }
             }
         }
+        
+//        if let image = seriesSelected.loadArt() {
+//            seriesArt.image = image
+//        } else {
+//            DispatchQueue.global(qos: .background).async { () -> Void in
+//                if let image = seriesSelected.fetchArt() {
+//                    if self.seriesSelected == seriesSelected {
+//                        Thread.onMainThread {
+//                            self.seriesArt.image = image
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
+        tableView.isHidden = false
+        
         seriesArt.isHidden = false
         seriesDescription.isHidden = false
     }
@@ -1272,13 +1284,25 @@ class MediaCollectionViewController: UIViewController
         setupTitle()
     }
     
-    func seriesFromSeriesDicts(_ seriesDicts:[[String:String]]?) -> [Series]?
+    func seriesFromSeriesDicts(_ seriesDicts:[[String:Any]]?) -> [Series]?
     {
-        return seriesDicts?.filter({ (seriesDict:[String:String]) -> Bool in
+        return seriesDicts?.filter({ (seriesDict:[String:Any]) -> Bool in
             let series = Series(seriesDict: seriesDict)
-            return series.show != 0
-        }).map({ (seriesDict:[String:String]) -> Series in
-            return Series(seriesDict: seriesDict)
+            return series.sermons?.count > 0 // .show != 0
+        }).map({ (seriesDict:[String:Any]) -> Series in
+            let series = Series(seriesDict: seriesDict)
+       
+            DispatchQueue.global(qos: .background).async { () -> Void in
+                series.coverArt { (image:UIImage?) in
+                    guard let name = series.coverArtURL?.lastPathComponent else {
+                        return
+                    }
+                    
+                    globals.images[name] = image
+                }
+            }
+            
+            return series
         })
     }
     
@@ -1310,63 +1334,112 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    func jsonFromURL(url:String,filename:String) -> Any?
+    lazy var operationQueue:OperationQueue! = {
+        let operationQueue = OperationQueue()
+        operationQueue.underlyingQueue = DispatchQueue(label: "JSON")
+        operationQueue.qualityOfService = .background
+        operationQueue.maxConcurrentOperationCount = 1
+        return operationQueue
+    }()
+    
+    func jsonFromURL(urlString:String,filename:String) -> Any?
     {
-        guard globals.reachability.isReachable, let url = URL(string: url) else {
+        guard globals.reachability.isReachable, let url = URL(string: urlString) else {
             return jsonFromFileSystem(filename: filename)
         }
         
-        do {
-            let data = try Data(contentsOf: url)
-            print("able to read json from the URL.")
-            
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: [])
-                
+        if globals.format == Constants.JSON.URL, let json = jsonFromFileSystem(filename: filename) {
+            operationQueue.addOperation {
                 do {
-                    if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
-                        try data.write(to: jsonFileSystemURL)
+                    let data = try Data(contentsOf: url)
+                    print("able to read json from the URL.")
+                    
+                    do {
+                        if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
+                            try data.write(to: jsonFileSystemURL)
+                        }
+                        globals.format = Constants.JSON.URL
+                        print("able to write json to the file system")
+                    } catch let error as NSError {
+                        print("unable to write json to the file system.")
+                        NSLog(error.localizedDescription)
                     }
-                    print("able to write json to the file system")
-                } catch let error as NSError {
-                    print("unable to write json to the file system.")
+                } catch let error {
                     NSLog(error.localizedDescription)
                 }
+            }
+            
+            return json
+        } else {
+            do {
+                let data = try Data(contentsOf: url)
+                print("able to read json from the URL.")
                 
-                return json
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    
+                    do {
+                        if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
+                            try data.write(to: jsonFileSystemURL)
+                        }
+                        globals.format = Constants.JSON.URL
+                        print("able to write json to the file system")
+                    } catch let error as NSError {
+                        print("unable to write json to the file system.")
+                        
+                        NSLog(error.localizedDescription)
+                    }
+                    
+                    return json
+                } catch let error as NSError {
+                    NSLog(error.localizedDescription)
+                    return jsonFromFileSystem(filename: filename)
+                }
             } catch let error as NSError {
                 NSLog(error.localizedDescription)
                 return jsonFromFileSystem(filename: filename)
             }
-        } catch let error as NSError {
-            NSLog(error.localizedDescription)
-            return jsonFromFileSystem(filename: filename)
         }
     }
     
-    func loadSeriesDicts() -> [[String:String]]?
+    func loadSeriesDicts() -> [[String:Any]]?
     {
-        if let json = jsonFromURL(url: Constants.JSON.URL,filename: Constants.JSON.SERIES) as? [String:Any] {
-            var seriesDicts = [[String:String]]()
-            
-            if let series = json[Constants.JSON.ARRAY_KEY] as? [[String:String]] {
-                for i in 0..<series.count {
-                    var dict = [String:String]()
-                    
-                    for (key,value) in series[i] {
-                        dict["\(key)"] = "\(value)".trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-                    }
-                    
-                    seriesDicts.append(dict)
-                }
-            }
-            
-            return seriesDicts.count > 0 ? seriesDicts : nil
-        } else {
+        guard let json = jsonFromURL(urlString: Constants.JSON.URL,filename: Constants.JSON.SERIES) as? [String:Any] else {
             print("could not get json from file, make sure that file contains valid json.")
+            return nil
         }
         
-        return nil
+        if let meta = json[Constants.JSON.KEYS.META] as? [String:Any] {
+            globals.meta = meta
+        }
+        
+        var seriesDicts = [[String:Any]]()
+        
+        var key : String
+        
+        switch Constants.JSON.URL {
+        case Constants.JSON.URLS.MEDIALIST_PHP:
+            key = Constants.JSON.KEYS.SERIES
+            break
+            
+        default:
+            key = Constants.JSON.KEYS.DATA
+            break
+        }
+        
+        if let series = json[key] as? [[String:Any]] {
+            for i in 0..<series.count {
+                var dict = [String:Any]()
+                
+                for (key,value) in series[i] {
+                    dict["\(key)"] = value  // "\(value)".trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                }
+                
+                seriesDicts.append(dict)
+            }
+        }
+        
+        return seriesDicts.count > 0 ? seriesDicts : nil
     }
     
     func loadSeries(_ completion: (() -> Void)?)
@@ -1495,18 +1568,18 @@ class MediaCollectionViewController: UIViewController
     
     func addNotifications()
     {
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.doneSeeking), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.DONE_SEEKING), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(doneSeeking), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.DONE_SEEKING), object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.showPlaying), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.SHOW_PLAYING), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.updateUI), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.FAILED_TO_PLAY), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.readyToPlay), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.READY_TO_PLAY), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(showPlaying), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.SHOW_PLAYING), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateUI), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.FAILED_TO_PLAY), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(readyToPlay), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.READY_TO_PLAY), object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.updateUI), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.PAUSED), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateUI), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.PAUSED), object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.setupPlayPauseButton), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(setupPlayPauseButton), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.UPDATE_PLAY_PAUSE), object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.willEnterForeground), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.WILL_ENTER_FORGROUND), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(MediaCollectionViewController.didBecomeActive), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.DID_BECOME_ACTIVE), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.WILL_ENTER_FORGROUND), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.DID_BECOME_ACTIVE), object: nil)
     }
     
     override func viewDidLoad()
@@ -1517,11 +1590,11 @@ class MediaCollectionViewController: UIViewController
         
         view.backgroundColor = #colorLiteral(red: 0.7254902124, green: 0.4784313738, blue: 0.09803921729, alpha: 0.75)
         
-        let menuPressRecognizer = UITapGestureRecognizer(target: self, action: #selector(MediaCollectionViewController.menuButtonAction(tap:)))
+        let menuPressRecognizer = UITapGestureRecognizer(target: self, action: #selector(menuButtonAction(tap:)))
         menuPressRecognizer.allowedPressTypes = [NSNumber(value: UIPressType.menu.rawValue)]
         view.addGestureRecognizer(menuPressRecognizer)
         
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(MediaCollectionViewController.playPauseButtonAction(tap:)))
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(playPauseButtonAction(tap:)))
         tapRecognizer.allowedPressTypes = [NSNumber(value: UIPressType.playPause.rawValue)];
         view.addGestureRecognizer(tapRecognizer)
 

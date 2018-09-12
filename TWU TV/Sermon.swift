@@ -14,7 +14,27 @@ var debug = false
 class Sermon : NSObject {
     var series:Series?
     
-    var id:Int
+    var dict:[String:Any]?
+    
+    var id:String!
+    {
+        return dict?["mediaCode"] as? String
+    }
+    
+    var part:String!
+    {
+        return dict?["part"] as? String
+    }
+    
+    var publishDate:String!
+    {
+        return dict?["publishDate"] as? String
+    }
+    
+    var text:String?
+    {
+        return dict?["description"] as? String
+    }
     
     var title:String?
     {
@@ -39,17 +59,33 @@ class Sermon : NSObject {
     
     var audio:String? {
         get {
-            return String(format: Constants.FILENAME_FORMAT, id)
+            return id + Constants.FILE_EXTENSION.MP3 // String(format: Constants.FILENAME_FORMAT, id)
         }
     }
 
     var audioURL:URL? {
         get {
-            if let audio = audio {
-                return URL(string: Constants.URL.BASE.AUDIO + audio)
-            } else {
+            guard let audioURL = globals.audioURL else {
                 return nil
             }
+            
+            guard let audio = audio else {
+                return nil
+            }
+            
+            return URL(string: audioURL + audio)
+            
+            //            return URL(string: Constants.URL.BASE.AUDIO + audio)
+        }
+    }
+    
+    var audioFileSystemURL:URL? {
+        get {
+            guard let audio = audio else {
+                return nil
+            }
+            
+            return cachesURL()?.appendingPathComponent(audio)
         }
     }
     
@@ -61,12 +97,12 @@ class Sermon : NSObject {
 
     var sermonID:String? {
         get {
-            if let seriesID = series?.id {
-                return "\(seriesID)\(Constants.COLON)\(id)"
-            } else {
+            guard let series = series else {
                 print("sermonID: series nil")
                 return nil
             }
+            
+            return id // "\(series.id)\(Constants.COLON)\(id)"
         }
     }
 
@@ -97,20 +133,31 @@ class Sermon : NSObject {
         }
     }
     
-    init(series:Series,id:Int) {
+    init(series:Series,dict:[String:Any]?) { // id:Int
         self.series = series
-        self.id = id
+        
+        switch Constants.JSON.URL {
+        case Constants.JSON.URLS.SERIES_JSON:
+            self.dict = dict?["program"] as? [String:Any]
+            break
+            
+        default:
+            self.dict = dict
+            break
+        }
+        
+//        self.id = id
     }
     
-    var index:Int? {
-        get {
-            if let startingIndex = series?.startingIndex {
-                return id - startingIndex
-            } else {
-                return nil
-            }
-        }
-    }
+//    var index:Int? {
+//        get {
+//            if let startingIndex = series?.startingIndex {
+//                return id - startingIndex
+//            } else {
+//                return nil
+//            }
+//        }
+//    }
     
     override var description : String
     {
@@ -122,10 +169,12 @@ class Sermon : NSObject {
             sermonString = "\(sermonString) \(title)"
         }
         
-        if let index = index {
-            sermonString = "\(sermonString) Part:\(index+1)"
-        }
-        
+//        if let index = index {
+//            sermonString = "\(sermonString) Part:\(index+1)"
+//        }
+
+        sermonString = "\(sermonString) Part:\(part!)"
+
         return sermonString
     }
     
