@@ -24,17 +24,13 @@ enum Constants {
     static let MIN_PLAY_TIME = 15.0
     static let MIN_LOAD_TIME = 30.0
     
-    enum TIMER_INTERVAL {
-        static let SLIDER       = 0.1
-        static let PLAYER       = 0.1
-        static let LOADING      = 0.2
-        static let PROGRESS     = 0.1
-    }
-    
-    enum INTERVAL {
-//        static let SLIDER_TIMER     = 0.5
-//        static let PLAYER_TIMER     = 0.2
-//        static let SEEKING_TIMER    = 0.1
+    enum INTERVALS {
+        enum TIMER {
+            static let SLIDER       = 0.1
+            static let PLAYER       = 0.1
+            static let LOADING      = 0.2
+            static let PROGRESS     = 0.1
+        }
         
         static let PLAY_OBSERVER_TIME = 10.0 // seconds
         
@@ -83,12 +79,6 @@ enum Constants {
 
         static let SERMON_UPDATE_UI             = "SERMON UPDATE UI"
         static let SERMON_UPDATE_PLAY_PAUSE     = "SERMON UPDATE PLAY PAUSE"
-        
-//        static let WILL_RESIGN_ACTIVE       = "WILL RESIGN ACTIVE"
-//        static let DID_BECOME_ACTIVE        = "DID BECOME ACTIVE"
-//        static let WILL_TERMINATE           = "WILL TERMINATE"
-//        static let WILL_ENTER_FORGROUND     = "WILL ENTER FORGROUND"
-//        static let DID_ENTER_BACKGROUND     = "DID ENTER BACKGROUND"
     }
     
     enum JSON {

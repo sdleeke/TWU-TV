@@ -106,15 +106,9 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
         
         clearView()
         
-//        if let isCollapsed = splitViewController?.isCollapsed, !isCollapsed {
-//            NotificationCenter.default.post(name: Notification.Name(rawValue: Constants.NOTIFICATION.CLEAR_VIEW), object: nil)
-//        }
-        
         disableBarButtons()
         
         // This is ABSOLUTELY ESSENTIAL to reset all of the Media so that things load as if from a cold start.
-//        globals = Globals()
-        
         Globals.shared.series = nil
         
         collectionView?.reloadData()
@@ -136,20 +130,6 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
                 self.collectionView.reloadData()
                 self.scrollToSeries(self.seriesSelected)
             }
-//            guard Globals.shared.series == nil else {
-//                return
-//            }
-//
-//            let alert = UIAlertController(title: "No media available.",
-//                                          message: "Please check your network connection and try again.",
-//                                          preferredStyle: UIAlertControllerStyle.alert)
-//
-//            let action = UIAlertAction(title: Constants.Okay, style: UIAlertActionStyle.cancel, handler: { (UIAlertAction) -> Void in
-//
-//            })
-//            alert.addAction(action)
-//
-//            self.present(alert, animated: true, completion: nil)
         }
     }
     
@@ -193,8 +173,6 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
             break
             
         case .selectingMenu:
-//            Globals.shared.showingAbout = false
-
             switch string {
             case "Refresh Media":
                 handleRefresh()
@@ -345,7 +323,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        Globals.shared.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVAL.SKIP_TIME)
+        Globals.shared.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVALS.SKIP_TIME)
     }
     
     @IBOutlet weak var skipForwardsButton: UIButton!
@@ -360,7 +338,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        Globals.shared.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVAL.SKIP_TIME)
+        Globals.shared.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVALS.SKIP_TIME)
     }
     
     @IBOutlet weak var playPauseButton: UIButton!
@@ -536,6 +514,8 @@ class MediaCollectionViewController: UIViewController
     
     var progressObserver: Timer?
     
+    var selectingSeries = false
+    
     var seriesSelected:Series? {
         willSet {
             
@@ -550,11 +530,13 @@ class MediaCollectionViewController: UIViewController
             Globals.shared.showingAbout = false
             
             avPlayerSpinner.stopAnimating()
+            
+            selectingSeries = true
             sermonSelected = seriesSelected.sermonSelected
+            selectingSeries = false
+            
             selectSermon(sermonSelected)
-            
-            preferredFocusView = tableView
-            
+
             if (sermonSelected?.series == seriesSelected) && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
                 addProgressObserver()
             } else {
@@ -566,6 +548,8 @@ class MediaCollectionViewController: UIViewController
             defaults.synchronize()
 
             tableView.reloadData()
+
+            preferredFocusView = tableView
 
             updateUI()
         }
@@ -598,7 +582,9 @@ class MediaCollectionViewController: UIViewController
                     addProgressObserver()
                 }
             } else {
-                preferredFocusView = playPauseButton
+                if !selectingSeries {
+                    preferredFocusView = playPauseButton
+                }
             }
         }
     }
@@ -694,20 +680,6 @@ class MediaCollectionViewController: UIViewController
 
         seriesLabel.text = seriesSelected.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "&ndash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
         
-//        seriesLabel.text = nil
-
-//        if let text = seriesSelected.text?.replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "–", with: "-").replacingOccurrences(of: "—", with: "&mdash;").replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "<br><br>").replacingOccurrences(of: "’", with: "&rsquo;").replacingOccurrences(of: "“", with: "&ldquo;").replacingOccurrences(of: "”", with: "&rdquo;").replacingOccurrences(of: "?۪s", with: "'s").replacingOccurrences(of: "…", with: "...") {
-//            if  let data = text.data(using: String.Encoding.utf8, allowLossyConversion: false),
-//                let attributedString = try? NSMutableAttributedString(data: data,
-//                                                                      options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType],
-//                                                                      documentAttributes: nil) {
-//                attributedString.addAttributes([NSFontAttributeName:UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1)],
-//                                               range: NSMakeRange(0, attributedString.length))
-//
-//                seriesDescription.attributedText = attributedString
-//            }
-//        }
-
         DispatchQueue.global(qos: .background).async { () -> Void in
             seriesSelected.coverArt { (image:UIImage?) in
                 Thread.onMainThread {
@@ -718,20 +690,6 @@ class MediaCollectionViewController: UIViewController
             }
         }
         
-//        if let image = seriesSelected.loadArt() {
-//            seriesArt.image = image
-//        } else {
-//            DispatchQueue.global(qos: .background).async { () -> Void in
-//                if let image = seriesSelected.fetchArt() {
-//                    if self.seriesSelected == seriesSelected {
-//                        Thread.onMainThread {
-//                            self.seriesArt.image = image
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         tableView.isHidden = false
         
         seriesArt.isHidden = false

@@ -97,12 +97,7 @@ class Sermon : NSObject {
 
     var sermonID:String? {
         get {
-            guard let series = series else {
-                print("sermonID: series nil")
-                return nil
-            }
-            
-            return id // "\(series.id)\(Constants.COLON)\(id)"
+            return id
         }
     }
 
@@ -145,19 +140,7 @@ class Sermon : NSObject {
             self.dict = dict
             break
         }
-        
-//        self.id = id
     }
-    
-//    var index:Int? {
-//        get {
-//            if let startingIndex = series?.startingIndex {
-//                return id - startingIndex
-//            } else {
-//                return nil
-//            }
-//        }
-//    }
     
     override var description : String
     {
@@ -168,12 +151,10 @@ class Sermon : NSObject {
         if let title = series?.title {
             sermonString = "\(sermonString) \(title)"
         }
-        
-//        if let index = index {
-//            sermonString = "\(sermonString) Part:\(index+1)"
-//        }
-
-        sermonString = "\(sermonString) Part:\(part!)"
+ 
+        if let part = part {
+            sermonString = "\(sermonString) Part:\(part)"
+        }
 
         return sermonString
     }

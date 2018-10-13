@@ -9,66 +9,14 @@
 import Foundation
 import MediaPlayer
 
-extension UIBarButtonItem {
-    func setTitleTextAttributes(_ attributes:[NSAttributedStringKey:UIFont])
-    {
-        setTitleTextAttributes(attributes, for: UIControlState.normal)
-        setTitleTextAttributes(attributes, for: UIControlState.disabled)
-        setTitleTextAttributes(attributes, for: UIControlState.selected)
-        setTitleTextAttributes(attributes, for: UIControlState.highlighted)
-        setTitleTextAttributes(attributes, for: UIControlState.focused)
-    }
-}
-
-extension UISegmentedControl {
-    func setTitleTextAttributes(_ attributes:[String:UIFont])
-    {
-        setTitleTextAttributes(attributes, for: UIControlState.normal)
-        setTitleTextAttributes(attributes, for: UIControlState.disabled)
-        setTitleTextAttributes(attributes, for: UIControlState.selected)
-        setTitleTextAttributes(attributes, for: UIControlState.highlighted)
-        setTitleTextAttributes(attributes, for: UIControlState.focused)
-    }
-}
-
-extension UIButton {
-    func setTitle(_ string:String?)
-    {
-        setTitle(string, for: UIControlState.normal)
-        setTitle(string, for: UIControlState.disabled)
-        setTitle(string, for: UIControlState.selected)
-        setTitle(string, for: UIControlState.highlighted)
-        setTitle(string, for: UIControlState.focused)
-    }
-}
-
-extension Thread {
-    static func onMainThread(block:(()->(Void))?)
-    {
-        if Thread.isMainThread {
-            block?()
-        } else {
-            DispatchQueue.main.async(execute: { () -> Void in
-                block?()
-            })
-        }
-    }
-}
-
 enum Showing {
     case all
     case filtered
 }
 
-//var globals:Globals!
-
-struct CoverArt {
+struct CoverArt
+{
     var storage : [String:UIImage]?
-    
-    //    init(storage:[String:UIImage]?)
-    //    {
-    //        self.storage = storage
-    //    }
     
     // Make it threadsafe
     let queue = DispatchQueue(label: "CoverArt")
@@ -102,7 +50,7 @@ class Globals : NSObject
 {
     static var shared = Globals()
     
-    var images = CoverArt() // [String:UIImage]()
+    var images = CoverArt()
     
     func freeMemory()
     {
@@ -247,9 +195,7 @@ class Globals : NSObject
             
             let defaults = UserDefaults.standard
             if let seriesSelectedName = defaults.string(forKey: Constants.SETTINGS.SELECTED.SERIES) {
-//                if let seriesSelectedID = Int(seriesSelectedStr) {
-                    seriesSelected = index?[seriesSelectedName]
-//                }
+                seriesSelected = index?[seriesSelectedName]
             }
             defaults.synchronize()
             
@@ -521,7 +467,7 @@ class Globals : NSObject
         MPRemoteCommandCenter.shared().skipBackwardCommand.isEnabled = true
         MPRemoteCommandCenter.shared().skipBackwardCommand.addTarget (handler: { (event:MPRemoteCommandEvent!) -> MPRemoteCommandHandlerStatus in
             if let currentTime = self.mediaPlayer.currentTime {
-                self.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVAL.SKIP_TIME)
+                self.mediaPlayer.seek(to: currentTime.seconds - Constants.INTERVALS.SKIP_TIME)
                 return MPRemoteCommandHandlerStatus.success
             } else {
                 return MPRemoteCommandHandlerStatus.commandFailed
@@ -531,7 +477,7 @@ class Globals : NSObject
         MPRemoteCommandCenter.shared().skipForwardCommand.isEnabled = true
         MPRemoteCommandCenter.shared().skipForwardCommand.addTarget (handler: { (event:MPRemoteCommandEvent!) -> MPRemoteCommandHandlerStatus in
             if let currentTime = self.mediaPlayer.currentTime {
-                self.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVAL.SKIP_TIME)
+                self.mediaPlayer.seek(to: currentTime.seconds + Constants.INTERVALS.SKIP_TIME)
                 return MPRemoteCommandHandlerStatus.success
             } else {
                 return MPRemoteCommandHandlerStatus.commandFailed

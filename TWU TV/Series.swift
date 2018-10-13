@@ -230,11 +230,6 @@ class Series : Equatable, CustomStringConvertible {
                 
             case Constants.JSON.URLS.SERIES_JSON:
                 return sermons?.count ?? -1
-                //                if let featuredStartDate = featuredStartDate {
-                //                    return sermons?.count ?? -1
-                //                } else {
-                //                    return numberOfSermons
-                //                }
                 
             default:
                 return -1
@@ -270,18 +265,10 @@ class Series : Equatable, CustomStringConvertible {
     
     var titleSort:String? {
         get {
-//            if (dict?[Constants.FIELDS.TITLE+Constants.SORTING] == nil) {
-//                dict?[Constants.FIELDS.TITLE+Constants.SORTING] = stringWithoutPrefixes(title)?.lowercased()
-//            }
-//
-//            return dict?[Constants.FIELDS.TITLE+Constants.SORTING]
-            
             return stringWithoutPrefixes(title)?.lowercased()
         }
     }
 
-//    var coverArt:String?
-    
     var coverArtURL : URL?
     {
         get {
@@ -349,89 +336,6 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
 
-//    func fetchArt() -> UIImage?
-//    {
-//        guard let name = name else {
-//            return nil
-//        }
-//
-//        let imageName = "\(Constants.COVER_ART_PREAMBLE)\(name)\(Constants.COVER_ART_POSTAMBLE)"
-//
-//        // See if it is in the cloud, download it and store it in the file system.
-//
-//        // Try to get it from the cloud
-//        let imageCloudURL = Constants.URL.BASE.IMAGE + imageName + Constants.FILE_EXTENSION.JPEG
-//        //                print("\(imageCloudURL)")
-//
-//        guard let url = URL(string: imageCloudURL) else {
-//            return nil
-//        }
-//
-//        do {
-//            let imageData = try Data(contentsOf: url)
-//            print("Image \(imageName) read from cloud")
-//
-//            if let image = UIImage(data: imageData) {
-//                print("Image \(imageName) read from cloud and converted to image")
-//
-//                DispatchQueue.global(qos: .background).async { () -> Void in
-//                    do {
-//                        if let imageURL = cachesURL()?.appendingPathComponent(imageName + Constants.FILE_EXTENSION.JPEG) {
-//                            try UIImageJPEGRepresentation(image, 1.0)?.write(to: imageURL, options: [.atomic])
-//                            print("Image \(imageName) saved to file system")
-//                        }
-//                    } catch let error as NSError {
-//                        NSLog(error.localizedDescription)
-//                        print("Image \(imageName) not saved to file system")
-//                    }
-//                }
-//
-//                return image
-//            } else {
-//                print("Image \(imageName) read from cloud but not converted to image")
-//            }
-//        } catch let error as NSError {
-//            NSLog(error.localizedDescription)
-//            print("Image \(imageName) not read from cloud")
-//        }
-//
-//        print("Image \(imageName) not available")
-//
-//        return nil
-//    }
-//
-//    func loadArt() -> UIImage?
-//    {
-//        guard let name = name else {
-//            return nil
-//        }
-//
-//        let imageName = "\(Constants.COVER_ART_PREAMBLE)\(name)\(Constants.COVER_ART_POSTAMBLE)"
-//
-//        // If it isn't in the bundle, see if it is in the file system.
-//
-//        if let image = UIImage(named:imageName) {
-////            print("Image \(imageName) in bundle")
-//            return image
-//        } else {
-////            print("Image \(imageName) not in bundle")
-//
-//            // Check to see if it is in the file system.
-//            if let imageURL = cachesURL()?.appendingPathComponent(imageName + Constants.FILE_EXTENSION.JPEG) {
-//                if let image = UIImage(contentsOfFile: imageURL.path) {
-////                    print("Image \(imageName) in file system")
-//                    return image
-//                } else {
-////                    print("Image \(imageName) not in file system")
-//                }
-//            }
-//        }
-//
-////        print("Image \(imageName) not available")
-//
-//        return nil
-//    }
-    
     var sermons:[Sermon]?
     {
         didSet {
@@ -509,14 +413,6 @@ class Series : Equatable, CustomStringConvertible {
                 return sermons?.filter({ (sermon) -> Bool in
                     return sermon.id == sermonID
                 }).first // [num - startingIndex]
-//            if  let sermonID = settings?[Constants.SETTINGS.SELECTED.SERMON],
-//                let range = sermonID.range(of: Constants.COLON),
-//                let num = Int(String(sermonID[range.upperBound...])),
-//                let startingIndex = startingIndex {
-//                return sermons?[num - startingIndex]
-//            } else {
-//                return nil
-//            }
             }
             
             return nil
@@ -553,22 +449,10 @@ class Series : Equatable, CustomStringConvertible {
         if let name = name, !name.isEmpty {
             seriesString = "\(seriesString)\n\(name)"
         }
-        
-//        if let id = id {
-//            seriesString = "\(seriesString)\n\(id)"
-//        }
-        
-//        if let startingIndex = startingIndex {
-//            seriesString = "\(seriesString) \(startingIndex)"
-//        }
 
         seriesString = "\(seriesString) \(startingIndex)"
 
         seriesString = "\(seriesString) \(numberOfSermons)"
-
-//        if let numberOfSermons = numberOfSermons {
-//            seriesString = "\(seriesString) \(numberOfSermons)"
-//        }
 
         if let text = text, !text.isEmpty {
             seriesString = "\(seriesString)\n\(text)"

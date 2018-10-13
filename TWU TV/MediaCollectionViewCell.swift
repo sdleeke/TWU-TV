@@ -8,11 +8,10 @@
 
 import UIKit
 
-class MediaCollectionViewCell: UICollectionViewCell {
+class MediaCollectionViewCell: UICollectionViewCell
+{
     @IBOutlet weak var seriesArt: UIImageView!
 
-//    var vc:MediaCollectionViewController?
-    
     var series:Series? {
         willSet {
             
@@ -68,21 +67,5 @@ class MediaCollectionViewCell: UICollectionViewCell {
                 }
             }
         }
-        
-//        if let series = self.series {
-//            if let image = series.loadArt() {
-//                seriesArt.image = image
-//            } else {
-//                DispatchQueue.global(qos: .background).async { () -> Void in
-//                    if let image = series.fetchArt() {
-//                        if self.series == series {
-//                            Thread.onMainThread {
-//                                self.seriesArt.image = image
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 }

@@ -35,19 +35,6 @@ class MediaViewController : UIViewController  {
         bodyString = bodyString + "</br>"
         
         return bodyString
-        
-//        var bodyString:String!
-//
-//        if let url = series?.url, let title = series?.title {
-//            bodyString = "I've enjoyed the sermon series "
-//            bodyString = bodyString + "<a href=\"" + url.absoluteString + "\">" + title + "</a>"
-//            bodyString = bodyString + " by " + "Tom Pennington"
-//            bodyString = bodyString + " from <a href=\"http://www.thewordunleashed.org\">" + "The Word Unleashed" + "</a>"
-//            bodyString = bodyString + " and thought you would enjoy it as well."
-//            bodyString = bodyString + "</br>"
-//        }
-//
-//        return bodyString
     }
     
     fileprivate func addressStringHTML() -> String

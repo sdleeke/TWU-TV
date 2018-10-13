@@ -20,99 +20,6 @@ protocol PopoverTableViewControllerDelegate
     func rowClickedAtIndex(_ index:Int, strings:[String]?, purpose:PopoverPurpose)
 }
 
-class Section {
-    var strings:[String]? {
-        willSet {
-            
-        }
-        didSet {
-            indexStrings = strings?.map({ (string:String) -> String in
-                if let string = indexTransform?(string.uppercased()) {
-                    return string
-                } else {
-                    return string.uppercased()
-                }
-            })
-        }
-    }
-    
-    var indexStrings:[String]?
-    
-    var indexTransform:((String?)->String?)? = stringWithoutPrefixes
-    
-    var showHeaders = false
-    var showIndex = false
-    
-    var titles:[String]?
-    var counts:[Int]?
-    var indexes:[Int]?
-    
-    func build()
-    {
-        guard let indexStrings = indexStrings, strings?.count > 0 else {
-            titles = nil
-            counts = nil
-            indexes = nil
-            
-            return
-        }
-        
-        if showIndex {
-            guard indexStrings.count > 0 else {
-                titles = nil
-                counts = nil
-                indexes = nil
-                
-                return
-            }
-        }
-        
-        let a = "A"
-        
-        titles = Array(Set(indexStrings.map({ (string:String) -> String in
-                if string.endIndex >= a.endIndex {
-                    return String(string[..<a.endIndex]).uppercased()
-                } else {
-                    return string
-                }
-            })
-            
-        )).sorted() { $0 < $1 }
-        
-        if titles?.count == 0 {
-            titles = nil
-            counts = nil
-            indexes = nil
-        } else {
-            var stringIndex = [String:[String]]()
-            
-            for indexString in indexStrings {
-                if stringIndex[String(indexString[..<a.endIndex])] == nil {
-                    stringIndex[String(indexString[..<a.endIndex])] = [String]()
-                }
-
-                stringIndex[String(indexString[..<a.endIndex])]?.append(indexString)
-            }
-            
-            var counter = 0
-            
-            var counts = [Int]()
-            var indexes = [Int]()
-            
-            for key in stringIndex.keys.sorted() {
-                if let value = stringIndex[key] {
-                    indexes.append(counter)
-                    counts.append(value.count)
-                    counter += value.count
-                }
-            }
-            
-            self.counts = counts.count > 0 ? counts : nil
-            self.indexes = indexes.count > 0 ? indexes : nil
-        }
-    }
-}
-
 class PopoverTableViewController : UIViewController {
     var vc:UIViewController?
     
@@ -290,7 +197,6 @@ class PopoverTableViewController : UIViewController {
         }
     }
     
-    
     override func viewWillDisappear(_ animated: Bool)
     {
         super.viewWillDisappear(animated)
@@ -310,8 +216,6 @@ class PopoverTableViewController : UIViewController {
     override func viewWillAppear(_ animated: Bool)
     {
         super.viewWillAppear(animated)
-        
-//        NotificationCenter.default.addObserver(self, selector: #selector(willResignActive), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.WILL_RESIGN_ACTIVE), object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(willResignActive), name: NSNotification.Name.UIApplicationWillResignActive, object: nil)
 

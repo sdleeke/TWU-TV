@@ -148,10 +148,6 @@ class MediaPlayer : NSObject {
         guard let title = playing?.series?.title else {
             return
         }
-            
-        guard let index = playing?.index else {
-            return
-        }
 
         var sermonInfo = [String:AnyObject]()
         
@@ -604,7 +600,7 @@ class MediaPlayer : NSObject {
     func observe()
     {
         Thread.onMainThread {
-            self.playerObserverTimer = Timer.scheduledTimer(timeInterval: Constants.TIMER_INTERVAL.PLAYER, target: self, selector: #selector(self.playerObserver), userInfo: nil, repeats: true)
+            self.playerObserverTimer = Timer.scheduledTimer(timeInterval: Constants.INTERVALS.TIMER.PLAYER, target: self, selector: #selector(self.playerObserver), userInfo: nil, repeats: true)
         }
         
         unobserve()
