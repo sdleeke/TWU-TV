@@ -31,7 +31,7 @@ class MediaTableViewCell: UITableViewCell
             return
         }
 
-        title.text = sermon?.title
+        title.text = sermon?.partString
     }
     
     @IBOutlet weak var title: UILabel!

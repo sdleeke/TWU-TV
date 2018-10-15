@@ -230,22 +230,6 @@ func stringWithoutPrefixes(_ fromString:String?) -> String?
         return nil
     }
     
-    var sortString = fromString
-    
-    let quote:String = "\""
-    let prefixes = ["A ","An ","And ","The "]
-    
-    if fromString.endIndex >= quote.endIndex, String(fromString[..<quote.endIndex]) == quote {
-        sortString = String(fromString[quote.endIndex...])
-    }
-    
-    for prefix in prefixes {
-        if fromString.endIndex >= prefix.endIndex, String(fromString[..<prefix.endIndex]) == prefix {
-            sortString = String(fromString[prefix.endIndex...])
-            break
-        }
-    }
-    
-    return sortString
+    return fromString.withoutPrefixes
 }
 

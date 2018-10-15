@@ -562,9 +562,9 @@ class MediaCollectionViewController: UIViewController
             
         }
         didSet {
-            sermonLabel.text = sermonSelected?.title
+            sermonLabel.text = sermonSelected?.partString
             
-            sermonLabel.isHidden = sermonSelected?.title == nil
+            sermonLabel.isHidden = sermonSelected?.partString == nil
             
             seriesSelected?.sermonSelected = sermonSelected
             

@@ -21,30 +21,30 @@ class Sermon : NSObject {
         return dict?["mediaCode"] as? String
     }
     
-    var part:String!
-    {
-        return dict?["part"] as? String
-    }
-    
     var publishDate:String?
     {
         return dict?["publishDate"] as? String
     }
     
-    var text:String?
+    var partNumber:String!
     {
-        return dict?["description"] as? String
+        return dict?["part"] as? String
     }
     
-    var title:String?
+    var partString:String?
     {
         get {
             if let numberOfSermons = series?.numberOfSermons { // , let index = series?.sermons?.index(of: self)
-                return "Part\u{00a0}\(part!)\u{00a0}of\u{00a0}\(numberOfSermons)"
+                return "Part\u{00a0}\(partNumber!)\u{00a0}of\u{00a0}\(numberOfSermons)"
             }
             
-            return "Part\u{00a0}\(part!)"
+            return "Part\u{00a0}\(partNumber!)"
         }
+    }
+    
+    var text:String?
+    {
+        return dict?["description"] as? String
     }
     
     var atEnd:Bool {
@@ -152,8 +152,8 @@ class Sermon : NSObject {
             sermonString = "\(sermonString) \(title)"
         }
  
-        if let part = part {
-            sermonString = "\(sermonString) Part:\(part)"
+        if let partNumber = partNumber {
+            sermonString = "\(sermonString) Part:\(partNumber)"
         }
 
         return sermonString

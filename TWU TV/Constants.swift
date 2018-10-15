@@ -137,21 +137,56 @@ enum Constants {
     enum Fonts {
         static let body = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
         
-        static let bold = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
+        static let headline = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
+        
+        static let footnote = UIFont.preferredFont(forTextStyle: UIFontTextStyle.footnote)
+        
+        static let caption1 = UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1)
+        
+        static let caption2 = UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption2)
+        
+        static let title1 = UIFont.preferredFont(forTextStyle: UIFontTextStyle.title1)
+        
+        static let title2 = UIFont.preferredFont(forTextStyle: UIFontTextStyle.title2)
+        
+        static let title3 = UIFont.preferredFont(forTextStyle: UIFontTextStyle.title3)
         
         enum Attributes {
-            static let normal = [ NSAttributedStringKey.font: Fonts.body ]
+            static let body = [ NSAttributedStringKey.font: Fonts.body ]
             
-            static let bold = [ NSAttributedStringKey.font: Fonts.bold ]
+            static let headline = [ NSAttributedStringKey.font: Fonts.headline ]
             
-            static let boldGrey = [ NSAttributedStringKey.foregroundColor: UIColor.gray,
-                                    NSAttributedStringKey.font: Fonts.bold ]
+            static let footnote = [ NSAttributedStringKey.font: Fonts.footnote ]
             
-            static let highlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
-                                       NSAttributedStringKey.font: Fonts.body ]
+            static let caption1 = [ NSAttributedStringKey.font: Fonts.caption1 ]
             
-            static let boldHighlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
-                                           NSAttributedStringKey.font: Fonts.bold ]
+            static let caption2 = [ NSAttributedStringKey.font: Fonts.caption2 ]
+            
+            static let title3 = [ NSAttributedStringKey.font: Fonts.title3 ]
+            
+            static let headlineGray = [ NSAttributedStringKey.foregroundColor: UIColor.gray,
+                                        NSAttributedStringKey.font: Fonts.headline ]
+            
+            static let title3Grey = [ NSAttributedStringKey.foregroundColor: UIColor.gray,
+                                      NSAttributedStringKey.font: Fonts.title3 ]
+            
+            static let bodyHighlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                           NSAttributedStringKey.font: Fonts.body ]
+            
+            static let footnoteHighlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                               NSAttributedStringKey.font: Fonts.footnote ]
+            
+            static let headlineHighlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                               NSAttributedStringKey.font: Fonts.headline ]
+            
+            static let title3Highlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                             NSAttributedStringKey.font: Fonts.title3 ]
+            
+            static let caption1Highlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                               NSAttributedStringKey.font: Fonts.caption1 ]
+            
+            static let caption2Highlighted = [ NSAttributedStringKey.backgroundColor: UIColor.yellow,
+                                               NSAttributedStringKey.font: Fonts.caption2 ]
         }
     }
     

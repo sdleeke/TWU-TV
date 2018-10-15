@@ -63,6 +63,155 @@ extension String
             return URL(string: self)
         }
     }
+    
+    var fileSystemURL : URL?
+    {
+        get {
+            return url?.fileSystemURL
+        }
+    }
+}
+
+extension Double {
+    var secondsToHMS : String?
+    {
+        get {
+            let hours = max(Int(self / (60*60)),0)
+            let mins = max(Int((self - (Double(hours) * 60*60)) / 60),0)
+            let sec = max(Int(self.truncatingRemainder(dividingBy: 60)),0)
+            
+            var string:String
+            
+            if (hours > 0) {
+                string = "\(String(format: "%d",hours)):"
+            } else {
+                string = Constants.EMPTY_STRING
+            }
+            
+            string += "\(String(format: "%02d",mins)):\(String(format: "%02d",sec))"
+            
+            return string
+        }
+    }
+}
+
+extension String
+{
+    var withoutPrefixes : String
+    {
+        get {
+            var sortString = self
+            
+            let quote:String = "\""
+            let prefixes = ["A ","An ","And ","The "]
+            
+            if self.endIndex >= quote.endIndex, String(self[..<quote.endIndex]) == quote {
+                sortString = String(self[quote.endIndex...])
+            }
+            
+            for prefix in prefixes {
+                if self.endIndex >= prefix.endIndex, String(self[..<prefix.endIndex]) == prefix {
+                    sortString = String(self[prefix.endIndex...])
+                    break
+                }
+            }
+            
+            return sortString
+        }
+    }
+    
+    var hmsToSeconds : Double?
+    {
+        get {
+            guard self.range(of: ":") != nil else {
+                return nil
+            }
+            
+            var str = self.replacingOccurrences(of: ",", with: ".")
+            
+            var numbers = [Double]()
+            
+            repeat {
+                if let index = str.range(of: ":") {
+                    let numberString = String(str[..<index.lowerBound])
+                    
+                    if let number = Double(numberString) {
+                        numbers.append(number)
+                    }
+                    
+                    str = String(str[index.upperBound...])
+                }
+            } while str.range(of: ":") != nil
+            
+            if !str.isEmpty {
+                if let number = Double(str) {
+                    numbers.append(number)
+                }
+            }
+            
+            var seconds = 0.0
+            var counter = 0.0
+            
+            for number in numbers.reversed() {
+                seconds = seconds + (counter != 0 ? number * pow(60.0,counter) : number)
+                counter += 1
+            }
+            
+            return seconds
+        }
+    }
+    
+    var secondsToHMS : String?
+    {
+        get {
+            guard let timeNow = Double(self) else {
+                return nil
+            }
+            
+            let hours = max(Int(timeNow / (60*60)),0)
+            let mins = max(Int((timeNow - (Double(hours) * 60*60)) / 60),0)
+            let sec = max(Int(timeNow.truncatingRemainder(dividingBy: 60)),0)
+            let fraction = timeNow - Double(Int(timeNow))
+            
+            var hms:String
+            
+            if (hours > 0) {
+                hms = "\(String(format: "%02d",hours)):"
+            } else {
+                hms = "00:" //Constants.EMPTY_STRING
+            }
+            
+            // \(String(format: "%.3f",fraction)
+            // .trimmingCharacters(in: CharacterSet(charactersIn: "0."))
+            
+            hms = hms + "\(String(format: "%02d",mins)):\(String(format: "%02d",sec)).\(String(format: "%03d",Int(fraction * 1000)))"
+            
+            return hms
+        }
+    }
+
+    func highlighted(_ searchText:String?) -> NSAttributedString
+    {
+        guard let searchText = searchText else {
+            return NSAttributedString(string: self, attributes: Constants.Fonts.Attributes.headline)
+        }
+        
+        guard let range = self.lowercased().range(of: searchText.lowercased()) else {
+            return NSAttributedString(string: self, attributes: Constants.Fonts.Attributes.headline)
+        }
+        
+        let highlightedString = NSMutableAttributedString()
+        
+        let before = String(self[..<range.lowerBound])
+        let string = String(self[range])
+        let after = String(self[range.upperBound...])
+        
+        highlightedString.append(NSAttributedString(string: before,   attributes: Constants.Fonts.Attributes.headline))
+        highlightedString.append(NSAttributedString(string: string,   attributes: Constants.Fonts.Attributes.headlineHighlighted))
+        highlightedString.append(NSAttributedString(string: after,   attributes: Constants.Fonts.Attributes.headline))
+        
+        return highlightedString
+    }
 }
 
 fileprivate var queue = DispatchQueue(label: UUID().uuidString)

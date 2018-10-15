@@ -82,20 +82,20 @@ class PopoverTableViewController : UIViewController {
         let viewWidth = view.frame.width
         
         let heightSize: CGSize = CGSize(width: viewWidth - deducts, height: .greatestFiniteMagnitude)
-        let widthSize: CGSize = CGSize(width: .greatestFiniteMagnitude, height: Constants.Fonts.bold.lineHeight)
+        let widthSize: CGSize = CGSize(width: .greatestFiniteMagnitude, height: Constants.Fonts.headline.lineHeight)
         
         if let title = self.navigationItem.title {
             let string = title.replacingOccurrences(of: Constants.SINGLE_SPACE, with: Constants.UNBREAKABLE_SPACE)
             
-            width = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil).width
+            width = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.headline, context: nil).width
         }
         
         for string in strings {
             let string = string.replacingOccurrences(of: Constants.SINGLE_SPACE, with: Constants.UNBREAKABLE_SPACE)
             
-            let maxWidth = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil)
+            let maxWidth = string.boundingRect(with: widthSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.headline, context: nil)
             
-            let maxHeight = string.boundingRect(with: heightSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.bold, context: nil)
+            let maxHeight = string.boundingRect(with: heightSize, options: .usesLineFragmentOrigin, attributes: Constants.Fonts.Attributes.headline, context: nil)
             
             if maxWidth.width > width {
                 width = maxWidth.width
@@ -337,9 +337,9 @@ extension PopoverTableViewController : UITableViewDataSource
         switch purpose {
         case .selectingSorting:
             if (Globals.shared.sorting == Constants.Sorting.Options[index]) {
-                cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
+                cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.headlineGray)
             } else {
-                cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
+                cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.headline)
             }
             break
             
@@ -347,24 +347,24 @@ extension PopoverTableViewController : UITableViewDataSource
             switch Globals.shared.showing {
             case .all:
                 if string == Constants.All {
-                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.headlineGray)
                 } else {
-                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.headline)
                 }
                 break
                 
             case .filtered:
                 if string == Globals.shared.filter {
-                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.boldGrey)
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.headlineGray)
                 } else {
-                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
+                    cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.headline)
                 }
                 break
             }
             break
             
         default:
-            cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.bold)
+            cell.title.attributedText = NSAttributedString(string: string, attributes: Constants.Fonts.Attributes.headline)
             break
         }
 

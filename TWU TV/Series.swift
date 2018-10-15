@@ -277,7 +277,7 @@ class Series : Equatable, CustomStringConvertible
     var titleSort:String?
     {
         get {
-            return stringWithoutPrefixes(title)?.lowercased()
+            return title?.withoutPrefixes.lowercased()
         }
     }
 
