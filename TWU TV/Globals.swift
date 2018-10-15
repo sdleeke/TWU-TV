@@ -66,7 +66,8 @@ class Globals : NSObject
 
     let reachability = Reachability()!
 
-    var sorting:String? = Constants.Sorting.Newest_to_Oldest {
+    var sorting:String? = Constants.Sorting.Newest_to_Oldest
+    {
         willSet {
             
         }
@@ -106,7 +107,8 @@ class Globals : NSObject
         }
     }
     
-    var filter:String? {
+    var filter:String?
+    {
         willSet {
             
         }
@@ -150,7 +152,8 @@ class Globals : NSObject
     
     var searchButtonClicked = false
 
-    var searchActive:Bool = false {
+    var searchActive:Bool = false
+    {
         willSet {
             
         }
@@ -164,7 +167,8 @@ class Globals : NSObject
         }
     }
     
-    var searchValid:Bool {
+    var searchValid:Bool
+    {
         get {
             return searchActive && (searchText != nil) && (searchText != Constants.EMPTY_STRING)
         }
@@ -189,7 +193,9 @@ class Globals : NSObject
             
         }
     }
-    var seriesSelected:Series? {
+    
+    var seriesSelected:Series?
+    {
         get {
             var seriesSelected:Series?
             
@@ -233,7 +239,8 @@ class Globals : NSObject
         return (meta?["imageSuffix"] as? [String:String])?["16x9"]
     }
     
-    var series:[Series]? {
+    var series:[Series]?
+    {
         willSet {
             
         }
@@ -287,7 +294,8 @@ class Globals : NSObject
     
     var showing:Showing = .all
 
-    var seriesToSearch:[Series]? {
+    var seriesToSearch:[Series]?
+    {
         get {
             switch showing {
             case .all:
@@ -299,7 +307,8 @@ class Globals : NSObject
         }
     }
     
-    var activeSeries:[Series]? {
+    var activeSeries:[Series]?
+    {
         get {
             if searchActive {
                 return searchSeries

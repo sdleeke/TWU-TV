@@ -54,10 +54,11 @@ class MediaCollectionViewCell: UICollectionViewCell
         } else {
             DispatchQueue.global(qos: .userInteractive).async { () -> Void in
                 series.coverArt { (image:UIImage?) in
+                    Globals.shared.images[name] = image
+
                     Thread.onMainThread {
                         if let image = image {
                             if self.series == series {
-                                Globals.shared.images[name] = image
                                 self.seriesArt.image = image
                             }
                         } else {

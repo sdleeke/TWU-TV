@@ -10,7 +10,8 @@ import UIKit
 import AVFoundation
 import MediaPlayer
 
-class MediaViewController : UIViewController  {
+class MediaViewController : UIViewController
+{
     var views : (seriesArt: UIView?, seriesDescription: UIView?)
 
     var actionButton:UIBarButtonItem?

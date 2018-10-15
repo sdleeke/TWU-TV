@@ -29,44 +29,6 @@ func userAlert(title:String?,message:String?)
     }
 }
 
-func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-  switch (lhs, rhs) {
-  case let (l?, r?):
-    return l < r
-  case (nil, _?):
-    return true
-  default:
-    return false
-  }
-}
-
-func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-  switch (lhs, rhs) {
-  case let (l?, r?):
-    return l > r
-  default:
-    return rhs < lhs
-  }
-}
-
-func >= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-    switch (lhs, rhs) {
-    case let (l?, r?):
-        return l >= r
-    default:
-        return !(lhs < rhs)
-    }
-}
-
-func <= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-    switch (lhs, rhs) {
-    case let (l?, r?):
-        return l <= r
-    default:
-        return !(lhs > rhs)
-    }
-}
-
 func startAudio()
 {
     let audioSession: AVAudioSession  = AVAudioSession.sharedInstance()
@@ -216,7 +178,7 @@ var alert:UIAlertController!
 
 func networkUnavailable(_ message:String?)
 {
-    if (alert == nil) { // && (UIApplication.shared.applicationState == UIApplicationState.active)
+    if (alert == nil) {
         UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true, completion: nil)
         
         alert = UIAlertController(title:Constants.Network_Error,

@@ -516,7 +516,8 @@ class MediaCollectionViewController: UIViewController
     
     var selectingSeries = false
     
-    var seriesSelected:Series? {
+    var seriesSelected:Series?
+    {
         willSet {
             
         }
@@ -555,7 +556,8 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    var sermonSelected:Sermon? {
+    var sermonSelected:Sermon?
+    {
         willSet {
             
         }
@@ -826,7 +828,6 @@ class MediaCollectionViewController: UIViewController
         self.remaining.text = remaining
     }
     
-    
     fileprivate func setProgressAndTimesToAudio()
     {
         guard Thread.isMainThread else {
@@ -1081,7 +1082,8 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    fileprivate func reloadCurrentSermon(_ sermon:Sermon?) {
+    fileprivate func reloadCurrentSermon(_ sermon:Sermon?)
+    {
         //This guarantees a fresh start.
         Globals.shared.mediaPlayer.playOnLoad = true
         Globals.shared.mediaPlayer.reload(sermon)
@@ -1540,9 +1542,6 @@ class MediaCollectionViewController: UIViewController
         
         NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
-
-//        NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.WILL_ENTER_FORGROUND), object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(didBecomeActive), name: NSNotification.Name(rawValue: Constants.NOTIFICATION.DID_BECOME_ACTIVE), object: nil)
     }
     
     override func viewDidLoad()
@@ -1568,8 +1567,6 @@ class MediaCollectionViewController: UIViewController
         } else {
             // Fallback on earlier versions
         }
-        
-        // Globals.shared.series load happens in didBecomeActive
     }
     
     @objc func readyToPlay()

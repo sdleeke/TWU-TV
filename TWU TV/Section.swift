@@ -10,7 +10,8 @@ import Foundation
 
 class Section
 {
-    var strings:[String]? {
+    var strings:[String]?
+    {
         willSet {
             
         }

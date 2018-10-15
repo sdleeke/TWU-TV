@@ -154,6 +154,8 @@ class MediaPlayer : NSObject {
         // FIX
         //            sermonInfo[MPMediaItemPropertyTitle] = "\(title) (Part \(part))" as AnyObject
         
+        playing?.title
+        
 //        sermonInfo[MPMediaItemPropertyTitle] = "\(title) (Part \(index + 1))" as AnyObject
         
         sermonInfo[MPMediaItemPropertyArtist] = Constants.Tom_Pennington as AnyObject
@@ -174,12 +176,6 @@ class MediaPlayer : NSObject {
                 }
             }
         }
-        
-//        if let art = playing?.series?.loadArt() {
-//            sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: art.size, requestHandler: { (CGSize) -> UIImage in
-//                return art
-//            })
-//        }
         
         // FIX
 //        sermonInfo[MPMediaItemPropertyAlbumTrackNumber] = index + 1 as AnyObject

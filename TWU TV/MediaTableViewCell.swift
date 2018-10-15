@@ -10,7 +10,8 @@ import UIKit
 
 class MediaTableViewCell: UITableViewCell
 {
-    var sermon:Sermon? {
+    var sermon:Sermon?
+    {
         willSet {
             
         }

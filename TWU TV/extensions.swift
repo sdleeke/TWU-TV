@@ -55,7 +55,8 @@ extension Thread {
     }
 }
 
-extension String {
+extension String
+{
     var url : URL?
     {
         get {
@@ -64,36 +65,92 @@ extension String {
     }
 }
 
+fileprivate var queue = DispatchQueue(label: UUID().uuidString)
+
 extension URL
 {
-    func image(block:((UIImage)->()))
+    var fileSystemURL : URL?
     {
-        guard let imageURL = cachesURL()?.appendingPathComponent(self.lastPathComponent) else {
+        return cachesURL()?.appendingPathComponent(self.lastPathComponent)
+    }
+    
+    var downloaded : Bool
+    {
+        get {
+            if let fileSystemURL = fileSystemURL {
+                return FileManager.default.fileExists(atPath: fileSystemURL.path)
+            } else {
+                return false
+            }
+        }
+    }
+    
+    var data : Data?
+    {
+        get {
+            return try? Data(contentsOf: self)
+        }
+    }
+    
+    func delete()
+    {
+        guard let fileSystemURL = fileSystemURL else {
             return
         }
         
-        if let image = UIImage(contentsOfFile: imageURL.path) {
+        // Check if file exists and if so, delete it.
+        if (FileManager.default.fileExists(atPath: fileSystemURL.path)){
+            do {
+                try FileManager.default.removeItem(at: fileSystemURL)
+            } catch let error as NSError {
+                print("failed to delete download: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func image(block:((UIImage)->()))
+    {
+        if let image = image {
             block(image)
-        } else {
-            guard let data = try? Data(contentsOf: self) else {
-                return
+        }
+    }
+    
+    var image : UIImage?
+    {
+        get {
+            guard let imageURL = fileSystemURL else {
+                return nil
             }
             
-            guard let image = UIImage(data: data) else {
-                return
-            }
-            
-            DispatchQueue.global(qos: .background).async {
-                do {
-                    try UIImageJPEGRepresentation(image, 1.0)?.write(to: imageURL, options: [.atomic])
-                    print("Image \(self.lastPathComponent) saved to file system")
-                } catch let error as NSError {
-                    NSLog(error.localizedDescription)
-                    print("Image \(self.lastPathComponent) not saved to file system")
+            if imageURL.downloaded, let image = UIImage(contentsOfFile: imageURL.path) {
+                return image
+            } else {
+                guard let data = try? Data(contentsOf: self) else {
+                    return nil
                 }
+                
+                guard let image = UIImage(data: data) else {
+                    return nil
+                }
+                
+                DispatchQueue.global(qos: .background).async {
+                    queue.sync {
+                        guard !imageURL.downloaded else {
+                            return
+                        }
+                        
+                        do {
+                            try UIImageJPEGRepresentation(image, 1.0)?.write(to: imageURL, options: [.atomic])
+                            print("Image \(self.lastPathComponent) saved to file system")
+                        } catch let error as NSError {
+                            NSLog(error.localizedDescription)
+                            print("Image \(self.lastPathComponent) not saved to file system")
+                        }
+                    }
+                }
+
+                return image
             }
-            
-            block(image)
         }
     }
 }

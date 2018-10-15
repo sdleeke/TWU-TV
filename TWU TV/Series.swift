@@ -19,7 +19,8 @@ func != (lhs:Series,rhs:Series) -> Bool
     return (lhs.name != rhs.name) // || (lhs.id != rhs.id)
 }
 
-class Series : Equatable, CustomStringConvertible {
+class Series : Equatable, CustomStringConvertible
+{
     var dict:[String:Any]?
     
     init(seriesDict:[String:Any]?)
@@ -63,7 +64,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
     
-    var id:Int! {
+    var id:Int!
+    {
         get {
             guard Constants.JSON.URL == Constants.JSON.URLS.MEDIALIST_PHP else {
                 return nil
@@ -81,7 +83,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
 
-    var seriesID:String! {
+    var seriesID:String!
+    {
         get {
             switch Constants.JSON.URL {
             case Constants.JSON.URLS.MEDIALIST_PHP:
@@ -99,7 +102,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
     
-    var url:URL? {
+    var url:URL?
+    {
         get {
             switch Constants.JSON.URL {
             case Constants.JSON.URLS.MEDIALIST_PHP:
@@ -121,25 +125,29 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
     
-    var name:String! {
+    var name:String!
+    {
         get {
             return dict?[Constants.FIELDS.NAME] as? String
         }
     }
     
-    var title:String? {
+    var title:String?
+    {
         get {
             return dict?[Constants.FIELDS.TITLE] as? String
         }
     }
     
-    var scripture:String? {
+    var scripture:String?
+    {
         get {
             return dict?[Constants.FIELDS.SCRIPTURE] as? String
         }
     }
     
-    var text:String? {
+    var text:String?
+    {
         get {
             switch Constants.JSON.URL {
             case Constants.JSON.URLS.MEDIALIST_PHP:
@@ -157,7 +165,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
     
-    var startingIndex:Int {
+    var startingIndex:Int
+    {
         get {
             switch Constants.JSON.URL {
             case Constants.JSON.URLS.MEDIALIST_PHP:
@@ -211,7 +220,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
     
-    var show:Int {
+    var show:Int
+    {
         get {
             switch Constants.JSON.URL {
             case Constants.JSON.URLS.MEDIALIST_PHP:
@@ -237,7 +247,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
     
-    var numberOfSermons:Int {
+    var numberOfSermons:Int
+    {
         get {
             switch Constants.JSON.URL {
             case Constants.JSON.URLS.MEDIALIST_PHP:
@@ -263,7 +274,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
     
-    var titleSort:String? {
+    var titleSort:String?
+    {
         get {
             return stringWithoutPrefixes(title)?.lowercased()
         }
@@ -303,7 +315,8 @@ class Series : Equatable, CustomStringConvertible {
         coverArtURL?.image(block:block)
     }
     
-    var book:String? {
+    var book:String?
+    {
         get {
             guard let scripture = scripture else {
                 return nil
@@ -351,9 +364,11 @@ class Series : Equatable, CustomStringConvertible {
             }
         }
     }
+    
     var index:[String:Sermon]?
 
-    class Settings {
+    class Settings
+    {
         weak var series:Series?
         
         init(series:Series?) {
@@ -407,7 +422,8 @@ class Series : Equatable, CustomStringConvertible {
         return Settings(series:self)
     }()
 
-    var sermonSelected:Sermon? {
+    var sermonSelected:Sermon?
+    {
         get {
             if let sermonID = settings?[Constants.SETTINGS.SELECTED.SERMON] {
                 return sermons?.filter({ (sermon) -> Bool in
@@ -433,7 +449,8 @@ class Series : Equatable, CustomStringConvertible {
         }
     }
 
-    var description : String {
+    var description : String
+    {
         //This requires that date, service, title, and speaker fields all be non-nil
         
         var seriesString = "Series: "
