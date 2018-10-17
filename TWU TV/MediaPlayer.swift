@@ -725,7 +725,7 @@ class MediaPlayer : NSObject {
         
         unobserve()
         
-        stateTime = PlayerStateTime(sermon: playing,state:.stopped)
+        stateTime = nil // PlayerStateTime(sermon: playing,state:.stopped)
         
         playing = nil
         player = nil

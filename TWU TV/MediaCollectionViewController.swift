@@ -64,9 +64,8 @@ extension MediaCollectionViewController : UICollectionViewDelegate
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath)
     {
-        //        print("didSelect")
-        
         if let cell: MediaCollectionViewCell = collectionView.cellForItem(at: indexPath) as? MediaCollectionViewCell {
+            didSelectSeries = true
             seriesSelected = cell.series
         } else {
             
@@ -241,12 +240,19 @@ extension MediaCollectionViewController : UITableViewDelegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
         sermonSelected = seriesSelected?.sermons?[(indexPath as NSIndexPath).row]
-
+        
         if (sermonSelected?.series == seriesSelected) && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
             addProgressObserver()
         }
         
-        updateUI()
+        setupPlayPauseButton()
+        setupSpinner()
+        setupProgressView()
+
+        if sermonSelected != nil {
+            playPauseButton.isEnabled = true
+            preferredFocusView = playPauseButton
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
@@ -273,6 +279,7 @@ class MediaCollectionViewController: UIViewController
             
             Thread.onMainThread {
                 self.setNeedsFocusUpdate()
+                self.updateFocusIfNeeded()
             }
         }
     }
@@ -342,6 +349,12 @@ class MediaCollectionViewController: UIViewController
     }
     
     @IBOutlet weak var playPauseButton: UIButton!
+    {
+        didSet {
+            
+        }
+    }
+    
     @IBAction func playPause(_ sender: UIButton)
     {
         guard let state = Globals.shared.mediaPlayer.state, Globals.shared.mediaPlayer.playing == sermonSelected, Globals.shared.mediaPlayer.player != nil else {
@@ -461,8 +474,10 @@ class MediaCollectionViewController: UIViewController
                     remaining.isHidden = false
                     progressView.isHidden = false
                 }
-                
-                preferredFocusView = playPauseButton
+
+//                if preferredFocusView == tableView {
+//                    preferredFocusView = playPauseButton
+//                }
                 break
                 
             case .failed:
@@ -514,7 +529,7 @@ class MediaCollectionViewController: UIViewController
     
     var progressObserver: Timer?
     
-    var selectingSeries = false
+    var didSelectSeries = false
     
     var seriesSelected:Series?
     {
@@ -523,8 +538,8 @@ class MediaCollectionViewController: UIViewController
         }
         didSet {
             guard let seriesSelected = seriesSelected else {
-                print("MediaCollectionViewController:seriesSelected nil")
                 sermonSelected = nil
+                didSelectSeries = false
                 return
             }
             
@@ -532,11 +547,7 @@ class MediaCollectionViewController: UIViewController
             
             avPlayerSpinner.stopAnimating()
             
-            selectingSeries = true
             sermonSelected = seriesSelected.sermonSelected
-            selectingSeries = false
-            
-            selectSermon(sermonSelected)
 
             if (sermonSelected?.series == seriesSelected) && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
                 addProgressObserver()
@@ -550,9 +561,15 @@ class MediaCollectionViewController: UIViewController
 
             tableView.reloadData()
 
-            preferredFocusView = tableView
+            if sermonSelected != nil {
+                selectSermon(sermonSelected)
+            } else {
+                preferredFocusView = tableView
+            }
 
             updateUI()
+            
+            didSelectSeries = false
         }
     }
     
@@ -579,12 +596,15 @@ class MediaCollectionViewController: UIViewController
                     removeProgressObserver()
                     playerURL(url: playingURL)
                 } else {
-                    preferredFocusView = playPauseButton
+                    if !didSelectSeries {
+                        preferredFocusView = playPauseButton
+                    }
+
                     removePlayerObserver()
                     addProgressObserver()
                 }
             } else {
-                if !selectingSeries {
+                if !didSelectSeries {
                     preferredFocusView = playPauseButton
                 }
             }
@@ -636,7 +656,7 @@ class MediaCollectionViewController: UIViewController
             skipBackwardsButton.isHidden = false
             skipForwardsButton.isHidden = false
         } else {
-            playPauseButton.isEnabled = true
+            playPauseButton.isEnabled = false
             playPauseButton.setTitle(Constants.FA.PLAY)
             
             restartButton.isEnabled = false
@@ -763,7 +783,7 @@ class MediaCollectionViewController: UIViewController
         setupSpinner()
         setupProgressView()
         
-        collectionView.reloadData()
+//        collectionView.reloadData()
     }
     
     func scrollToSermon(_ sermon:Sermon?,select:Bool,position:UITableViewScrollPosition)
@@ -790,6 +810,8 @@ class MediaCollectionViewController: UIViewController
         }
         
         tableView.scrollToRow(at: indexPath, at: position, animated: false)
+        
+        preferredFocusView = tableView.cellForRow(at: indexPath)
     }
 
     fileprivate func setTimes(timeNow:Double, length:Double)
@@ -1225,7 +1247,7 @@ class MediaCollectionViewController: UIViewController
         }
         
         guard let index = Globals.shared.activeSeries?.index(of: series) else {
-            preferredFocusView = playPauseButton
+//            preferredFocusView = playPauseButton
             return
         }
         
@@ -1298,7 +1320,7 @@ class MediaCollectionViewController: UIViewController
     
     lazy var operationQueue:OperationQueue! = {
         let operationQueue = OperationQueue()
-        operationQueue.underlyingQueue = DispatchQueue(label: "JSON")
+        operationQueue.name = "JSON"
         operationQueue.qualityOfService = .background
         operationQueue.maxConcurrentOperationCount = 1
         return operationQueue
@@ -1573,7 +1595,7 @@ class MediaCollectionViewController: UIViewController
     {
         updateUI()
 
-        preferredFocusView = playPauseButton
+//        preferredFocusView = playPauseButton
     }
     
     @objc func showPlaying()
