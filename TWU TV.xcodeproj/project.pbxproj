@@ -19,6 +19,7 @@
 		171250831EEF1582005288E3 /* MediaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171250801EEF1582005288E3 /* MediaViewController.swift */; };
 		1731F62021720B1D00609DE6 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1731F61F21720B1D00609DE6 /* extensions.swift */; };
 		1731F62221720DCB00609DE6 /* Section.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1731F62121720DCB00609DE6 /* Section.swift */; };
+		17324D2A2188C1F200F36F6F /* FetchImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17324D292188C1F200F36F6F /* FetchImage.swift */; };
 		1736F2DA2174C2FF00F2D8EC /* generics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1736F2D92174C2FF00F2D8EC /* generics.swift */; };
 		174021701EF2A4AE001967C1 /* PopoverTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1740216E1EF2A4AE001967C1 /* PopoverTableViewController.swift */; };
 		174021711EF2A4AE001967C1 /* PopoverTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1740216F1EF2A4AE001967C1 /* PopoverTableViewCell.swift */; };
@@ -62,6 +63,7 @@
 		171250801EEF1582005288E3 /* MediaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaViewController.swift; sourceTree = "<group>"; };
 		1731F61F21720B1D00609DE6 /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		1731F62121720DCB00609DE6 /* Section.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Section.swift; sourceTree = "<group>"; };
+		17324D292188C1F200F36F6F /* FetchImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FetchImage.swift; sourceTree = "<group>"; };
 		1736F2D92174C2FF00F2D8EC /* generics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = generics.swift; sourceTree = "<group>"; };
 		1740216E1EF2A4AE001967C1 /* PopoverTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverTableViewController.swift; sourceTree = "<group>"; };
 		1740216F1EF2A4AE001967C1 /* PopoverTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverTableViewCell.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				1712506F1EEF154D005288E3 /* Sermon.swift */,
 				1731F61F21720B1D00609DE6 /* extensions.swift */,
 				171250771EEF1569005288E3 /* functions.swift */,
+				17324D292188C1F200F36F6F /* FetchImage.swift */,
 				1736F2D92174C2FF00F2D8EC /* generics.swift */,
 				171250781EEF1569005288E3 /* MediaCollectionViewCell.swift */,
 				171250791EEF1569005288E3 /* MediaCollectionViewController.swift */,
@@ -327,6 +330,7 @@
 				1731F62021720B1D00609DE6 /* extensions.swift in Sources */,
 				1712507B1EEF1569005288E3 /* functions.swift in Sources */,
 				171250831EEF1582005288E3 /* MediaViewController.swift in Sources */,
+				17324D2A2188C1F200F36F6F /* FetchImage.swift in Sources */,
 				171250741EEF154D005288E3 /* Sermon.swift in Sources */,
 				174021711EF2A4AE001967C1 /* PopoverTableViewCell.swift in Sources */,
 				171250731EEF154D005288E3 /* Series.swift in Sources */,

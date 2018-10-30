@@ -12,12 +12,14 @@ class MediaCollectionViewCell: UICollectionViewCell
 {
     @IBOutlet weak var seriesArt: UIImageView!
 
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
     var series:Series? {
         willSet {
             
         }
         didSet {
-            if series != oldValue {
+            if (series != oldValue) || (seriesArt.image == nil) {
                 seriesArt.image = nil
                 updateUI()
             }
@@ -49,20 +51,30 @@ class MediaCollectionViewCell: UICollectionViewCell
             return
         }
         
-        if let image = Globals.shared.images[name] {
+        if let image = series.coverArt.fetch?.cache {
+//        if let image = Globals.shared.images[name] {
             self.seriesArt.image = image
         } else {
+            Thread.onMainThread {
+                self.activityIndicator.isHidden = false
+                self.activityIndicator.startAnimating()
+            }
+            
             DispatchQueue.global(qos: .userInteractive).async { () -> Void in
-                series.coverArt { (image:UIImage?) in
-                    Globals.shared.images[name] = image
-
+                series.coverArt.block { (image:UIImage?) in
                     Thread.onMainThread {
                         if let image = image {
+//                            Globals.shared.images[name] = image
+                            
                             if self.series == series {
                                 self.seriesArt.image = image
+                                self.activityIndicator.stopAnimating()
+                                self.activityIndicator.isHidden = true
                             }
                         } else {
                             self.seriesArt.image = UIImage(named: "twu_logo_circle_r")
+                            self.activityIndicator.stopAnimating()
+                            self.activityIndicator.isHidden = true
                         }
                     }
                 }

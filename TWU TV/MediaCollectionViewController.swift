@@ -213,11 +213,7 @@ extension MediaCollectionViewController : UITableViewDataSource
     {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
-        if let show = seriesSelected?.show {
-            return show
-        } else {
-            return 0
-        }
+        return seriesSelected?.sermons?.count ?? 0
     }
 }
 
@@ -703,7 +699,7 @@ class MediaCollectionViewController: UIViewController
         seriesLabel.text = seriesSelected.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "&ndash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
         
         DispatchQueue.global(qos: .background).async { () -> Void in
-            seriesSelected.coverArt { (image:UIImage?) in
+            seriesSelected.coverArt.block { (image:UIImage?) in
                 Thread.onMainThread {
                     if self.seriesSelected == seriesSelected {
                         self.seriesArt.image = image
@@ -798,7 +794,7 @@ class MediaCollectionViewController: UIViewController
         
         var indexPath = IndexPath(row: 0, section: 0)
         
-        if (seriesSelected?.show > 1) {
+        if (seriesSelected?.sermons?.count > 1) {
             if let sermon = sermon, let sermonIndex = seriesSelected?.sermons?.index(of: sermon) {
                 //                    print("\(sermonIndex)")
                 indexPath = IndexPath(row: sermonIndex, section: 0)
@@ -1276,15 +1272,24 @@ class MediaCollectionViewController: UIViewController
         }).map({ (seriesDict:[String:Any]) -> Series in
             let series = Series(seriesDict: seriesDict)
        
-            DispatchQueue.global(qos: .background).async { () -> Void in
-                series.coverArt { (image:UIImage?) in
-                    guard let name = series.coverArtURL?.lastPathComponent else {
-                        return
-                    }
-                    
-                    Globals.shared.images[name] = image
+            // Allows the visible cells to load first/faster, I think because tvOS isn't as well-threaded as iOS.
+            if series.coverArtURL?.downloaded == true {
+                DispatchQueue.global(qos: .background).async { () -> Void in
+                    // This blocks.
+                    series.coverArt.load()
                 }
             }
+
+            // Too slow, loads everything, and because it isn't sync'd through a Fetch may not speed anything up.
+//            DispatchQueue.global(qos: .background).async { () -> Void in
+//                series.coverArt { (image:UIImage?) in
+//                    guard let name = series.coverArtURL?.lastPathComponent else {
+//                        return
+//                    }
+//                    
+//                    Globals.shared.images[name] = image
+//                }
+//            }
             
             return series
         })
@@ -1326,33 +1331,35 @@ class MediaCollectionViewController: UIViewController
         return operationQueue
     }()
     
-    func jsonFromURL(urlString:String,filename:String) -> Any?
+    func jsonFromURL(urlString:String,filename:String?) -> Any?
     {
         guard Globals.shared.reachability.isReachable, let url = URL(string: urlString) else {
             return jsonFromFileSystem(filename: filename)
         }
         
-        if Globals.shared.format == Constants.JSON.URL, let json = jsonFromFileSystem(filename: filename) {
+        if Globals.shared.format == Constants.JSON.SERIES_JSON, let json = jsonFromFileSystem(filename: filename) {
             operationQueue.addOperation {
                 do {
                     let data = try Data(contentsOf: url)
                     print("able to read json from the URL.")
                     
-                    do {
-                        if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
-                            try data.write(to: jsonFileSystemURL)
+                    if let filename = filename {
+                        do {
+                            if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
+                                try data.write(to: jsonFileSystemURL)
+                            }
+                            print("able to write json to the file system")
+                        } catch let error as NSError {
+                            print("unable to write json to the file system.")
+                            NSLog(error.localizedDescription)
                         }
-                        Globals.shared.format = Constants.JSON.URL
-                        print("able to write json to the file system")
-                    } catch let error as NSError {
-                        print("unable to write json to the file system.")
-                        NSLog(error.localizedDescription)
                     }
                 } catch let error {
                     NSLog(error.localizedDescription)
                 }
             }
             
+            Globals.shared.format = Constants.JSON.SERIES_JSON
             return json
         } else {
             do {
@@ -1361,19 +1368,21 @@ class MediaCollectionViewController: UIViewController
                 
                 do {
                     let json = try JSONSerialization.jsonObject(with: data, options: [])
-                    
-                    do {
-                        if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
-                            try data.write(to: jsonFileSystemURL)
+
+                    if let filename = filename {
+                        do {
+                            if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
+                                try data.write(to: jsonFileSystemURL)
+                            }
+                            print("able to write json to the file system")
+                        } catch let error as NSError {
+                            print("unable to write json to the file system.")
+                            
+                            NSLog(error.localizedDescription)
                         }
-                        Globals.shared.format = Constants.JSON.URL
-                        print("able to write json to the file system")
-                    } catch let error as NSError {
-                        print("unable to write json to the file system.")
-                        
-                        NSLog(error.localizedDescription)
                     }
                     
+                    Globals.shared.format = Constants.JSON.SERIES_JSON
                     return json
                 } catch let error as NSError {
                     NSLog(error.localizedDescription)
@@ -1388,7 +1397,7 @@ class MediaCollectionViewController: UIViewController
     
     func loadSeriesDicts() -> [[String:Any]]?
     {
-        guard let json = jsonFromURL(urlString: Constants.JSON.URL,filename: Constants.JSON.SERIES) as? [String:Any] else {
+        guard let json = jsonFromURL(urlString: Constants.JSON.SERIES_JSON,filename: Constants.JSON.SERIES_JSON.url?.lastPathComponent) as? [String:Any] else {
             print("could not get json from file, make sure that file contains valid json.")
             return nil
         }
@@ -1399,17 +1408,17 @@ class MediaCollectionViewController: UIViewController
         
         var seriesDicts = [[String:Any]]()
         
-        var key : String
-        
-        switch Constants.JSON.URL {
-        case Constants.JSON.URLS.MEDIALIST_PHP:
-            key = Constants.JSON.KEYS.SERIES
-            break
-            
-        default:
-            key = Constants.JSON.KEYS.DATA
-            break
-        }
+        let key = Constants.JSON.KEYS.DATA
+
+//        switch Constants.JSON.URL {
+//        case Constants.JSON.URLS.MEDIALIST_PHP:
+//            key = Constants.JSON.KEYS.SERIES
+//            break
+//
+//        default:
+//            key = Constants.JSON.KEYS.DATA
+//            break
+//        }
         
         if let series = json[key] as? [[String:Any]] {
             for i in 0..<series.count {

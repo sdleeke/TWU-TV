@@ -14,43 +14,43 @@ enum Showing {
     case filtered
 }
 
-struct CoverArt
-{
-    var storage : [String:UIImage]?
-    
-    // Make it threadsafe
-    let queue = DispatchQueue(label: "CoverArt")
-    
-    subscript(key:String?) -> UIImage? {
-        get {
-            return queue.sync {
-                guard let key = key else {
-                    return nil
-                }
-                
-                return storage?[key]
-            }
-        }
-        set {
-            queue.sync {
-                guard let key = key else {
-                    return
-                }
-                
-                if storage == nil {
-                    storage = [String:UIImage]()
-                }
-                storage?[key] = newValue
-            }
-        }
-    }
-}
+//struct CoverArt
+//{
+//    var storage : [String:UIImage]?
+//    
+//    // Make it threadsafe
+//    let queue = DispatchQueue(label: "CoverArt")
+//    
+//    subscript(key:String?) -> UIImage? {
+//        get {
+//            return queue.sync {
+//                guard let key = key else {
+//                    return nil
+//                }
+//                
+//                return storage?[key]
+//            }
+//        }
+//        set {
+//            queue.sync {
+//                guard let key = key else {
+//                    return
+//                }
+//                
+//                if storage == nil {
+//                    storage = [String:UIImage]()
+//                }
+//                storage?[key] = newValue
+//            }
+//        }
+//    }
+//}
 
 class Globals : NSObject
 {
     static var shared = Globals()
     
-    var images = CoverArt()
+//    var images = CoverArt()
     
     func freeMemory()
     {
@@ -215,13 +215,14 @@ class Globals : NSObject
 
     var audioURL : String?
     {
-        switch Constants.JSON.URL {
-        case Constants.JSON.URLS.MEDIALIST_PHP:
-            return Constants.URL.BASE.PHP_AUDIO
-            
-        default:
-            return meta?["audio"] as? String
-        }
+        return meta?["audio"] as? String
+//        switch Constants.JSON.URL {
+//        case Constants.JSON.URLS.MEDIALIST_PHP:
+//            return Constants.URL.BASE.PHP_AUDIO
+//            
+//        default:
+//            return meta?["audio"] as? String
+//        }
     }
 
     var imageURL : String?

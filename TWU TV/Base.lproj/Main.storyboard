@@ -218,13 +218,19 @@
                                                         <constraint firstAttribute="width" secondItem="wna-wx-eNM" secondAttribute="height" multiplier="1:1" id="4wb-Gj-pNk"/>
                                                     </constraints>
                                                 </imageView>
+                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="VO9-Av-j9Z">
+                                                    <rect key="frame" x="105" y="105" width="64" height="64"/>
+                                                    <color key="color" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                         </view>
                                         <constraints>
                                             <constraint firstItem="wna-wx-eNM" firstAttribute="centerY" secondItem="c4P-db-XfR" secondAttribute="centerY" id="1OS-Ti-fbc"/>
                                             <constraint firstAttribute="trailing" secondItem="wna-wx-eNM" secondAttribute="trailing" id="26x-HA-jDe"/>
                                             <constraint firstItem="wna-wx-eNM" firstAttribute="centerX" secondItem="c4P-db-XfR" secondAttribute="centerX" id="7HQ-Zj-Rqr"/>
+                                            <constraint firstItem="VO9-Av-j9Z" firstAttribute="centerX" secondItem="wna-wx-eNM" secondAttribute="centerX" id="U95-Zk-FO9"/>
                                             <constraint firstItem="wna-wx-eNM" firstAttribute="leading" secondItem="c4P-db-XfR" secondAttribute="leading" id="Vwm-o1-Bce"/>
+                                            <constraint firstItem="VO9-Av-j9Z" firstAttribute="centerY" secondItem="wna-wx-eNM" secondAttribute="centerY" id="fZc-6t-8CG"/>
                                             <constraint firstItem="wna-wx-eNM" firstAttribute="top" secondItem="c4P-db-XfR" secondAttribute="top" id="mzh-zB-NGO"/>
                                             <constraint firstItem="wna-wx-eNM" firstAttribute="centerX" secondItem="c4P-db-XfR" secondAttribute="centerX" constant="12.5" id="vS7-Sg-O5P"/>
                                             <constraint firstAttribute="bottom" secondItem="wna-wx-eNM" secondAttribute="bottom" id="wyQ-gw-dkK"/>
@@ -235,6 +241,7 @@
                                             </mask>
                                         </variation>
                                         <connections>
+                                            <outlet property="activityIndicator" destination="VO9-Av-j9Z" id="XmW-Rk-Ds9"/>
                                             <outlet property="seriesArt" destination="wna-wx-eNM" id="Im9-0G-X9g"/>
                                         </connections>
                                     </collectionViewCell>
@@ -455,7 +462,7 @@
     </scenes>
     <resources>
         <image name="bg" width="1920" height="1080"/>
-        <image name="tom_pennington" width="800" height="800"/>
+        <image name="tom_pennington" width="576" height="576"/>
         <image name="twu_logo_circle_r" width="1000" height="1000"/>
     </resources>
 </document>

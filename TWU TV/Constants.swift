@@ -88,15 +88,17 @@ enum Constants {
             static let META = "meta"
         }
         
-        enum URLS {
-            static let MEDIALIST_PHP = "https://www.thewordunleashed.org/medialist.php"
-            static let MEDIALIST_JSON = "https://craft.thewordunleashed.org/medialist.json"
-            static let SERIES_JSON = "https://craft.thewordunleashed.org/series.json"
-        }
+//        enum URLS {
+//            static let MEDIALIST_PHP = "https://www.thewordunleashed.org/medialist.php"
+//            static let MEDIALIST_JSON = "https://www.thewordunleashed.org/medialist.json" // craft
+//            static let SERIES_JSON = "https://www.thewordunleashed.org/series.json" // craft
+//        }
+
+        static let SERIES_JSON = "https://www.thewordunleashed.org/series.json" // craft
+
+//        static let URL = URLS.MEDIALIST_PHP
         
-        static let URL = URLS.MEDIALIST_PHP
-        
-        static let SERIES = "series.json"
+//        static let SERIES = "series.json"
     }
     
     enum TWU {

@@ -34,7 +34,7 @@ class Sermon : NSObject {
     var partString:String?
     {
         get {
-            if let numberOfSermons = series?.numberOfSermons { // , let index = series?.sermons?.index(of: self)
+            if let numberOfSermons = series?.sermons?.count { // , let index = series?.sermons?.index(of: self)
                 return "Part\u{00a0}\(partNumber!)\u{00a0}of\u{00a0}\(numberOfSermons)"
             }
             
@@ -130,16 +130,18 @@ class Sermon : NSObject {
     
     init(series:Series,dict:[String:Any]?) { // id:Int
         self.series = series
-        
-        switch Constants.JSON.URL {
-        case Constants.JSON.URLS.SERIES_JSON:
-            self.dict = dict?["program"] as? [String:Any]
-            break
-            
-        default:
-            self.dict = dict
-            break
-        }
+
+        self.dict = dict?["program"] as? [String:Any]
+
+//        switch Constants.JSON.URL {
+//        case Constants.JSON.URLS.SERIES_JSON:
+//            self.dict = dict?["program"] as? [String:Any]
+//            break
+//            
+//        default:
+//            self.dict = dict
+//            break
+//        }
     }
     
     override var description : String
