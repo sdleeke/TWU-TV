@@ -47,9 +47,9 @@ class MediaCollectionViewCell: UICollectionViewCell
             return
         }
         
-        guard let name = series.coverArtURL?.lastPathComponent else {
-            return
-        }
+//        guard let name = series.coverArtURL?.lastPathComponent else {
+//            return
+//        }
         
         if let image = series.coverArt.fetch?.cache {
 //        if let image = Globals.shared.images[name] {
