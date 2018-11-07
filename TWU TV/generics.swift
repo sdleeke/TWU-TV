@@ -462,13 +462,16 @@ class ThreadSafeDictionaryOfDictionaries<T>
 
 class Fetch<T>
 {
-    init(name:String,fetch:(()->(T?))? = nil)
+    init(name:String?,fetch:(()->(T?))? = nil)
     {
         self.name = name
         self.fetch = fetch
     }
     
     var fetch : (()->(T?))?
+    
+    var store : ((T?)->())?
+    var retrieve : (()->(T?))?
     
     var name : String?
     
@@ -489,7 +492,16 @@ class Fetch<T>
             guard cache == nil else {
                 return
             }
+
+            cache = retrieve?()
+            
+            guard cache == nil else {
+                return
+            }
+            
             self.cache = self.fetch?()
+            
+            store?(self.cache)
         }
     }
     
