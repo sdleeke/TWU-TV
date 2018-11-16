@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="14313.18" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="JX0-jU-xHg">
+<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="JX0-jU-xHg">
     <device id="appleTV" orientation="landscape">
         <adaptation id="light"/>
     </device>
     <dependencies>
         <deployment identifier="tvOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
@@ -319,6 +320,7 @@
                             <constraint firstItem="yAL-Yv-ZQQ" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" id="wx9-Qf-yZb"/>
                             <constraint firstItem="XTS-8z-3GM" firstAttribute="leading" secondItem="FcM-Py-mbJ" secondAttribute="leading" id="yJt-Ol-3Gi"/>
                         </constraints>
+                        <viewLayoutGuide key="safeArea" id="gfs-Ba-oyW"/>
                         <variation key="default">
                             <mask key="constraints">
                                 <exclude reference="Hus-ND-5IX"/>
@@ -421,6 +423,7 @@
                             <constraint firstItem="g6s-nZ-Q2S" firstAttribute="centerY" secondItem="70h-c5-Qjc" secondAttribute="centerY" id="X0c-Mv-ozh"/>
                             <constraint firstItem="g6s-nZ-Q2S" firstAttribute="centerX" secondItem="70h-c5-Qjc" secondAttribute="centerX" id="rnM-lD-9hM"/>
                         </constraints>
+                        <viewLayoutGuide key="safeArea" id="ktb-Sl-vqh"/>
                         <variation key="default">
                             <mask key="constraints">
                                 <exclude reference="KAr-bg-Fes"/>

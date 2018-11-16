@@ -81,11 +81,7 @@ class Sermon : NSObject {
     
     var audioFileSystemURL:URL? {
         get {
-            guard let audio = audio else {
-                return nil
-            }
-            
-            return cachesURL()?.appendingPathComponent(audio)
+            return audio?.fileSystemURL
         }
     }
     

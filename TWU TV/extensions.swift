@@ -67,9 +67,20 @@ extension String
     var fileSystemURL : URL?
     {
         get {
+            guard self != url?.lastPathComponent else {
+                return cachesURL?.appendingPathComponent(self.replacingOccurrences(of: " ", with: ""))
+            }
+            
             return url?.fileSystemURL
         }
     }
+    
+//    var fileSystemURL : URL?
+//    {
+//        get {
+//            return url?.fileSystemURL
+//        }
+//    }
 }
 
 extension Double {
@@ -220,10 +231,10 @@ extension URL
 {
     var fileSystemURL : URL?
     {
-        return cachesURL()?.appendingPathComponent(self.lastPathComponent)
+        return self.lastPathComponent.fileSystemURL
     }
     
-    var downloaded : Bool
+    var exists : Bool
     {
         get {
             if let fileSystemURL = fileSystemURL {
@@ -237,7 +248,12 @@ extension URL
     var data : Data?
     {
         get {
-            return try? Data(contentsOf: self)
+            do {
+                return try Data(contentsOf: self)
+            } catch let error {
+                print("failed to delete download: \(error.localizedDescription)")
+                return nil
+            }
         }
     }
     
@@ -246,14 +262,17 @@ extension URL
         guard let fileSystemURL = fileSystemURL else {
             return
         }
-        
+
         // Check if file exists and if so, delete it.
-        if (FileManager.default.fileExists(atPath: fileSystemURL.path)){
-            do {
-                try FileManager.default.removeItem(at: fileSystemURL)
-            } catch let error as NSError {
-                print("failed to delete download: \(error.localizedDescription)")
-            }
+
+        guard FileManager.default.fileExists(atPath: fileSystemURL.path) else {
+            return
+        }
+        
+        do {
+            try FileManager.default.removeItem(at: fileSystemURL)
+        } catch let error {
+            print("failed to delete download: \(error.localizedDescription)")
         }
     }
     
@@ -271,7 +290,7 @@ extension URL
                 return nil
             }
             
-            if imageURL.downloaded, let image = UIImage(contentsOfFile: imageURL.path) {
+            if imageURL.exists, let image = UIImage(contentsOfFile: imageURL.path) {
                 return image
             } else {
                 guard let data = try? Data(contentsOf: self) else {
@@ -284,14 +303,14 @@ extension URL
                 
                 DispatchQueue.global(qos: .background).async {
                     queue.sync {
-                        guard !imageURL.downloaded else {
+                        guard !imageURL.exists else {
                             return
                         }
                         
                         do {
                             try UIImageJPEGRepresentation(image, 1.0)?.write(to: imageURL, options: [.atomic])
                             print("Image \(self.lastPathComponent) saved to file system")
-                        } catch let error as NSError {
+                        } catch let error {
                             NSLog(error.localizedDescription)
                             print("Image \(self.lastPathComponent) not saved to file system")
                         }
@@ -304,9 +323,63 @@ extension URL
     }
 }
 
+extension Data
+{
+    func save(to url: URL?)
+    {
+        guard let url = url else {
+            return
+        }
+        
+        do {
+            try self.write(to: url)
+        } catch let error {
+            NSLog("Data write error: \(url.absoluteString)",error.localizedDescription)
+        }
+    }
+    
+    var json : Any?
+    {
+        get {
+            do {
+                let json = try JSONSerialization.jsonObject(with: self, options: [])
+                return json
+            } catch let error {
+                NSLog("JSONSerialization error", error.localizedDescription)
+                return nil
+            }
+        }
+    }
+    
+    var html2AttributedString: NSAttributedString?
+    {
+        get {
+            do {
+                return try NSAttributedString(data: self, options: [NSAttributedString.DocumentReadingOptionKey.documentType:NSAttributedString.DocumentType.html, NSAttributedString.DocumentReadingOptionKey.characterEncoding: String.Encoding.utf16.rawValue], documentAttributes: nil)
+            } catch {
+                print("error:", error)
+                return  nil
+            }
+        }
+    }
+    
+    var html2String: String?
+    {
+        get {
+            return html2AttributedString?.string
+        }
+    }
+    
+    var image : UIImage?
+    {
+        get {
+            return UIImage(data: self)
+        }
+    }
+}
+
 extension Date
 {
-    
     init(dateString:String) {
         let dateStringFormatter = DateFormatter()
         dateStringFormatter.dateFormat = "MM/dd/yyyy"

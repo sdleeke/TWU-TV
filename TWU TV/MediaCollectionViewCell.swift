@@ -51,7 +51,7 @@ class MediaCollectionViewCell: UICollectionViewCell
 //            return
 //        }
         
-        if let image = series.coverArt.fetch?.cache {
+        if let image = series.coverArt.fetch.cache {
 //        if let image = Globals.shared.images[name] {
             self.seriesArt.image = image
         } else {

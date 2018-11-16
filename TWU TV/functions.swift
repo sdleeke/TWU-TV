@@ -35,21 +35,23 @@ func startAudio()
     
     do {
         try audioSession.setCategory(AVAudioSessionCategoryPlayback)
-    } catch let error as NSError {
+    } catch let error {
         NSLog(error.localizedDescription)
     }
 }
 
-func documentsURL() -> URL?
+var documentsURL:URL?
 {
-    let fileManager = FileManager.default
-    return fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+    get {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+    }
 }
 
-func cachesURL() -> URL?
+var cachesURL:URL?
 {
-    let fileManager = FileManager.default
-    return fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first
+    get {
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+    }
 }
 
 func sortSeries(_ series:[Series]?,sorting:String?) -> [Series]?
@@ -200,7 +202,7 @@ func networkUnavailable(_ message:String?)
 
 func filesOfTypeInCache(_ fileType:String) -> [String]?
 {
-    guard let path = cachesURL()?.path else {
+    guard let path = cachesURL?.path else {
         return nil
     }
 
@@ -218,7 +220,7 @@ func filesOfTypeInCache(_ fileType:String) -> [String]?
                 }
             }
         }
-    } catch let error as NSError {
+    } catch let error {
         NSLog(error.localizedDescription)
         print("failed to get files in caches directory")
     }

@@ -1273,7 +1273,7 @@ class MediaCollectionViewController: UIViewController
             let series = Series(seriesDict: seriesDict)
        
             // Allows the visible cells to load first/faster, I think because tvOS isn't as well-threaded as iOS.
-            if series.coverArtURL?.downloaded == true {
+            if series.coverArtURL?.exists == true {
                 DispatchQueue.global(qos: .background).async { () -> Void in
                     // This blocks.
                     series.coverArt.load()
@@ -1295,33 +1295,30 @@ class MediaCollectionViewController: UIViewController
         })
     }
     
-    func jsonFromFileSystem(filename:String?) -> Any?
-    {
-        guard let filename = filename else {
-            return nil
-        }
-        
-        guard let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) else {
-            return nil
-        }
-        
-        do {
-            let data = try Data(contentsOf: jsonFileSystemURL) // , options: NSData.ReadingOptions.mappedIfSafe
-            print("able to read json from the URL.")
-            
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: [])
-                return json
-            } catch let error as NSError {
-                NSLog(error.localizedDescription)
-                return nil
-            }
-        } catch let error as NSError {
-            print("Network unavailable: json could not be read from the file system.")
-            NSLog(error.localizedDescription)
-            return nil
-        }
-    }
+//    func jsonFromFileSystem(filename:String?) -> Any?
+//    {
+//        guard let filename = filename else {
+//            return nil
+//        }
+//
+//        guard let jsonFileSystemURL = filename.fileSystemURL else {
+//            return nil
+//        }
+//
+//        guard let data = jsonFileSystemURL.data else {
+//            return nil
+//        }
+//
+//        return data.json
+//
+////        do {
+////            let json = try JSONSerialization.jsonObject(with: data, options: [])
+////            return json
+////        } catch let error {
+////            NSLog(error.localizedDescription)
+////            return nil
+////        }
+//    }
     
     lazy var operationQueue:OperationQueue! = {
         let operationQueue = OperationQueue()
@@ -1331,69 +1328,105 @@ class MediaCollectionViewController: UIViewController
         return operationQueue
     }()
     
-    func jsonFromURL(urlString:String,filename:String?) -> Any?
+    func jsonFromURL(urlString:String?,filename:String?) -> Any?
     {
-        guard Globals.shared.reachability.isReachable, let url = URL(string: urlString) else {
-            return jsonFromFileSystem(filename: filename)
+        guard Globals.shared.reachability.isReachable else {
+            return nil
         }
         
-        if Globals.shared.format == Constants.JSON.SERIES_JSON, let json = jsonFromFileSystem(filename: filename) {
+        guard let json = filename?.fileSystemURL?.data?.json else {
+            // BLOCKS
+            let data = urlString?.url?.data
+            
             operationQueue.addOperation {
-                do {
-                    let data = try Data(contentsOf: url)
-                    print("able to read json from the URL.")
-                    
-                    if let filename = filename {
-                        do {
-                            if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
-                                try data.write(to: jsonFileSystemURL)
-                            }
-                            print("able to write json to the file system")
-                        } catch let error as NSError {
-                            print("unable to write json to the file system.")
-                            NSLog(error.localizedDescription)
-                        }
-                    }
-                } catch let error {
-                    NSLog(error.localizedDescription)
-                }
+                data?.save(to: filename?.fileSystemURL)
             }
             
-            Globals.shared.format = Constants.JSON.SERIES_JSON
-            return json
-        } else {
-            do {
-                let data = try Data(contentsOf: url)
-                print("able to read json from the URL.")
-                
-                do {
-                    let json = try JSONSerialization.jsonObject(with: data, options: [])
-
-                    if let filename = filename {
-                        do {
-                            if let jsonFileSystemURL = cachesURL()?.appendingPathComponent(filename) {
-                                try data.write(to: jsonFileSystemURL)
-                            }
-                            print("able to write json to the file system")
-                        } catch let error as NSError {
-                            print("unable to write json to the file system.")
-                            
-                            NSLog(error.localizedDescription)
-                        }
-                    }
-                    
-                    Globals.shared.format = Constants.JSON.SERIES_JSON
-                    return json
-                } catch let error as NSError {
-                    NSLog(error.localizedDescription)
-                    return jsonFromFileSystem(filename: filename)
-                }
-            } catch let error as NSError {
-                NSLog(error.localizedDescription)
-                return jsonFromFileSystem(filename: filename)
-            }
+            return data?.json
         }
+        
+        operationQueue.addOperation {
+            urlString?.url?.data?.save(to: filename?.fileSystemURL)
+        }
+        
+        return json
     }
+    
+//    func jsonFromURL(urlString:String?,filename:String?) -> Any?
+//    {
+//        guard Globals.shared.reachability.isReachable, urlString?.url != nil else {
+//            return filename?.fileSystemURL?.data?.json
+//        }
+//
+//        if Globals.shared.format == Constants.JSON.SERIES_JSON, let json = jsonFromFileSystem(filename: filename) {
+//            operationQueue.addOperation {
+//                url.data?.save(to: filename?.fileSystemURL)
+//
+////                do {
+////                    let data = try Data(contentsOf: url)
+////                    print("able to read json from the URL.")
+////
+////                    if let filename = filename {
+////                        do {
+////                            if let jsonFileSystemURL = cachesURL?.appendingPathComponent(filename) {
+////                                try data.write(to: jsonFileSystemURL)
+////                            }
+////                            print("able to write json to the file system")
+////                        } catch let error {
+////                            print("unable to write json to the file system.")
+////                            NSLog(error.localizedDescription)
+////                        }
+////                    }
+////                } catch let error {
+////                    NSLog(error.localizedDescription)
+////                }
+//            }
+//
+//            Globals.shared.format = Constants.JSON.SERIES_JSON
+//            return json
+//        } else {
+//            guard let data = url.data else {
+//                return jsonFromFileSystem(filename: filename)
+//            }
+//
+//            if let fileSystemURL = url.fileSystemURL {
+//                data.save(to: fileSystemURL)
+//            }
+//
+//            return data.json ?? jsonFromFileSystem(filename: filename)
+//
+////            do {
+////                let data = try Data(contentsOf: url)
+////                print("able to read json from the URL.")
+////
+////                do {
+////                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+////
+////                    if let filename = filename {
+////                        do {
+////                            if let jsonFileSystemURL = cachesURL?.appendingPathComponent(filename) {
+////                                try data.write(to: jsonFileSystemURL)
+////                            }
+////                            print("able to write json to the file system")
+////                        } catch let error {
+////                            print("unable to write json to the file system.")
+////
+////                            NSLog(error.localizedDescription)
+////                        }
+////                    }
+////
+////                    Globals.shared.format = Constants.JSON.SERIES_JSON
+////                    return json
+////                } catch let error {
+////                    NSLog(error.localizedDescription)
+////                    return jsonFromFileSystem(filename: filename)
+////                }
+////            } catch let error {
+////                NSLog(error.localizedDescription)
+////                return jsonFromFileSystem(filename: filename)
+////            }
+//        }
+//    }
     
     func loadSeriesDicts() -> [[String:Any]]?
     {
