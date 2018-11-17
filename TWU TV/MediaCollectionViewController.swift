@@ -1320,7 +1320,7 @@ class MediaCollectionViewController: UIViewController
 ////        }
 //    }
     
-    lazy var operationQueue:OperationQueue! = {
+    lazy var jsonQueue:OperationQueue! = {
         let operationQueue = OperationQueue()
         operationQueue.name = "JSON"
         operationQueue.qualityOfService = .background
@@ -1338,14 +1338,14 @@ class MediaCollectionViewController: UIViewController
             // BLOCKS
             let data = urlString?.url?.data
             
-            operationQueue.addOperation {
+            jsonQueue.addOperation {
                 data?.save(to: filename?.fileSystemURL)
             }
             
             return data?.json
         }
         
-        operationQueue.addOperation {
+        jsonQueue.addOperation {
             urlString?.url?.data?.save(to: filename?.fileSystemURL)
         }
         
@@ -1468,6 +1468,14 @@ class MediaCollectionViewController: UIViewController
         return seriesDicts.count > 0 ? seriesDicts : nil
     }
     
+    lazy var operationQueue : OperationQueue! = {
+        let operationQueue = OperationQueue()
+        operationQueue.name = "MCVC:" + UUID().uuidString
+        operationQueue.qualityOfService = .userInitiated
+        operationQueue.maxConcurrentOperationCount = 1 // Slides and Notes
+        return operationQueue
+    }()
+    
     func loadSeries(_ completion: (() -> Void)?)
     {
         Globals.shared.isLoading = true
@@ -1476,7 +1484,12 @@ class MediaCollectionViewController: UIViewController
             self.activityIndicator.startAnimating()
         }
         
-        DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
+        operationQueue.cancelAllOperations()
+        
+        operationQueue.waitUntilAllOperationsAreFinished()
+        
+        let operation = CancellableOperation { (test:(()->(Bool))?) in
+//        DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
             Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Loading_Series
             }
@@ -1510,7 +1523,9 @@ class MediaCollectionViewController: UIViewController
             }
 
             Globals.shared.isLoading = false
-        })
+        }
+        
+        operationQueue.addOperation(operation)
     }
     
     func disableBarButtons()

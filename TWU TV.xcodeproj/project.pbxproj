@@ -24,6 +24,7 @@
 		174021701EF2A4AE001967C1 /* PopoverTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1740216E1EF2A4AE001967C1 /* PopoverTableViewController.swift */; };
 		174021711EF2A4AE001967C1 /* PopoverTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1740216F1EF2A4AE001967C1 /* PopoverTableViewCell.swift */; };
 		174ACCD31EF48B940056FCBC /* MediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174ACCD21EF48B940056FCBC /* MediaPlayer.swift */; };
+		17590CCE219F9C3B00ED6EB1 /* CancellableOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17590CCD219F9C3B00ED6EB1 /* CancellableOperation.swift */; };
 		17812B811EEEE10100894B45 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17812B801EEEE10100894B45 /* AppDelegate.swift */; };
 		17812B881EEEE10100894B45 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17812B861EEEE10100894B45 /* Main.storyboard */; };
 		17812B8A1EEEE10100894B45 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 17812B891EEEE10100894B45 /* Assets.xcassets */; };
@@ -68,6 +69,7 @@
 		1740216E1EF2A4AE001967C1 /* PopoverTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverTableViewController.swift; sourceTree = "<group>"; };
 		1740216F1EF2A4AE001967C1 /* PopoverTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverTableViewCell.swift; sourceTree = "<group>"; };
 		174ACCD21EF48B940056FCBC /* MediaPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaPlayer.swift; sourceTree = "<group>"; };
+		17590CCD219F9C3B00ED6EB1 /* CancellableOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CancellableOperation.swift; sourceTree = "<group>"; };
 		17812B7D1EEEE10100894B45 /* TWU TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TWU TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		17812B801EEEE10100894B45 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		17812B871EEEE10100894B45 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 				1731F61F21720B1D00609DE6 /* extensions.swift */,
 				171250771EEF1569005288E3 /* functions.swift */,
 				1736F2D92174C2FF00F2D8EC /* generics.swift */,
+				17590CCD219F9C3B00ED6EB1 /* CancellableOperation.swift */,
 				17324D292188C1F200F36F6F /* FetchImage.swift */,
 				171250781EEF1569005288E3 /* MediaCollectionViewCell.swift */,
 				171250791EEF1569005288E3 /* MediaCollectionViewController.swift */,
@@ -329,6 +332,7 @@
 				174021701EF2A4AE001967C1 /* PopoverTableViewController.swift in Sources */,
 				1731F62021720B1D00609DE6 /* extensions.swift in Sources */,
 				1712507B1EEF1569005288E3 /* functions.swift in Sources */,
+				17590CCE219F9C3B00ED6EB1 /* CancellableOperation.swift in Sources */,
 				171250831EEF1582005288E3 /* MediaViewController.swift in Sources */,
 				17324D2A2188C1F200F36F6F /* FetchImage.swift in Sources */,
 				171250741EEF154D005288E3 /* Sermon.swift in Sources */,
