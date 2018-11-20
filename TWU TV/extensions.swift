@@ -67,20 +67,30 @@ extension String
     var fileSystemURL : URL?
     {
         get {
+            guard !self.isEmpty else {
+                return nil
+                
+            }
+            
+            guard url != nil else {
+                if let lastPathComponent = self.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) {
+                    return cachesURL?.appendingPathComponent(lastPathComponent)
+                } else {
+                    return nil
+                }
+            }
+            
             guard self != url?.lastPathComponent else {
-                return cachesURL?.appendingPathComponent(self.replacingOccurrences(of: " ", with: ""))
+                if let lastPathComponent = self.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) {
+                    return cachesURL?.appendingPathComponent(lastPathComponent)
+                } else {
+                    return nil
+                }
             }
             
             return url?.fileSystemURL
         }
     }
-    
-//    var fileSystemURL : URL?
-//    {
-//        get {
-//            return url?.fileSystemURL
-//        }
-//    }
 }
 
 extension Double {
@@ -225,8 +235,6 @@ extension String
     }
 }
 
-fileprivate var queue = DispatchQueue(label: UUID().uuidString)
-
 extension URL
 {
     var fileSystemURL : URL?
@@ -251,7 +259,7 @@ extension URL
             do {
                 return try Data(contentsOf: self)
             } catch let error {
-                print("failed to delete download: \(error.localizedDescription)")
+                print("failed to read data at \(self.absoluteString) \(error.localizedDescription)")
                 return nil
             }
         }
@@ -272,7 +280,7 @@ extension URL
         do {
             try FileManager.default.removeItem(at: fileSystemURL)
         } catch let error {
-            print("failed to delete download: \(error.localizedDescription)")
+            print("failed to delete file at \(self.absoluteString): \(error.localizedDescription)")
         }
     }
     
@@ -286,40 +294,32 @@ extension URL
     var image : UIImage?
     {
         get {
-            guard let imageURL = fileSystemURL else {
+            guard let data = data else {
                 return nil
             }
             
-            if imageURL.exists, let image = UIImage(contentsOfFile: imageURL.path) {
-                return image
-            } else {
-                guard let data = try? Data(contentsOf: self) else {
-                    return nil
-                }
-                
-                guard let image = UIImage(data: data) else {
-                    return nil
-                }
-                
-                DispatchQueue.global(qos: .background).async {
-                    queue.sync {
-                        guard !imageURL.exists else {
-                            return
-                        }
-                        
-                        do {
-                            try UIImageJPEGRepresentation(image, 1.0)?.write(to: imageURL, options: [.atomic])
-                            print("Image \(self.lastPathComponent) saved to file system")
-                        } catch let error {
-                            NSLog(error.localizedDescription)
-                            print("Image \(self.lastPathComponent) not saved to file system")
-                        }
-                    }
-                }
-
-                return image
-            }
+            return UIImage(data: data)
         }
+    }
+}
+
+extension UIImage
+{
+    func save(to url: URL?) -> UIImage?
+    {
+        guard let url = url else {
+            return nil
+        }
+        
+        do {
+            try UIImageJPEGRepresentation(self, 1.0)?.write(to: url, options: [.atomic])
+            print("Image saved to \(url.absoluteString)")
+        } catch let error {
+            NSLog(error.localizedDescription)
+            print("Image not saved to \(url.absoluteString)")
+        }
+        
+        return self
     }
 }
 
