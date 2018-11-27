@@ -698,6 +698,7 @@ class MediaCollectionViewController: UIViewController
 
         seriesLabel.text = seriesSelected.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "&ndash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
         
+        // Should be an opQueue
         DispatchQueue.global(qos: .background).async { () -> Void in
             seriesSelected.coverArt.block { (image:UIImage?) in
                 Thread.onMainThread {
@@ -945,7 +946,8 @@ class MediaCollectionViewController: UIViewController
         
         setupPlayPauseButton()
         
-        //Without this background/main dispatching there isn't time to scroll correctly after a reload.
+        // Without this background/main dispatching there isn't time to scroll correctly after a reload.
+        // For UI
         DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
             Thread.onMainThread {
                 self.scrollToSermon(sermon, select: true, position: UITableViewScrollPosition.none)
@@ -1274,10 +1276,11 @@ class MediaCollectionViewController: UIViewController
        
             // Allows the visible cells to load first/faster, I think because tvOS isn't as well-threaded as iOS.
             if series.coverArtURL?.exists == true {
-                DispatchQueue.global(qos: .background).async { () -> Void in
-                    // This blocks.
-                    series.coverArt.load()
-                }
+                series.coverArt.fetch.fill()
+//                DispatchQueue.global(qos: .background).async { () -> Void in
+//                    // This blocks.
+//                    series.coverArt.load()
+//                }
             }
 
             // Too slow, loads everything, and because it isn't sync'd through a Fetch may not speed anything up.
@@ -1330,9 +1333,10 @@ class MediaCollectionViewController: UIViewController
     
     func jsonFromURL(urlString:String?,filename:String?) -> Any?
     {
-        guard Globals.shared.reachability.isReachable else {
-            return nil
-        }
+        // THIS STOPS THE FILESYSTEM CALL BELOW!
+//        guard Globals.shared.reachability.isReachable else {
+//            return nil
+//        }
         
         guard let json = filename?.fileSystemURL?.data?.json else {
             // BLOCKS

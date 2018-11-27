@@ -368,6 +368,7 @@ class Globals : NSObject
     func saveSettingsBackground()
     {
         print("saveSermonSettingsBackground")
+        // Should be an opQueue
         DispatchQueue.global(qos: .background).async { () -> Void in
             self.saveSettings()
         }

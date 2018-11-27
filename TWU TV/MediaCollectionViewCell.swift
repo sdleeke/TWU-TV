@@ -66,15 +66,19 @@ class MediaCollectionViewCell: UICollectionViewCell
                         if let image = image {
 //                            Globals.shared.images[name] = image
                             
+                            // Make sure we're still in the right place.
                             if self.series == series {
                                 self.seriesArt.image = image
                                 self.activityIndicator.stopAnimating()
                                 self.activityIndicator.isHidden = true
                             }
                         } else {
-                            self.seriesArt.image = UIImage(named: "twu_logo_circle_r")
-                            self.activityIndicator.stopAnimating()
-                            self.activityIndicator.isHidden = true
+                            // Make sure we're still in the right place.
+                            if self.series == series {
+                                self.seriesArt.image = UIImage(named: "twu_logo_circle_r")
+                                self.activityIndicator.stopAnimating()
+                                self.activityIndicator.isHidden = true
+                            }
                         }
                     }
                 }

@@ -257,9 +257,12 @@ extension URL
     {
         get {
             do {
-                return try Data(contentsOf: self)
+                let data = try Data(contentsOf: self)
+                print("Data read from \(self.absoluteString)")
+                return data
             } catch let error {
-                print("failed to read data at \(self.absoluteString) \(error.localizedDescription)")
+                NSLog(error.localizedDescription)
+                print("Data not read from \(self.absoluteString)")
                 return nil
             }
         }
