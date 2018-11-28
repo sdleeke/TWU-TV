@@ -1331,6 +1331,11 @@ class MediaCollectionViewController: UIViewController
         return operationQueue
     }()
     
+    deinit {
+        jsonQueue.cancelAllOperations()
+        operationQueue.cancelAllOperations()
+    }
+    
     func jsonFromURL(urlString:String?,filename:String?) -> Any?
     {
         // THIS STOPS THE FILESYSTEM CALL BELOW!
@@ -1490,7 +1495,7 @@ class MediaCollectionViewController: UIViewController
         
         operationQueue.cancelAllOperations()
         
-        operationQueue.waitUntilAllOperationsAreFinished()
+//        operationQueue.waitUntilAllOperationsAreFinished()
         
         let operation = CancellableOperation { (test:(()->(Bool))?) in
 //        DispatchQueue.global(qos: .userInitiated).async(execute: { () -> Void in
