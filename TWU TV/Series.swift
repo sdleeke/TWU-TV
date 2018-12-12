@@ -330,7 +330,7 @@ class Series : Equatable, CustomStringConvertible
 //        coverArtURL?.image(block:block)
 //    }
     
-    lazy var coverArt = {
+    lazy var coverArt:FetchImage? = { [weak self] in
         return FetchImage(url: coverArtURL)
     }()
     
@@ -437,7 +437,7 @@ class Series : Equatable, CustomStringConvertible
         }
     }
 
-    lazy var settings:Settings? = {
+    lazy var settings:Settings? = { [weak self] in
         return Settings(series:self)
     }()
 

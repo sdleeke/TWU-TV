@@ -51,7 +51,7 @@ class MediaCollectionViewCell: UICollectionViewCell
 //            return
 //        }
         
-        if let image = series.coverArt.fetch.cache {
+        if let image = series.coverArt?.fetch.cache {
 //        if let image = Globals.shared.images[name] {
             self.seriesArt.image = image
         } else {
@@ -61,7 +61,7 @@ class MediaCollectionViewCell: UICollectionViewCell
             }
             
             DispatchQueue.global(qos: .userInteractive).async { () -> Void in
-                series.coverArt.block { (image:UIImage?) in
+                series.coverArt?.block { (image:UIImage?) in
                     Thread.onMainThread {
                         if let image = image {
 //                            Globals.shared.images[name] = image

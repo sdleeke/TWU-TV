@@ -700,7 +700,7 @@ class MediaCollectionViewController: UIViewController
         
         // Should be an opQueue
         DispatchQueue.global(qos: .background).async { () -> Void in
-            seriesSelected.coverArt.block { (image:UIImage?) in
+            seriesSelected.coverArt?.block { (image:UIImage?) in
                 Thread.onMainThread {
                     if self.seriesSelected == seriesSelected {
                         self.seriesArt.image = image
@@ -1276,7 +1276,7 @@ class MediaCollectionViewController: UIViewController
        
             // Allows the visible cells to load first/faster, I think because tvOS isn't as well-threaded as iOS.
             if series.coverArtURL?.exists == true {
-                series.coverArt.fetch.fill()
+                series.coverArt?.fetch.fill()
 //                DispatchQueue.global(qos: .background).async { () -> Void in
 //                    // This blocks.
 //                    series.coverArt.load()

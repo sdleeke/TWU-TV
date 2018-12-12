@@ -209,7 +209,7 @@ class Sermon : NSObject {
         }
     }
     
-    lazy var settings:Settings? = {
+    lazy var settings:Settings? = { [weak self] in
         return Settings(sermon:self)
     }()
 }
