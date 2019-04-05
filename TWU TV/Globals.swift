@@ -76,7 +76,7 @@ class Globals : NSObject
                 return
             }
 
-            activeSeries = sortSeries(activeSeries,sorting: sorting)
+            activeSeries = activeSeries?.sort(sorting: sorting)
             
             let defaults = UserDefaults.standard
             if (sorting != nil) {
@@ -129,7 +129,7 @@ class Globals : NSObject
             
             updateSearchResults()
             
-            activeSeries = sortSeries(activeSeries,sorting: sorting)
+            activeSeries = activeSeries?.sort(sorting: sorting)
             
             let defaults = UserDefaults.standard
             if (filter != nil) {
@@ -163,7 +163,7 @@ class Globals : NSObject
             }
             
             searchText = nil
-            activeSeries = sortSeries(activeSeries,sorting: sorting)
+            activeSeries = activeSeries?.sort(sorting: sorting)
         }
     }
     
@@ -411,7 +411,7 @@ class Globals : NSObject
         }
         
         if let seriesPlaying = defaults.string(forKey: Constants.SETTINGS.PLAYING.SERIES) {
-            if let index = series?.index(where: { (series) -> Bool in
+            if let index = series?.firstIndex(where: { (series) -> Bool in
                 return series.name == seriesPlaying
             }) {
                 let seriesPlaying = series?[index]
@@ -518,6 +518,72 @@ class Globals : NSObject
         MPRemoteCommandCenter.shared().likeCommand.isEnabled = false
         MPRemoteCommandCenter.shared().dislikeCommand.isEnabled = false
         MPRemoteCommandCenter.shared().bookmarkCommand.isEnabled = false
+    }
+
+    var alert:UIAlertController!
+    
+    func networkUnavailable(_ message:String?)
+    {
+        if (alert == nil) {
+            UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true, completion: nil)
+            
+            alert = UIAlertController(title:Constants.Network_Error,
+                                      message: message,
+                                      preferredStyle: UIAlertController.Style.alert)
+            
+            let action = UIAlertAction(title: Constants.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+                self.alert = nil
+            })
+            alert.addAction(action)
+            
+            Thread.onMainThread {
+                UIApplication.shared.keyWindow?.rootViewController?.present(self.alert, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    func alert(title:String?,message:String?)
+    {
+        guard alert == nil else {
+            return
+        }
+        
+        guard UIApplication.shared.applicationState == UIApplication.State.active else {
+            return
+        }
+        
+        alert = UIAlertController(title:title,
+                                  message: message,
+                                  preferredStyle: UIAlertController.Style.alert)
+        
+        let action = UIAlertAction(title: Constants.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+            self.alert = nil
+        })
+        alert.addAction(action)
+        
+        Thread.onMainThread {
+            UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true, completion: nil)
+            UIApplication.shared.keyWindow?.rootViewController?.present(self.alert, animated: true, completion: nil)
+        }
+    }
+    
+    func userAlert(title:String?,message:String?)
+    {
+        if (UIApplication.shared.applicationState == UIApplication.State.active) {
+            
+            let alert = UIAlertController(title: title,
+                                          message: message,
+                                          preferredStyle: UIAlertController.Style.alert)
+            
+            let action = UIAlertAction(title: Constants.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+                
+            })
+            alert.addAction(action)
+            
+            Thread.onMainThread {
+                UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true, completion: nil)
+            }
+        }
     }
 }
 

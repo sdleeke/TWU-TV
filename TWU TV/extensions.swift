@@ -9,36 +9,70 @@
 import Foundation
 import UIKit
 
-extension UIBarButtonItem {
-    func setTitleTextAttributes(_ attributes:[NSAttributedStringKey:UIFont])
+
+extension Set
+{
+    var array: [Element]
     {
-        setTitleTextAttributes(attributes, for: UIControlState.normal)
-        setTitleTextAttributes(attributes, for: UIControlState.disabled)
-        setTitleTextAttributes(attributes, for: UIControlState.selected)
-        setTitleTextAttributes(attributes, for: UIControlState.highlighted)
-        setTitleTextAttributes(attributes, for: UIControlState.focused)
+        return Array(self)
+    }
+}
+
+extension Array where Element : Hashable
+{
+    var set: Set<Element>
+    {
+        return Set(self)
+    }
+}
+
+extension FileManager
+{
+    var documentsURL : URL?
+    {
+        get {
+            return self.urls(for: .documentDirectory, in: .userDomainMask).first
+        }
+    }
+    
+    var cachesURL : URL?
+    {
+        get {
+            return self.urls(for: .cachesDirectory, in: .userDomainMask).first
+        }
+    }
+}
+
+extension UIBarButtonItem {
+    func setTitleTextAttributes(_ attributes:[NSAttributedString.Key:UIFont])
+    {
+        setTitleTextAttributes(attributes, for: UIControl.State.normal)
+        setTitleTextAttributes(attributes, for: UIControl.State.disabled)
+        setTitleTextAttributes(attributes, for: UIControl.State.selected)
+        setTitleTextAttributes(attributes, for: UIControl.State.highlighted)
+        setTitleTextAttributes(attributes, for: UIControl.State.focused)
     }
 }
 
 extension UISegmentedControl {
-    func setTitleTextAttributes(_ attributes:[String:UIFont])
+    func setTitleTextAttributes(_ attributes:[NSAttributedString.Key:Any])
     {
-        setTitleTextAttributes(attributes, for: UIControlState.normal)
-        setTitleTextAttributes(attributes, for: UIControlState.disabled)
-        setTitleTextAttributes(attributes, for: UIControlState.selected)
-        setTitleTextAttributes(attributes, for: UIControlState.highlighted)
-        setTitleTextAttributes(attributes, for: UIControlState.focused)
+        setTitleTextAttributes(attributes, for: UIControl.State.normal)
+        setTitleTextAttributes(attributes, for: UIControl.State.disabled)
+        setTitleTextAttributes(attributes, for: UIControl.State.selected)
+        setTitleTextAttributes(attributes, for: UIControl.State.highlighted)
+        setTitleTextAttributes(attributes, for: UIControl.State.focused)
     }
 }
 
 extension UIButton {
     func setTitle(_ string:String?)
     {
-        setTitle(string, for: UIControlState.normal)
-        setTitle(string, for: UIControlState.disabled)
-        setTitle(string, for: UIControlState.selected)
-        setTitle(string, for: UIControlState.highlighted)
-        setTitle(string, for: UIControlState.focused)
+        setTitle(string, for: UIControl.State.normal)
+        setTitle(string, for: UIControl.State.disabled)
+        setTitle(string, for: UIControl.State.selected)
+        setTitle(string, for: UIControl.State.highlighted)
+        setTitle(string, for: UIControl.State.focused)
     }
 }
 
@@ -74,7 +108,7 @@ extension String
             
             guard url != nil else {
                 if let lastPathComponent = self.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) {
-                    return cachesURL?.appendingPathComponent(lastPathComponent)
+                    return FileManager.default.cachesURL?.appendingPathComponent(lastPathComponent)
                 } else {
                     return nil
                 }
@@ -82,7 +116,7 @@ extension String
             
             guard self != url?.lastPathComponent else {
                 if let lastPathComponent = self.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlPathAllowed) {
-                    return cachesURL?.appendingPathComponent(lastPathComponent)
+                    return FileManager.default.cachesURL?.appendingPathComponent(lastPathComponent)
                 } else {
                     return nil
                 }
@@ -235,8 +269,100 @@ extension String
     }
 }
 
+extension String
+{
+    var bookNumberInBible : Int?
+    {
+//        guard let book = book else {
+//            return nil
+//        }
+
+        let book = self
+        
+        if let index = Constants.TESTAMENT.OLD.firstIndex(of: book) {
+            return index
+        }
+        
+        if let index = Constants.TESTAMENT.NEW.firstIndex(of: book) {
+            return Constants.TESTAMENT.OLD.count + index
+        }
+        
+        return Constants.TESTAMENT.OLD.count + Constants.TESTAMENT.NEW.count+1 // Not in the Bible.  E.g. Selected Scriptures
+    }
+    
+    var lastName : String?
+    {
+        var lastname = self
+        
+        while let range = lastname.range(of: Constants.SINGLE_SPACE) {
+            lastname = String(lastname[range.upperBound...])
+        }
+        
+        return !lastname.isEmpty ? lastname : nil
+    }
+}
+
 extension URL
 {
+    func files(ofType fileType:String) -> [String]?
+    {
+        //        guard let path = self.path else {
+        //            return nil
+        //        }
+        
+        guard let isDirectory = try? FileWrapper(url: self, options: []).isDirectory, isDirectory else {
+            return nil
+        }
+        
+        var files = [String]()
+        
+        do {
+            let array = try FileManager.default.contentsOfDirectory(atPath: path)
+            
+            for string in array {
+                //                if let range = string.range(of: fileType) {
+                if let range = string.range(of: "." + fileType) {
+                    if fileType == String(string[range.lowerBound...]) {
+                        files.append(string)
+                    }
+                }
+            }
+        } catch let error {
+            NSLog("failed to get files in caches directory: \(error.localizedDescription)")
+        }
+        
+        return files.count > 0 ? files : nil
+    }
+    
+    func files(startingWith filename:String) -> [String]?
+    {
+        //        guard let path = path else {
+        //            return nil
+        //        }
+        
+        guard let isDirectory = try? FileWrapper(url: self, options: []).isDirectory, isDirectory else {
+            return nil
+        }
+        
+        var files = [String]()
+        
+        do {
+            let array = try FileManager.default.contentsOfDirectory(atPath: path)
+            
+            for string in array {
+                if let range = string.range(of: filename) {
+                    if filename == String(string[..<range.upperBound]) {
+                        files.append(string)
+                    }
+                }
+            }
+        } catch let error {
+            NSLog("failed to get files in caches directory: \(error.localizedDescription)")
+        }
+        
+        return files.count > 0 ? files : nil
+    }
+    
     var fileSystemURL : URL?
     {
         return self.lastPathComponent.fileSystemURL
@@ -315,7 +441,7 @@ extension UIImage
         }
         
         do {
-            try UIImageJPEGRepresentation(self, 1.0)?.write(to: url, options: [.atomic])
+            try self.jpegData(compressionQuality: 1.0)?.write(to: url, options: [.atomic])
             print("Image saved to \(url.absoluteString)")
         } catch let error {
             NSLog(error.localizedDescription)
@@ -445,3 +571,78 @@ extension Date
     }
 }
 
+extension Array where Element == Series
+{
+    func sort(sorting:String?) -> [Series]?
+    {
+//        guard let series = series else {
+//            return nil
+//        }
+
+        let series = self
+        
+        guard let sorting = sorting else {
+            return nil
+        }
+        
+        var results:[Series]?
+        
+        switch sorting {
+        case Constants.Sorting.Title_AZ:
+            results = series.sorted() { $0.titleSort < $1.titleSort }
+            break
+        case Constants.Sorting.Title_ZA:
+            results = series.sorted() { $0.titleSort > $1.titleSort }
+            break
+        case Constants.Sorting.Newest_to_Oldest:
+            results = series.sorted() { $0.featuredStartDate > $1.featuredStartDate }
+            //        switch Constants.JSON.URL {
+            //        case Constants.JSON.URLS.MEDIALIST_PHP:
+            //            results = series.sorted() { $0.id > $1.id }
+            //
+            //        case Constants.JSON.URLS.MEDIALIST_JSON:
+            //            fallthrough
+            //
+            //        case Constants.JSON.URLS.SERIES_JSON:
+            //            results = series.sorted() { $0.featuredStartDate > $1.featuredStartDate }
+            //
+            //        default:
+            //            return nil
+            //        }
+            break
+        case Constants.Sorting.Oldest_to_Newest:
+            results = series.sorted() { $0.featuredStartDate < $1.featuredStartDate }
+            //        switch Constants.JSON.URL {
+            //        case Constants.JSON.URLS.MEDIALIST_PHP:
+            //            results = series.sorted() { $0.id < $1.id }
+            //
+            //        case Constants.JSON.URLS.MEDIALIST_JSON:
+            //            fallthrough
+            //
+            //        case Constants.JSON.URLS.SERIES_JSON:
+            //            results = series.sorted() { $0.featuredStartDate < $1.featuredStartDate }
+            //
+            //        default:
+            //            return nil
+            //        }
+            break
+        default:
+            break
+        }
+        
+        return results
+    }
+
+    var books : [String]?
+    {
+//        guard let series = series else {
+//            return nil
+//        }
+        
+        return self.filter({ (series:Series) -> Bool in
+            return series.book != nil
+        }).map({ (series:Series) -> String in
+            return series.book!
+        }).set.array.sorted(by: { $0.bookNumberInBible < $1.bookNumberInBible })
+    }
+}

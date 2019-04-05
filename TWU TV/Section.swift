@@ -28,7 +28,9 @@ class Section
     
     var indexStrings:[String]?
     
-    var indexTransform:((String?)->String?)? = stringWithoutPrefixes
+    var indexTransform:((String?)->String?)? = { (string:String?) in
+        return string?.withoutPrefixes
+    }
     
     var showHeaders = false
     var showIndex = false

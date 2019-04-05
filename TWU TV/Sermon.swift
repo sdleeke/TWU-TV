@@ -11,8 +11,9 @@ import UIKit
 
 var debug = false
 
-class Sermon : NSObject {
-    var series:Series?
+class Sermon : NSObject
+{
+    weak var series:Series?
     
     var dict:[String:Any]?
     
@@ -124,7 +125,8 @@ class Sermon : NSObject {
         }
     }
     
-    init(series:Series,dict:[String:Any]?) { // id:Int
+    init(series:Series,dict:[String:Any]?) // id:Int
+    {
         self.series = series
 
         self.dict = dict?["program"] as? [String:Any]

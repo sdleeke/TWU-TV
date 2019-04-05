@@ -19,6 +19,57 @@ func != (lhs:Series,rhs:Series) -> Bool
     return (lhs.name != rhs.name) // || (lhs.id != rhs.id)
 }
 
+class Settings
+{
+    weak var series:Series?
+    
+    init(series:Series?) {
+        if (series == nil) {
+            print("nil series in Settings init!")
+        }
+        self.series = series
+    }
+    
+    subscript(key:String) -> String? {
+        get {
+            var value:String?
+            if let name = self.series?.name {
+                value = Globals.shared.seriesSettings?[name]?[key]
+            }
+            return value
+        }
+        set {
+            guard (newValue != nil) else {
+                print("newValue == nil in Settings!")
+                return
+            }
+            
+            guard let series = series else {
+                print("series == nil in Settings!")
+                return
+            }
+            
+            guard let name = series.name else {
+                print("series!.name == nil in Settings!")
+                return
+            }
+            
+            if (Globals.shared.seriesSettings == nil) {
+                Globals.shared.seriesSettings = [String:[String:String]]()
+            }
+            
+            if (Globals.shared.seriesSettings?[name] == nil) {
+                Globals.shared.seriesSettings?[name] = [String:String]()
+            }
+            
+            Globals.shared.seriesSettings?[name]?[key] = newValue
+            
+            // For a high volume of activity this can be very expensive.
+            Globals.shared.saveSettingsBackground()
+        }
+    }
+}
+
 class Series : Equatable, CustomStringConvertible
 {
     var dict:[String:Any]?
@@ -385,57 +436,6 @@ class Series : Equatable, CustomStringConvertible
     }
     
     var index:[String:Sermon]?
-
-    class Settings
-    {
-        weak var series:Series?
-        
-        init(series:Series?) {
-            if (series == nil) {
-                print("nil series in Settings init!")
-            }
-            self.series = series
-        }
-        
-        subscript(key:String) -> String? {
-            get {
-                var value:String?
-                if let name = self.series?.name {
-                    value = Globals.shared.seriesSettings?[name]?[key]
-                }
-                return value
-            }
-            set {
-                guard (newValue != nil) else {
-                    print("newValue == nil in Settings!")
-                    return
-                }
-                
-                guard let series = series else {
-                    print("series == nil in Settings!")
-                    return
-                }
-                
-                guard let name = series.name else {
-                    print("series!.name == nil in Settings!")
-                    return
-                }
-                
-                if (Globals.shared.seriesSettings == nil) {
-                    Globals.shared.seriesSettings = [String:[String:String]]()
-                }
-                
-                if (Globals.shared.seriesSettings?[name] == nil) {
-                    Globals.shared.seriesSettings?[name] = [String:String]()
-                }
-                
-                Globals.shared.seriesSettings?[name]?[key] = newValue
-                
-                // For a high volume of activity this can be very expensive.
-                Globals.shared.saveSettingsBackground()
-            }
-        }
-    }
 
     lazy var settings:Settings? = { [weak self] in
         return Settings(series:self)
