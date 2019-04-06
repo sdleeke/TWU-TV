@@ -304,65 +304,6 @@ extension String
 
 extension URL
 {
-    func files(ofType fileType:String) -> [String]?
-    {
-        //        guard let path = self.path else {
-        //            return nil
-        //        }
-        
-        guard let isDirectory = try? FileWrapper(url: self, options: []).isDirectory, isDirectory else {
-            return nil
-        }
-        
-        var files = [String]()
-        
-        do {
-            let array = try FileManager.default.contentsOfDirectory(atPath: path)
-            
-            for string in array {
-                //                if let range = string.range(of: fileType) {
-                if let range = string.range(of: "." + fileType) {
-                    if fileType == String(string[range.lowerBound...]) {
-                        files.append(string)
-                    }
-                }
-            }
-        } catch let error {
-            NSLog("failed to get files in caches directory: \(error.localizedDescription)")
-        }
-        
-        return files.count > 0 ? files : nil
-    }
-    
-    func files(startingWith filename:String) -> [String]?
-    {
-        //        guard let path = path else {
-        //            return nil
-        //        }
-        
-        guard let isDirectory = try? FileWrapper(url: self, options: []).isDirectory, isDirectory else {
-            return nil
-        }
-        
-        var files = [String]()
-        
-        do {
-            let array = try FileManager.default.contentsOfDirectory(atPath: path)
-            
-            for string in array {
-                if let range = string.range(of: filename) {
-                    if filename == String(string[..<range.upperBound]) {
-                        files.append(string)
-                    }
-                }
-            }
-        } catch let error {
-            NSLog("failed to get files in caches directory: \(error.localizedDescription)")
-        }
-        
-        return files.count > 0 ? files : nil
-    }
-    
     var fileSystemURL : URL?
     {
         return self.lastPathComponent.fileSystemURL
