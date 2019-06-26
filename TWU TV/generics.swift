@@ -462,7 +462,7 @@ class ThreadSafeDictionaryOfDictionaries<T>
 
 class Fetch<T>
 {
-    lazy var operationQueue : OperationQueue! = {
+    private lazy var operationQueue : OperationQueue! = {
         let operationQueue = OperationQueue()
         operationQueue.name = "Fetch" + UUID().uuidString
         operationQueue.qualityOfService = .background
@@ -534,6 +534,12 @@ class Fetch<T>
     }
 }
 
+protocol Size
+{
+    var _fileSize : Int? { get set }
+    var fileSize : Int? { get set }
+}
+
 class FetchCodable<T:Codable> : Fetch<T>
 {
     var fileSystemURL : URL?
@@ -541,6 +547,29 @@ class FetchCodable<T:Codable> : Fetch<T>
         get {
             return name?.fileSystemURL
         }
+    }
+    
+    internal var _fileSize : Int?
+    var fileSize : Int?
+    {
+        get {
+            guard let fileSize = _fileSize else {
+                _fileSize = fileSystemURL?.fileSize
+                return _fileSize
+            }
+            
+            return fileSize
+        }
+        set {
+            _fileSize = newValue
+        }
+    }
+    
+    func delete(block:Bool)
+    {
+        clear()
+        fileSize = nil
+        fileSystemURL?.delete(block:block)
     }
     
     // name MUST be unique to ever INSTANCE, not just the class!

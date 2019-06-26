@@ -127,10 +127,15 @@ extension String
     }
 }
 
-extension Double {
+extension Double
+{
     var secondsToHMS : String?
     {
         get {
+            guard !self.isNaN, !self.isInfinite else {
+                return nil
+            }
+            
             let hours = max(Int(self / (60*60)),0)
             let mins = max(Int((self - (Double(hours) * 60*60)) / 60),0)
             let sec = max(Int(self.truncatingRemainder(dividingBy: 60)),0)
@@ -144,6 +149,32 @@ extension Double {
             }
             
             string += "\(String(format: "%02d",mins)):\(String(format: "%02d",sec))"
+            
+            return string
+        }
+    }
+
+    var secondsToHMSms : String?
+    {
+        get {
+            guard !self.isNaN, !self.isInfinite else {
+                return nil
+            }
+            
+            let hours = max(Int(self / (60*60)),0)
+            let mins = max(Int((self - (Double(hours) * 60*60)) / 60),0)
+            let sec = max(Int(self.truncatingRemainder(dividingBy: 60)),0)
+            let fraction = self - Double(Int(self))
+            
+            var string:String
+            
+            if (hours > 0) {
+                string = "\(String(format: "%02d",hours)):"
+            } else {
+                string = "00:"
+            }
+            
+            string += "\(String(format: "%02d",mins)):\(String(format: "%02d",sec)).\(String(format: "%03d",Int(fraction * 1000)))"
             
             return string
         }
@@ -309,6 +340,36 @@ extension URL
         return self.lastPathComponent.fileSystemURL
     }
     
+    /**
+     Extension of URL to return the file's size
+     */
+    var fileSize:Int?
+    {
+        guard let fileSystemURL = fileSystemURL else {
+            return nil
+        }
+        
+        guard fileSystemURL.exists else {
+            debug("File does not exist at \(fileSystemURL.absoluteString)")
+            return 0
+        }
+        
+        do {
+            let fileAttributes = try FileManager.default.attributesOfItem(atPath: fileSystemURL.path)
+            
+            if let num = fileAttributes[FileAttributeKey.size] as? Int {
+                return num
+            }
+        } catch let error {
+            //            debug("failed to get file attributes for \(fileSystemURL): \(error.localizedDescription)")
+            //            NSLog("Error: \(error.localizedDescription)")
+            //            NSLog("Failed to get file attributes for: \(fileSystemURL)")
+            print("failed to get file attributes for \(fileSystemURL): \(error.localizedDescription)") // remove
+        }
+        
+        return nil
+    }
+    
     var exists : Bool
     {
         get {
@@ -335,22 +396,38 @@ extension URL
         }
     }
     
-    func delete()
+    /**
+     Extension of URL to delete file.
+     */
+    func delete(block:Bool = true)
     {
-        guard let fileSystemURL = fileSystemURL else {
-            return
-        }
-
-        // Check if file exists and if so, delete it.
-
-        guard FileManager.default.fileExists(atPath: fileSystemURL.path) else {
-            return
+        let op = {
+            // Check if file exists and if so, delete it.
+            
+            guard let fileSystemURL = self.fileSystemURL else {
+                print("fileSystemURL doesn't exist for: \(self.absoluteString)")
+                return
+            }
+            
+            guard fileSystemURL.exists else {
+                print("item doesn't exist: \(self.absoluteString)")
+                return
+            }
+            
+            do {
+                try FileManager.default.removeItem(at: fileSystemURL)
+            } catch let error {
+                print("failed to delete \(self.absoluteString): \(error.localizedDescription)")
+            }
         }
         
-        do {
-            try FileManager.default.removeItem(at: fileSystemURL)
-        } catch let error {
-            print("failed to delete file at \(self.absoluteString): \(error.localizedDescription)")
+        if block {
+            op()
+        } else {
+            // As an extension, no way to put this in an OpQueue
+            DispatchQueue.global(qos: .background).async {
+                op()
+            }
         }
     }
     

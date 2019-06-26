@@ -816,38 +816,52 @@ class MediaCollectionViewController: UIViewController
 
     fileprivate func setTimes(timeNow:Double, length:Double)
     {
-        let elapsedHours = max(Int(timeNow / (60*60)),0)
-        let elapsedMins = max(Int((timeNow - (Double(elapsedHours) * 60*60)) / 60),0)
-        let elapsedSec = max(Int(timeNow.truncatingRemainder(dividingBy: 60)),0)
-        
-        var elapsed:String
-        
-        if (elapsedHours > 0) {
-            elapsed = "\(String(format: "%d",elapsedHours)):"
-        } else {
-            elapsed = Constants.EMPTY_STRING
+        guard !timeNow.isNaN, !timeNow.isInfinite else {
+            return
         }
         
-        elapsed = elapsed + "\(String(format: "%02d",elapsedMins)):\(String(format: "%02d",elapsedSec))"
+        guard !length.isNaN, !length.isInfinite else {
+            return
+        }
         
-        self.elapsed.text = elapsed
+        self.elapsed.text = timeNow.secondsToHMS
         
         let timeRemaining = max(length - timeNow,0)
-        let remainingHours = max(Int(timeRemaining / (60*60)),0)
-        let remainingMins = max(Int((timeRemaining - (Double(remainingHours) * 60*60)) / 60),0)
-        let remainingSec = max(Int(timeRemaining.truncatingRemainder(dividingBy: 60)),0)
         
-        var remaining:String
-        
-        if (remainingHours > 0) {
-            remaining = "\(String(format: "%d",remainingHours)):"
-        } else {
-            remaining = Constants.EMPTY_STRING
-        }
-        
-        remaining = remaining + "\(String(format: "%02d",remainingMins)):\(String(format: "%02d",remainingSec))"
-        
-        self.remaining.text = remaining
+        self.remaining.text = timeRemaining.secondsToHMS
+
+//        let elapsedHours = max(Int(timeNow / (60*60)),0)
+//        let elapsedMins = max(Int((timeNow - (Double(elapsedHours) * 60*60)) / 60),0)
+//        let elapsedSec = max(Int(timeNow.truncatingRemainder(dividingBy: 60)),0)
+//
+//        var elapsed:String
+//
+//        if (elapsedHours > 0) {
+//            elapsed = "\(String(format: "%d",elapsedHours)):"
+//        } else {
+//            elapsed = Constants.EMPTY_STRING
+//        }
+//
+//        elapsed = elapsed + "\(String(format: "%02d",elapsedMins)):\(String(format: "%02d",elapsedSec))"
+//
+//        self.elapsed.text = elapsed
+//
+//        let timeRemaining = max(length - timeNow,0)
+//        let remainingHours = max(Int(timeRemaining / (60*60)),0)
+//        let remainingMins = max(Int((timeRemaining - (Double(remainingHours) * 60*60)) / 60),0)
+//        let remainingSec = max(Int(timeRemaining.truncatingRemainder(dividingBy: 60)),0)
+//
+//        var remaining:String
+//
+//        if (remainingHours > 0) {
+//            remaining = "\(String(format: "%d",remainingHours)):"
+//        } else {
+//            remaining = Constants.EMPTY_STRING
+//        }
+//
+//        remaining = remaining + "\(String(format: "%02d",remainingMins)):\(String(format: "%02d",remainingSec))"
+//
+//        self.remaining.text = remaining
     }
     
     fileprivate func setProgressAndTimesToAudio()
@@ -1278,13 +1292,13 @@ class MediaCollectionViewController: UIViewController
             let series = Series(seriesDict: seriesDict)
        
             // Allows the visible cells to load first/faster, I think because tvOS isn't as well-threaded as iOS.
-            if series.coverArtURL?.exists == true {
-                series.coverArt?.fetch.fill()
-//                DispatchQueue.global(qos: .background).async { () -> Void in
-//                    // This blocks.
-//                    series.coverArt.load()
-//                }
-            }
+//            if series.coverArtURL?.exists == true {
+//                series.coverArt?.fetch.fill()
+////                DispatchQueue.global(qos: .background).async { () -> Void in
+////                    // This blocks.
+////                    series.coverArt.load()
+////                }
+//            }
 
             // Too slow, loads everything, and because it isn't sync'd through a Fetch may not speed anything up.
 //            DispatchQueue.global(qos: .background).async { () -> Void in
@@ -1326,7 +1340,7 @@ class MediaCollectionViewController: UIViewController
 ////        }
 //    }
     
-    lazy var jsonQueue:OperationQueue! = {
+    private lazy var jsonQueue:OperationQueue! = {
         let operationQueue = OperationQueue()
         operationQueue.name = "JSON"
         operationQueue.qualityOfService = .background
@@ -1494,7 +1508,7 @@ class MediaCollectionViewController: UIViewController
         return seriesDicts.count > 0 ? seriesDicts : nil
     }
     
-    lazy var operationQueue : OperationQueue! = {
+    private lazy var operationQueue : OperationQueue! = {
         let operationQueue = OperationQueue()
         operationQueue.name = "MCVC:" + UUID().uuidString
         operationQueue.qualityOfService = .userInitiated

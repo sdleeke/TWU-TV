@@ -9,7 +9,10 @@
 import Foundation
 import UIKit
 
-var debug = false
+func debug(_ any:Any)
+{
+    //    print(any)
+}
 
 class Sermon : NSObject
 {
