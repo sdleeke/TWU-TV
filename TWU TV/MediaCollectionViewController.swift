@@ -20,11 +20,13 @@ extension MediaCollectionViewController : UICollectionViewDataSource
         return 1
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int
+    {
         return Globals.shared.activeSeries?.count ?? 0
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+    {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.IDENTIFIER.SERIES_CELL, for: indexPath) as? MediaCollectionViewCell ?? MediaCollectionViewCell()
         
         // Configure the cell
@@ -138,65 +140,70 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
             return
         }
         
-        dismiss(animated: true, completion: nil)
-        
-        guard let string = strings?[index] else {
-            return
-        }
-        
-        splitViewController?.preferredDisplayMode = .allVisible
-        
-        switch purpose {
-        case .selectingSorting:
-            Globals.shared.sorting = string
-            collectionView.reloadData()
-            scrollToSeries(seriesSelected)
-            break
-            
-        case .selectingFiltering:
-            guard (Globals.shared.filter != string) else {
-                break
+        dismiss(animated: true, completion: {
+            guard let string = strings?[index] else {
+                return
             }
             
-            if (string == Constants.All) {
-                Globals.shared.showing = .all
-                Globals.shared.filter = nil
-            } else {
-                Globals.shared.showing = .filtered
-                Globals.shared.filter = string
-            }
+            self.splitViewController?.preferredDisplayMode = .allVisible
             
-            self.collectionView.reloadData()
-            
-            scrollToSeries(seriesSelected)
-            break
-            
-        case .selectingMenu:
-            switch string {
-            case "Refresh Media":
-                handleRefresh()
+            switch purpose {
+            case .selectingSorting:
+                guard (Globals.shared.sorting != string) else {
+                    break
+                }
+                
+                Globals.shared.sorting = string
+//                self.preferredFocusView = self.collectionView
+                self.collectionView.reloadData()
+                self.scrollToSeries(self.seriesSelected)
                 break
                 
-            case "About":
-                Globals.shared.showingAbout = true
-                seriesSelected = nil
+            case .selectingFiltering:
+                guard (Globals.shared.filter != string) else {
+                    break
+                }
+                
+                if (string == Constants.All) {
+                    Globals.shared.showing = .all
+                    Globals.shared.filter = nil
+                } else {
+                    Globals.shared.showing = .filtered
+                    Globals.shared.filter = string
+                }
+                
+//                self.preferredFocusView = self.collectionView
+                self.collectionView.reloadData()
+                self.scrollToSeries(self.seriesSelected)
                 break
                 
-            case "Sorting":
-                sorting()
-                break
-                
-            case "Filtering":
-                filtering()
-                break
+            case .selectingMenu:
+                switch string {
+                case "Refresh Media":
+                    self.handleRefresh()
+                    break
+                    
+                case "About":
+                    Globals.shared.showingAbout = true
+                    self.seriesSelected = nil
+                    break
+                    
+                case "Sorting":
+                    self.sorting()
+                    break
+                    
+                case "Filtering":
+                    self.filtering()
+                    break
+                    
+                default:
+                    break
+                }
                 
             default:
                 break
             }
-            
-        default:
-            break
-        }
+        })
     }
 }
 
@@ -1271,7 +1278,7 @@ class MediaCollectionViewController: UIViewController
         self.collectionView.scrollToItem(at: indexPath, at: UICollectionView.ScrollPosition.left, animated: false)
         self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: UICollectionView.ScrollPosition.left)
         
-        preferredFocusView = collectionView.cellForItem(at: indexPath)
+//        preferredFocusView = collectionView.cellForItem(at: indexPath)
     }
     
     func setupViews()
@@ -1757,23 +1764,25 @@ class MediaCollectionViewController: UIViewController
     {
         super.viewWillAppear(animated)
         
-        collectionView.remembersLastFocusedIndexPath = true
+//        collectionView.remembersLastFocusedIndexPath = true
         
         addNotifications()
 
         updateUI()
+
+        collectionView.reloadData()
+        scrollToSeries(self.seriesSelected)
     }
     
     override func viewDidAppear(_ animated: Bool)
     {
         super.viewDidAppear(animated)
 
-        scrollToSeries(seriesSelected)
-
         setNeedsFocusUpdate()
     }
     
-    func removeProgressObserver() {
+    func removeProgressObserver()
+    {
         if Globals.shared.mediaPlayer.progressTimerReturn != nil {
             Globals.shared.mediaPlayer.player?.removeTimeObserver(Globals.shared.mediaPlayer.progressTimerReturn!)
             Globals.shared.mediaPlayer.progressTimerReturn = nil
