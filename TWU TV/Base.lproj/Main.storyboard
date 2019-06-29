@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="JX0-jU-xHg">
+<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="14490.70" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="JX0-jU-xHg">
     <device id="appleTV" orientation="landscape">
         <adaptation id="light"/>
     </device>
     <dependencies>
         <deployment identifier="tvOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -184,7 +184,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView alpha="0.14999999999999999" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="twu_logo_circle_r" translatesAutoresizingMaskIntoConstraints="NO" id="Rqp-hy-0eC">
-                                <rect key="frame" x="1120" y="100" width="800" height="800"/>
+                                <rect key="frame" x="1120" y="0.0" width="800" height="800"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="Rqp-hy-0eC" secondAttribute="height" multiplier="1:1" id="0M6-gT-blU"/>
                                     <constraint firstAttribute="height" constant="800" id="qiJ-Pe-Day"/>
@@ -299,7 +299,7 @@
                             <constraint firstItem="Rqp-hy-0eC" firstAttribute="trailing" secondItem="CQk-b9-wlF" secondAttribute="trailing" constant="60" id="Oso-0B-RIN"/>
                             <constraint firstItem="yAL-Yv-ZQQ" firstAttribute="leading" secondItem="V7o-0N-B8m" secondAttribute="leading" constant="60" id="RKt-rZ-SsP"/>
                             <constraint firstItem="sR3-ut-2yq" firstAttribute="leading" secondItem="V7o-0N-B8m" secondAttribute="leading" id="TKy-dA-AfE"/>
-                            <constraint firstItem="Rqp-hy-0eC" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" constant="40" id="UaT-VS-1xy"/>
+                            <constraint firstItem="Kbj-2a-oto" firstAttribute="bottom" secondItem="Rqp-hy-0eC" secondAttribute="top" constant="60" id="UaT-VS-1xy"/>
                             <constraint firstItem="FcM-Py-mbJ" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" id="V8Z-fg-fdw"/>
                             <constraint firstItem="v9q-Nr-bjf" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" constant="-100" id="VZd-ve-Bn7"/>
                             <constraint firstAttribute="trailing" secondItem="sR3-ut-2yq" secondAttribute="trailing" id="XiZ-wq-qBF"/>
@@ -465,7 +465,7 @@
     </scenes>
     <resources>
         <image name="bg" width="1920" height="1080"/>
-        <image name="tom_pennington" width="576" height="576"/>
+        <image name="tom_pennington" width="800" height="800"/>
         <image name="twu_logo_circle_r" width="1000" height="1000"/>
     </resources>
 </document>
