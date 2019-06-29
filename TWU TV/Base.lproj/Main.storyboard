@@ -172,19 +172,19 @@
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="HAj-xq-8Cj">
                                 <rect key="frame" x="473" y="568" width="64" height="64"/>
                             </activityIndicatorView>
-                            <textView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CQk-b9-wlF">
-                                <rect key="frame" x="695" y="60" width="1165" height="570"/>
+                            <textView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CQk-b9-wlF" customClass="MyTextView" customModule="TWU_TV" customModuleProvider="target">
+                                <rect key="frame" x="695" y="40" width="1165" height="610"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SERIES DESCRIPTION" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tru-qh-qDs">
-                                <rect key="frame" x="715" y="60" width="1145" height="35"/>
+                                <rect key="frame" x="715" y="40" width="1145" height="35"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView alpha="0.14999999999999999" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="twu_logo_circle_r" translatesAutoresizingMaskIntoConstraints="NO" id="Rqp-hy-0eC">
-                                <rect key="frame" x="1120" y="0.0" width="800" height="800"/>
+                                <rect key="frame" x="1165" y="-15" width="800" height="800"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="Rqp-hy-0eC" secondAttribute="height" multiplier="1:1" id="0M6-gT-blU"/>
                                     <constraint firstAttribute="height" constant="800" id="qiJ-Pe-Day"/>
@@ -285,7 +285,7 @@
                             <constraint firstItem="Ytd-JE-8av" firstAttribute="top" secondItem="iRM-x7-IJN" secondAttribute="bottom" constant="60" id="8qp-Yz-h4e"/>
                             <constraint firstItem="HDk-zs-0nf" firstAttribute="trailing" secondItem="Ytd-JE-8av" secondAttribute="trailing" id="9iN-ih-FQO"/>
                             <constraint firstAttribute="trailing" secondItem="CQk-b9-wlF" secondAttribute="trailing" constant="60" id="A6b-lU-uma"/>
-                            <constraint firstItem="psR-hz-CgZ" firstAttribute="top" secondItem="CQk-b9-wlF" secondAttribute="bottom" id="AnN-yz-DJz"/>
+                            <constraint firstItem="psR-hz-CgZ" firstAttribute="top" secondItem="CQk-b9-wlF" secondAttribute="bottom" constant="-20" id="AnN-yz-DJz"/>
                             <constraint firstItem="tru-qh-qDs" firstAttribute="top" secondItem="CQk-b9-wlF" secondAttribute="top" id="BFa-B2-1ST"/>
                             <constraint firstItem="v9q-Nr-bjf" firstAttribute="width" secondItem="v9q-Nr-bjf" secondAttribute="height" multiplier="1:1" id="DyB-P5-eoZ"/>
                             <constraint firstItem="CQk-b9-wlF" firstAttribute="leading" secondItem="iRM-x7-IJN" secondAttribute="trailing" id="EAT-4Y-gNZ"/>
@@ -296,10 +296,10 @@
                             <constraint firstItem="HDk-zs-0nf" firstAttribute="leading" secondItem="XTS-8z-3GM" secondAttribute="trailing" constant="20" id="Jgr-Zb-CtD"/>
                             <constraint firstItem="sR3-ut-2yq" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" id="Mhx-Ui-Fnw"/>
                             <constraint firstItem="iRM-x7-IJN" firstAttribute="leading" secondItem="FcM-Py-mbJ" secondAttribute="trailing" constant="20" id="OS5-t5-dRS"/>
-                            <constraint firstItem="Rqp-hy-0eC" firstAttribute="trailing" secondItem="CQk-b9-wlF" secondAttribute="trailing" constant="60" id="Oso-0B-RIN"/>
+                            <constraint firstItem="Rqp-hy-0eC" firstAttribute="trailing" secondItem="CQk-b9-wlF" secondAttribute="trailing" constant="105" id="Oso-0B-RIN"/>
                             <constraint firstItem="yAL-Yv-ZQQ" firstAttribute="leading" secondItem="V7o-0N-B8m" secondAttribute="leading" constant="60" id="RKt-rZ-SsP"/>
                             <constraint firstItem="sR3-ut-2yq" firstAttribute="leading" secondItem="V7o-0N-B8m" secondAttribute="leading" id="TKy-dA-AfE"/>
-                            <constraint firstItem="Kbj-2a-oto" firstAttribute="bottom" secondItem="Rqp-hy-0eC" secondAttribute="top" constant="60" id="UaT-VS-1xy"/>
+                            <constraint firstItem="Kbj-2a-oto" firstAttribute="bottom" secondItem="Rqp-hy-0eC" secondAttribute="top" constant="75" id="UaT-VS-1xy"/>
                             <constraint firstItem="FcM-Py-mbJ" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" id="V8Z-fg-fdw"/>
                             <constraint firstItem="v9q-Nr-bjf" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" constant="-100" id="VZd-ve-Bn7"/>
                             <constraint firstAttribute="trailing" secondItem="sR3-ut-2yq" secondAttribute="trailing" id="XiZ-wq-qBF"/>
@@ -314,7 +314,7 @@
                             <constraint firstItem="AoA-PE-Gnv" firstAttribute="top" secondItem="sR3-ut-2yq" secondAttribute="bottom" id="oOR-QC-Tp6"/>
                             <constraint firstItem="AoA-PE-Gnv" firstAttribute="top" secondItem="psR-hz-CgZ" secondAttribute="bottom" id="rch-CD-Gt0"/>
                             <constraint firstItem="FcM-Py-mbJ" firstAttribute="leading" secondItem="V7o-0N-B8m" secondAttribute="leading" constant="80" id="rtF-OS-8t6"/>
-                            <constraint firstItem="CQk-b9-wlF" firstAttribute="top" secondItem="FcM-Py-mbJ" secondAttribute="top" id="tAx-Ku-kb7"/>
+                            <constraint firstItem="CQk-b9-wlF" firstAttribute="top" secondItem="FcM-Py-mbJ" secondAttribute="top" constant="-20" id="tAx-Ku-kb7"/>
                             <constraint firstItem="HDk-zs-0nf" firstAttribute="top" secondItem="Ytd-JE-8av" secondAttribute="bottom" constant="20" id="uo8-ny-fP9"/>
                             <constraint firstItem="iRM-x7-IJN" firstAttribute="bottom" secondItem="FcM-Py-mbJ" secondAttribute="bottom" id="uq1-TJ-cOb"/>
                             <constraint firstItem="yAL-Yv-ZQQ" firstAttribute="top" secondItem="Kbj-2a-oto" secondAttribute="bottom" id="wx9-Qf-yZb"/>

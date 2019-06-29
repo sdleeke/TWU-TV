@@ -10,6 +10,27 @@ import UIKit
 import AVFoundation
 import MediaPlayer
 
+class MyTextView : UITextView
+{
+    override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator)
+    {
+        guard context.previouslyFocusedItem != nil else {
+            return
+        }
+        
+//        let inset:CGFloat = 10
+        
+        if context.nextFocusedView == self {
+//            frame = frame.inset(by: UIEdgeInsets.init(top: -inset, left: 0, bottom: -2*inset, right: -2*inset))
+            backgroundColor = UIColor(displayP3Red: 1.0, green: 1.0, blue: 1.0, alpha: 0.8)
+        } else {
+//            frame = frame.inset(by: UIEdgeInsets.init(top: inset, left: 0, bottom: 2*inset, right: 2*inset))
+            scrollRangeToVisible(NSMakeRange(0,0))
+            backgroundColor = UIColor.clear
+        }
+    }
+}
+
 extension MediaCollectionViewController : UICollectionViewDataSource
 {
     // MARK: UICollectionViewDataSource
@@ -416,7 +437,19 @@ class MediaCollectionViewController: UIViewController
     @IBOutlet weak var seriesArt: UIImageView!
     
     @IBOutlet weak var seriesLabel: UILabel!
+    {
+        didSet {
+            seriesLabel.text = nil
+        }
+    }
+    
     @IBOutlet weak var seriesDescription: UITextView!
+    {
+        didSet {
+            seriesDescription.isSelectable = true
+            seriesDescription.panGestureRecognizer.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.indirect.rawValue)]
+        }
+    }
     
     @IBOutlet weak var tableView: UITableView!
     {
@@ -546,9 +579,14 @@ class MediaCollectionViewController: UIViewController
             guard let seriesSelected = seriesSelected else {
                 sermonSelected = nil
                 didSelectSeries = false
+//                seriesDescription.isSelectable = false
+//                seriesDescription.panGestureRecognizer.allowedTouchTypes = []
                 return
             }
             
+//            seriesDescription.isSelectable = true
+//            seriesDescription.panGestureRecognizer.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.indirect.rawValue)]
+
             Globals.shared.showingAbout = false
             
             avPlayerSpinner.stopAnimating()
@@ -696,8 +734,14 @@ class MediaCollectionViewController: UIViewController
             
             let description = "Tom Pennington is Pastor-Teacher at Countryside Bible Church in Southlake, TX.<br/>His pulpit ministry provides the material for The Word Unleashed.\n\nOur ministry is founded upon one principle: God has given you every spiritual resource you need to grow in Jesus Christ, and you find those resources in His all-sufficient Word (2 Pet. 1:3). That's why Tom embraces expository preaching - an approach that seeks to understand what the original authors of Scripture meant, rather than an approach that reads our own meaning into it. If that's what you've been looking for, you've come to the right place.  It's our prayer that the transforming power of God's Word be unleashed in your life.\n\nP.O. Box 96077<br>Southlake, Texas 76092<br/>www.thewordunleashed.org<br/>listeners@thewordunleashed.org<br/>877-577-WORD (9673)"
             
-            seriesLabel.text = description.replacingOccurrences(of: "<br/>", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
+            // seriesLabel
+            seriesDescription.text = description.replacingOccurrences(of: "<br/>", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
             
+            DispatchQueue.global(qos: .background).async {
+                Thread.onMainThread {
+                    self.preferredFocusView = self.seriesDescription
+                }
+            }
             return
         }
         
@@ -706,7 +750,8 @@ class MediaCollectionViewController: UIViewController
 
         backgroundLogo.isHidden = false
 
-        seriesLabel.text = seriesSelected.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "\n\n\n", with: "\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "&ndash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
+        // seriesLabel
+        seriesDescription.text = seriesSelected.text?.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n\n", with: "\n").replacingOccurrences(of: "\n", with: "\n\n").replacingOccurrences(of: "\n\n\n", with: "\n").replacingOccurrences(of: "?۪", with: "'").replacingOccurrences(of: " ??? What", with: ", what").replacingOccurrences(of: " ???", with: ",").replacingOccurrences(of: "&rsquo;", with: "’").replacingOccurrences(of: "&mdash;", with: "—").replacingOccurrences(of: "&ndash;", with: "—").replacingOccurrences(of: "sanctification–", with: "sanctification")
         
         // Should be an opQueue
         DispatchQueue.global(qos: .background).async { () -> Void in
@@ -836,39 +881,6 @@ class MediaCollectionViewController: UIViewController
         let timeRemaining = max(length - timeNow,0)
         
         self.remaining.text = timeRemaining.secondsToHMS
-
-//        let elapsedHours = max(Int(timeNow / (60*60)),0)
-//        let elapsedMins = max(Int((timeNow - (Double(elapsedHours) * 60*60)) / 60),0)
-//        let elapsedSec = max(Int(timeNow.truncatingRemainder(dividingBy: 60)),0)
-//
-//        var elapsed:String
-//
-//        if (elapsedHours > 0) {
-//            elapsed = "\(String(format: "%d",elapsedHours)):"
-//        } else {
-//            elapsed = Constants.EMPTY_STRING
-//        }
-//
-//        elapsed = elapsed + "\(String(format: "%02d",elapsedMins)):\(String(format: "%02d",elapsedSec))"
-//
-//        self.elapsed.text = elapsed
-//
-//        let timeRemaining = max(length - timeNow,0)
-//        let remainingHours = max(Int(timeRemaining / (60*60)),0)
-//        let remainingMins = max(Int((timeRemaining - (Double(remainingHours) * 60*60)) / 60),0)
-//        let remainingSec = max(Int(timeRemaining.truncatingRemainder(dividingBy: 60)),0)
-//
-//        var remaining:String
-//
-//        if (remainingHours > 0) {
-//            remaining = "\(String(format: "%d",remainingHours)):"
-//        } else {
-//            remaining = Constants.EMPTY_STRING
-//        }
-//
-//        remaining = remaining + "\(String(format: "%02d",remainingMins)):\(String(format: "%02d",remainingSec))"
-//
-//        self.remaining.text = remaining
     }
     
     fileprivate func setProgressAndTimesToAudio()
