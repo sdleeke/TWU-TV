@@ -235,6 +235,11 @@ class Globals : NSObject
         return (meta?["imageSuffix"] as? [String:String])?["1x1"]
     }
     
+    var imageTransformDir : [String:String]?
+    {
+        return meta?["imageTransformDir"] as? [String:String]
+    }
+    
     var wideSuffix : String?
     {
         return (meta?["imageSuffix"] as? [String:String])?["16x9"]
@@ -531,7 +536,7 @@ class Globals : NSObject
                                       message: message,
                                       preferredStyle: UIAlertController.Style.alert)
             
-            let action = UIAlertAction(title: Constants.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+            let action = UIAlertAction(title: Constants.Strings.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
                 self.alert = nil
             })
             alert.addAction(action)
@@ -556,7 +561,7 @@ class Globals : NSObject
                                   message: message,
                                   preferredStyle: UIAlertController.Style.alert)
         
-        let action = UIAlertAction(title: Constants.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+        let action = UIAlertAction(title: Constants.Strings.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
             self.alert = nil
         })
         alert.addAction(action)
@@ -575,7 +580,7 @@ class Globals : NSObject
                                           message: message,
                                           preferredStyle: UIAlertController.Style.alert)
             
-            let action = UIAlertAction(title: Constants.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+            let action = UIAlertAction(title: Constants.Strings.Cancel, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
                 
             })
             alert.addAction(action)

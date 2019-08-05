@@ -329,35 +329,46 @@ enum Constants {
     static let Settings = "Settings"
     static let Settings_Title = "Settings"
     
-    static let Play = "Play"
-    static let Pause = "Pause"
-    
-    static let Playing = "Playing"
-    static let Paused = "Paused"
-    
-    static let None = "None"
-    
-    static let Okay = "OK"
-    static let Cancel = "Cancel"
-    
-    static let Email_Subject = "Recommendation"
-    
-    static let Download = "Download"
-    static let Downloaded = Download + "ed"
-    static let Downloading = Download + "ing"
-    
-    static let Download_All = "Download All"
-    static let Cancel_All_Downloads = "Cancel All Downloads"
-    static let Delete_All_Downloads = "Delete All Downloads"
-    
-    static let Selected_Scriptures = "Selected Scriptures"
-    static let Open_Scripture = "Open Scripture"
-    
-    static let Open_Series = "Open on TWU Web Site" // Series 
-    static let Share = "Share" // Series
-    
-    static let Share_on_Facebook = "Share on Facebook"
-    static let Share_on_Twitter = "Share on Twitter"
+    enum Strings {
+        static let About = "About"
+        
+        static let Refresh_Media = "Refresh Media"
+        
+        static let Sorting = "Sorting"
+        static let Filtering = "Filtering"
+
+        static let Menu_Options = "Menu Options"
+        
+        static let Play = "Play"
+        static let Pause = "Pause"
+        
+        static let Playing = "Playing"
+        static let Paused = "Paused"
+        
+        static let None = "None"
+        
+        static let Okay = "OK"
+        static let Cancel = "Cancel"
+        
+        static let Email_Subject = "Recommendation"
+        
+        static let Download = "Download"
+        static let Downloaded = Download + "ed"
+        static let Downloading = Download + "ing"
+        
+        static let Download_All = "Download All"
+        static let Cancel_All_Downloads = "Cancel All Downloads"
+        static let Delete_All_Downloads = "Delete All Downloads"
+        
+        static let Selected_Scriptures = "Selected Scriptures"
+        static let Open_Scripture = "Open Scripture"
+        
+        static let Open_Series = "Open on TWU Web Site" // Series
+        static let Share = "Share" // Series
+        
+        static let Share_on_Facebook = "Share on Facebook"
+        static let Share_on_Twitter = "Share on Twitter"
+    }
 
     enum TESTAMENT {
         static let OLD:[String] = [

@@ -362,6 +362,14 @@ class Series : Equatable, CustomStringConvertible
                 return nil
             }
             
+            guard let imageTransformDir = Globals.shared.imageTransformDir else {
+                return nil
+            }
+            
+            guard let imageDir = imageTransformDir["1x1md"] else {
+                return nil
+            }
+            
             guard let imageName = name else {
                 return nil
             }
@@ -370,8 +378,8 @@ class Series : Equatable, CustomStringConvertible
                 return nil
             }
             
-            let coverArtURL = imageURL + imageName + squareSuffix // + Constants.FILE_EXTENSION.JPEG
-            
+            var coverArtURL = imageURL + imageDir + imageName + squareSuffix
+
             return coverArtURL.url
         }
     }
@@ -393,8 +401,8 @@ class Series : Equatable, CustomStringConvertible
             }
             
             if (dict?[Constants.FIELDS.BOOK] == nil) {
-                if (scripture == Constants.Selected_Scriptures) {
-                    dict?[Constants.FIELDS.BOOK] = Constants.Selected_Scriptures
+                if (scripture == Constants.Strings.Selected_Scriptures) {
+                    dict?[Constants.FIELDS.BOOK] = Constants.Strings.Selected_Scriptures
                 } else {
                     if (dict?[Constants.FIELDS.BOOK] == nil) {
                         for bookTitle in Constants.TESTAMENT.OLD {

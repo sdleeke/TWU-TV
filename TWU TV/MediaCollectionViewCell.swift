@@ -61,27 +61,25 @@ class MediaCollectionViewCell: UICollectionViewCell
             }
             
             DispatchQueue.global(qos: .userInteractive).async { () -> Void in
-                series.coverArt?.block { (image:UIImage?) in
+                series.coverArt?.load(success: { [weak self] (image:UIImage) in
                     Thread.onMainThread {
-                        if let image = image {
 //                            Globals.shared.images[name] = image
-                            
-                            // Make sure we're still in the right place.
-                            if self.series == series {
-                                self.seriesArt.image = image
-                                self.activityIndicator.stopAnimating()
-                                self.activityIndicator.isHidden = true
-                            }
-                        } else {
-                            // Make sure we're still in the right place.
-                            if self.series == series {
-                                self.seriesArt.image = UIImage(named: "twu_logo_circle_r")
-                                self.activityIndicator.stopAnimating()
-                                self.activityIndicator.isHidden = true
-                            }
+                        // Make sure we're still in the right place.
+                        if self?.series == series {
+                            self?.seriesArt.image = image
+                            self?.activityIndicator.stopAnimating()
+                            self?.activityIndicator.isHidden = true
                         }
                     }
-                }
+                }, failure: { [weak self] in
+                    Thread.onMainThread {
+                        if self?.series == series {
+                            self?.seriesArt.image = UIImage(named: "iTunesArtwork") // twu_logo_circle_r
+                            self?.activityIndicator.stopAnimating()
+                            self?.activityIndicator.isHidden = true
+                        }
+                    }
+                })
             }
         }
     }

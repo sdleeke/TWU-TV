@@ -46,12 +46,21 @@ extension MediaCollectionViewController : UICollectionViewDataSource
         return Globals.shared.activeSeries?.count ?? 0
     }
     
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath)
+    {
+        if let cell = cell as? MediaCollectionViewCell {
+            // Configure the cell
+            
+            cell.series = Globals.shared.activeSeries?[indexPath.row]
+        }
+    }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.IDENTIFIER.SERIES_CELL, for: indexPath) as? MediaCollectionViewCell ?? MediaCollectionViewCell()
         
         // Configure the cell
-        cell.series = Globals.shared.activeSeries?[(indexPath as NSIndexPath).row]
+        cell.series = Globals.shared.activeSeries?[indexPath.row]
         
         return cell
     }
@@ -142,7 +151,7 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
                                               message: "Please check your network connection and try again.",
                                               preferredStyle: UIAlertController.Style.alert)
                 
-                let action = UIAlertAction(title: Constants.Okay, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+                let action = UIAlertAction(title: Constants.Strings.Okay, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
                     
                 })
                 alert.addAction(action)
@@ -200,12 +209,13 @@ extension MediaCollectionViewController : PopoverTableViewControllerDelegate
                 
             case .selectingMenu:
                 switch string {
-                case "Refresh Media":
+                case Constants.Strings.Refresh_Media:
                     self.handleRefresh()
                     break
                     
                 case "About":
                     Globals.shared.showingAbout = true
+                    self.preferredFocusView = nil
                     self.seriesSelected = nil
                     break
                     
@@ -263,7 +273,7 @@ extension MediaCollectionViewController : UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        sermonSelected = seriesSelected?.sermons?[(indexPath as NSIndexPath).row]
+        sermonSelected = seriesSelected?.sermons?[indexPath.row]
         
         if (sermonSelected?.series == seriesSelected) && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
             addProgressObserver()
@@ -273,10 +283,10 @@ extension MediaCollectionViewController : UITableViewDelegate
         setupSpinner()
         setupProgressView()
 
-        if sermonSelected != nil {
-            playPauseButton.isEnabled = true
-            preferredFocusView = playPauseButton
-        }
+//        if sermonSelected != nil {
+//            playPauseButton.isEnabled = true
+//            preferredFocusView = playPauseButton
+//        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
@@ -297,9 +307,9 @@ class MediaCollectionViewController: UIViewController
     var preferredFocusView:UIView?
     {
         didSet {
-            guard (preferredFocusView != nil) else {
-                return
-            }
+//            guard (preferredFocusView != nil) else {
+//                return
+//            }
             
             Thread.onMainThread {
                 self.setNeedsFocusUpdate()
@@ -511,6 +521,8 @@ class MediaCollectionViewController: UIViewController
                     progressView.isHidden = false
                 }
 
+                playPauseButton.isEnabled = true
+                preferredFocusView = playPauseButton
 //                if preferredFocusView == tableView {
 //                    preferredFocusView = playPauseButton
 //                }
@@ -674,7 +686,7 @@ class MediaCollectionViewController: UIViewController
             return
         }
         
-        if (sermonSelected == Globals.shared.mediaPlayer.playing) {
+        if (sermonSelected == Globals.shared.mediaPlayer.playing) || (Globals.shared.mediaPlayer.playing == nil) {
             playPauseButton.isEnabled = Globals.shared.mediaPlayer.loaded || Globals.shared.mediaPlayer.loadFailed
 
             if let state = Globals.shared.mediaPlayer.state {
@@ -736,6 +748,7 @@ class MediaCollectionViewController: UIViewController
             
             // seriesLabel
             seriesDescription.text = description.replacingOccurrences(of: "<br/>", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
+            seriesDescription.isHidden = false
             
             DispatchQueue.global(qos: .background).async {
                 Thread.onMainThread {
@@ -755,13 +768,19 @@ class MediaCollectionViewController: UIViewController
         
         // Should be an opQueue
         DispatchQueue.global(qos: .background).async { () -> Void in
-            seriesSelected.coverArt?.block { (image:UIImage?) in
+            seriesSelected.coverArt?.load(success: { [weak self] (image:UIImage?) in
                 Thread.onMainThread {
-                    if self.seriesSelected == seriesSelected {
-                        self.seriesArt.image = image
+                    if self?.seriesSelected == seriesSelected {
+                        self?.seriesArt.image = image
                     }
                 }
-            }
+            }, failure: { [weak self] in
+                Thread.onMainThread {
+                    if self?.seriesSelected == seriesSelected {
+                        self?.seriesArt.image = UIImage(named: "iTunesArtwork") // twu_logo_circle_r
+                    }
+                }
+            })
         }
         
         tableView.isHidden = false
@@ -1302,37 +1321,38 @@ class MediaCollectionViewController: UIViewController
         setupTitle()
     }
     
-    func seriesFromSeriesDicts(_ seriesDicts:[[String:Any]]?) -> [Series]?
-    {
-        return seriesDicts?.filter({ (seriesDict:[String:Any]) -> Bool in
-            let series = Series(seriesDict: seriesDict)
-            return series.sermons?.count > 0 // .show != 0
-        }).map({ (seriesDict:[String:Any]) -> Series in
-            let series = Series(seriesDict: seriesDict)
-       
-            // Allows the visible cells to load first/faster, I think because tvOS isn't as well-threaded as iOS.
-//            if series.coverArtURL?.exists == true {
-//                series.coverArt?.fetch.fill()
-////                DispatchQueue.global(qos: .background).async { () -> Void in
-////                    // This blocks.
-////                    series.coverArt.load()
-////                }
-//            }
-
-            // Too slow, loads everything, and because it isn't sync'd through a Fetch may not speed anything up.
-//            DispatchQueue.global(qos: .background).async { () -> Void in
-//                series.coverArt { (image:UIImage?) in
-//                    guard let name = series.coverArtURL?.lastPathComponent else {
-//                        return
-//                    }
-//                    
-//                    Globals.shared.images[name] = image
-//                }
-//            }
-            
-            return series
-        })
-    }
+//    func seriesFromSeriesDicts(_ seriesDicts:[[String:Any]]?) -> [Series]?
+//    {
+//        return seriesDicts?.compactMap({ (seriesDict:[String:Any]) -> Series? in
+//            let series = Series(seriesDict: seriesDict)
+//            return series.sermons?.count > 0 ? series : nil // .show != 0
+//        })
+////            .map({ (seriesDict:[String:Any]) -> Series in
+////            let series = Series(seriesDict: seriesDict)
+////
+////            // Allows the visible cells to load first/faster, I think because tvOS isn't as well-threaded as iOS.
+//////            if series.coverArtURL?.exists == true {
+//////                series.coverArt?.fetch.fill()
+////////                DispatchQueue.global(qos: .background).async { () -> Void in
+////////                    // This blocks.
+////////                    series.coverArt.load()
+////////                }
+//////            }
+////
+////            // Too slow, loads everything, and because it isn't sync'd through a Fetch may not speed anything up.
+//////            DispatchQueue.global(qos: .background).async { () -> Void in
+//////                series.coverArt { (image:UIImage?) in
+//////                    guard let name = series.coverArtURL?.lastPathComponent else {
+//////                        return
+//////                    }
+//////
+//////                    Globals.shared.images[name] = image
+//////                }
+//////            }
+////
+////            return series
+////        })
+//    }
     
 //    func jsonFromFileSystem(filename:String?) -> Any?
 //    {
@@ -1554,9 +1574,21 @@ class MediaCollectionViewController: UIViewController
             }
             
             if let seriesDicts = self.loadSeriesDicts() {
-                Globals.shared.series = self.seriesFromSeriesDicts(seriesDicts)
+                let upgradedImages = UserDefaults.standard.bool(forKey: "UPGRADED IMAGES")
+                
+                Globals.shared.series = seriesDicts.compactMap({ (seriesDict:[String:Any]) -> Series? in
+                    let series = Series(seriesDict: seriesDict)
+                    
+                    if !upgradedImages {
+                        series.coverArt?.fileSystemURL?.delete()
+                    }
+                
+                    return series.sermons?.count > 0 ? series : nil // .show != 0
+                })
+                
+                UserDefaults.standard.set(true, forKey: "UPGRADED IMAGES")
             }
-            
+
             Thread.onMainThread {
                 self.navigationItem.title = Constants.Titles.Loading_Settings
             }
@@ -1644,7 +1676,7 @@ class MediaCollectionViewController: UIViewController
         if let popoverNavCon = Globals.shared.popoverNavCon, let popover = popoverNavCon.viewControllers[0] as? PopoverTableViewController {
             popoverNavCon.modalPresentationStyle = .fullScreen
             
-            popover.navigationItem.title = "Menu Options"
+            popover.navigationItem.title = Constants.Strings.Menu_Options
             
             popover.delegate = self
             
@@ -1652,13 +1684,13 @@ class MediaCollectionViewController: UIViewController
             
             var strings = [String]()
             
-            strings.append("Refresh Media")
             if !Globals.shared.showingAbout {
-                strings.append("About")
+                strings.append(Constants.Strings.About)
             }
-            strings.append("Sorting")
-            strings.append("Filtering")
-            
+            strings.append(Constants.Strings.Sorting)
+            strings.append(Constants.Strings.Filtering)
+            strings.append(Constants.Strings.Refresh_Media)
+
             popover.purpose = .selectingMenu
             popover.section.strings = strings
             
@@ -1700,11 +1732,11 @@ class MediaCollectionViewController: UIViewController
 
         collectionView?.allowsSelection = true
 
-        if #available(iOS 10.0, *) {
-            collectionView?.isPrefetchingEnabled = false
-        } else {
-            // Fallback on earlier versions
-        }
+//        if #available(iOS 10.0, *) {
+//            collectionView?.isPrefetchingEnabled = false
+//        } else {
+//            // Fallback on earlier versions
+//        }
     }
     
     @objc func readyToPlay()
@@ -1759,7 +1791,7 @@ class MediaCollectionViewController: UIViewController
                                               message: "Please check your network connection and try again.",
                                               preferredStyle: UIAlertController.Style.alert)
                 
-                let action = UIAlertAction(title: Constants.Okay, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
+                let action = UIAlertAction(title: Constants.Strings.Okay, style: UIAlertAction.Style.cancel, handler: { (UIAlertAction) -> Void in
                     
                 })
                 alert.addAction(action)

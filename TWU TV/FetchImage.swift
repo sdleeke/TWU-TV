@@ -17,13 +17,13 @@ class FetchImage : Fetch<UIImage>, Size
     
     var url : URL?
     
-    init?(name:String? = nil, url:URL?)
+    init?(name:String? = nil, useCache:Bool = true, url:URL?)
     {
         guard let url = url else {
             return nil
         }
         
-        super.init(name: name)
+        super.init(name:name, useCache:useCache)
         
         fetch = { [weak self] () -> (UIImage?) in
             return self?.fetchIt()
@@ -56,13 +56,22 @@ class FetchImage : Fetch<UIImage>, Size
     
     func fetchIt() -> UIImage?
     {
-        return self.url?.image
+        return self.url?.image ?? url?.absoluteString.replacingOccurrences(of: "-square", with: "_square").url?.image
     }
     
-    func block(_ block:((UIImage?)->()))
+//    func block(_ block:((UIImage?)->()))
+//    {
+//        if let image = image {
+//            block(image)
+//        }
+//    }
+    
+    func load(success:((UIImage)->())?, failure:(()->())?)
     {
-        if let image = image {
-            block(image)
+        if let image = result {
+            success?(image)
+        } else {
+            failure?()
         }
     }
     
