@@ -159,13 +159,13 @@ class MediaPlayer : NSObject
         }
         
         var sermonInfo = [String:AnyObject]()
-        
+
         sermonInfo[MPMediaItemPropertyTitle] = "\(title) \(partString)" as AnyObject
-        
+
         sermonInfo[MPMediaItemPropertyArtist] = Constants.Tom_Pennington as AnyObject
-        
+
         sermonInfo[MPMediaItemPropertyAlbumTitle] = title as AnyObject
-        
+
         sermonInfo[MPMediaItemPropertyAlbumArtist] = Constants.Tom_Pennington as AnyObject
 
         playing?.series?.coverArt?.load(success: { (image:UIImage) in
@@ -178,27 +178,27 @@ class MediaPlayer : NSObject
                 sermonInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: image)
             }
         }, failure: {
-            
+
         })
-        
+
         sermonInfo[MPMediaItemPropertyAlbumTrackNumber] = partNumber as AnyObject
-        
+
         if let numberOfSermons = playing?.series?.sermons?.count {
             sermonInfo[MPMediaItemPropertyAlbumTrackCount] = numberOfSermons as AnyObject
         }
-        
+
         if let duration = duration?.seconds {
             sermonInfo[MPMediaItemPropertyPlaybackDuration] = NSNumber(value: duration)
         }
-        
+
         if let currentTime = currentTime?.seconds {
             sermonInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(value: currentTime)
         }
-        
+
         if let rate = rate {
             sermonInfo[MPNowPlayingInfoPropertyPlaybackRate] = NSNumber(value: rate)
         }
-        
+
         MPNowPlayingInfoCenter.default().nowPlayingInfo = sermonInfo
     }
     

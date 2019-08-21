@@ -398,11 +398,11 @@ class MediaCollectionViewController: UIViewController
         
         switch state {
         case .none:
-            print("none")
+//            print("none")
             break
             
         case .playing:
-            print("playing")
+//            print("playing")
             Globals.shared.mediaPlayer.pause()
             
             setupPlayPauseButton()
@@ -414,7 +414,7 @@ class MediaCollectionViewController: UIViewController
             break
             
         case .paused:
-            print("paused")
+//            print("paused")
             if Globals.shared.mediaPlayer.loaded && (Globals.shared.mediaPlayer.url == sermonSelected?.playingURL) {
                 addProgressObserver()
                 playCurrentSermon(sermonSelected)
@@ -424,16 +424,16 @@ class MediaCollectionViewController: UIViewController
             break
             
         case .stopped:
-            print("stopped")
+//            print("stopped")
             break
             
         case .seekingForward:
-            print("seekingForward")
+//            print("seekingForward")
             Globals.shared.mediaPlayer.pause()
             break
             
         case .seekingBackward:
-            print("seekingBackward")
+//            print("seekingBackward")
             Globals.shared.mediaPlayer.pause()
             break
         }
@@ -1047,11 +1047,11 @@ class MediaCollectionViewController: UIViewController
         
         switch state {
         case .none:
-            print("none")
+//            print("none")
             break
             
         case .playing:
-            print("playing")
+//            print("playing")
             setProgressAndTimesToAudio()
             
             if (!Globals.shared.mediaPlayer.loaded) {
@@ -1075,7 +1075,7 @@ class MediaCollectionViewController: UIViewController
             break
             
         case .paused:
-            print("paused")
+//            print("paused")
             
             if Globals.shared.mediaPlayer.loaded {
                 setProgressAndTimesToAudio()
@@ -1090,11 +1090,11 @@ class MediaCollectionViewController: UIViewController
             break
             
         case .stopped:
-            print("stopped")
+//            print("stopped")
             break
             
         case .seekingForward:
-            print("seekingForward")
+//            print("seekingForward")
             if !spinner.isAnimating {
                 spinner.isHidden = false
                 spinner.startAnimating()
@@ -1102,7 +1102,7 @@ class MediaCollectionViewController: UIViewController
             break
             
         case .seekingBackward:
-            print("seekingBackward")
+//            print("seekingBackward")
             if !spinner.isAnimating {
                 spinner.isHidden = false
                 spinner.startAnimating()
@@ -1651,11 +1651,11 @@ class MediaCollectionViewController: UIViewController
                 Globals.shared.mediaPlayer.play()
                 
             case .stopped:
-                print("stopped")
+//                print("stopped")
                 playPause(playPauseButton)
                 
             default:
-                print("default")
+//                print("default")
                 break
             }
         } else {
