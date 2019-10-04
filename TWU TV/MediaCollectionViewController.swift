@@ -476,53 +476,113 @@ class MediaCollectionViewController: UIViewController
         }
     }
     
-    var observerActive = false
+    var observer: NSKeyValueObservation?
+    
+//    var observerActive = false
 
-    override func observeValue(forKeyPath keyPath: String?,
-                               of object: Any?,
-                               change: [NSKeyValueChangeKey : Any]?,
-                               context: UnsafeMutableRawPointer?) {
-        // Only handle observations for the playerItemContext
-        //        guard context == &PlayerContext else {
-        //            super.observeValue(forKeyPath: keyPath,
-        //                               of: object,
-        //                               change: change,
-        //                               context: nil)
-        //            return
-        //        }
+//    override func observeValue(forKeyPath keyPath: String?,
+//                               of object: Any?,
+//                               change: [NSKeyValueChangeKey : Any]?,
+//                               context: UnsafeMutableRawPointer?) {
+//        // Only handle observations for the playerItemContext
+//        //        guard context == &PlayerContext else {
+//        //            super.observeValue(forKeyPath: keyPath,
+//        //                               of: object,
+//        //                               change: change,
+//        //                               context: nil)
+//        //            return
+//        //        }
+//
+//        if keyPath == #keyPath(AVPlayerItem.status) {
+//            let status: AVPlayerItem.Status
+//
+//            // Get the status change from the change dictionary
+//            if let statusNumber = change?[.newKey] as? NSNumber, let itemStatus = AVPlayerItem.Status(rawValue: statusNumber.intValue) {
+//                status = itemStatus
+//            } else {
+//                status = .unknown
+//            }
+//
+//            // Switch over the status
+//            switch status {
+//            case .readyToPlay:
+//                // Player item is ready to play.
+//
+//                if let currentTime = sermonSelected?.currentTime, let timeNow = Double(currentTime), let length = player?.currentItem?.duration.seconds {
+//                    let progress = timeNow / length
+//
+//                    progressView.progress = Float(progress)
+//                    setTimes(timeNow: timeNow,length: length)
+//
+//                    avPlayerSpinner.stopAnimating()
+//                    avPlayerSpinner.isHidden = true
+//
+//                    controlView.isHidden = false
+//                    elapsed.isHidden = false
+//                    remaining.isHidden = false
+//                    progressView.isHidden = false
+//                }
+//
+//                playPauseButton.isEnabled = true
+//                preferredFocusView = playPauseButton
+////                if preferredFocusView == tableView {
+////                    preferredFocusView = playPauseButton
+////                }
+//                break
+//
+//            case .failed:
+//                // Player item failed. See error.
+//                break
+//
+//            case .unknown:
+//                // Player item is not yet ready.
+//                break
+//
+//            @unknown default:
+//                break
+//            }
+//        }
+//    }
+    
+    var player:AVPlayer?
+    
+    func removePlayerObserver()
+    {
+        observer?.invalidate()
         
-        if keyPath == #keyPath(AVPlayerItem.status) {
-            let status: AVPlayerItem.Status
-            
-            // Get the status change from the change dictionary
-            if let statusNumber = change?[.newKey] as? NSNumber, let itemStatus = AVPlayerItem.Status(rawValue: statusNumber.intValue) {
-                status = itemStatus
-            } else {
-                status = .unknown
-            }
-            
-            // Switch over the status
-            switch status {
+//        // observerActive and this function would not be needed if we cache as we would assume EVERY AVPlayer in the cache has an observer => must remove them prior to dealloc.
+//
+//        if observerActive {
+//            player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil) // &PlayerContext
+//            observerActive = false
+//        }
+    }
+    
+    func addPlayerObserver()
+    {
+        observer = player?.currentItem?.observe(\.status, options:[.new]) { [weak self] (currentItem, change) in
+            switch currentItem.status {
             case .readyToPlay:
                 // Player item is ready to play.
                 
-                if let currentTime = sermonSelected?.currentTime, let timeNow = Double(currentTime), let length = player?.currentItem?.duration.seconds {
+                if let currentTime = self?.sermonSelected?.currentTime, let timeNow = Double(currentTime), let length = self?.player?.currentItem?.duration.seconds {
                     let progress = timeNow / length
                     
-                    progressView.progress = Float(progress)
-                    setTimes(timeNow: timeNow,length: length)
+                    self?.progressView.progress = Float(progress)
+                    self?.setTimes(timeNow: timeNow,length: length)
                     
-                    avPlayerSpinner.stopAnimating()
-                    avPlayerSpinner.isHidden = true
+                    self?.avPlayerSpinner.stopAnimating()
+                    self?.avPlayerSpinner.isHidden = true
                     
-                    controlView.isHidden = false
-                    elapsed.isHidden = false
-                    remaining.isHidden = false
-                    progressView.isHidden = false
+                    self?.controlView.isHidden = false
+                    self?.elapsed.isHidden = false
+                    self?.remaining.isHidden = false
+                    self?.progressView.isHidden = false
                 }
-
-                playPauseButton.isEnabled = true
-                preferredFocusView = playPauseButton
+                
+                self?.playPauseButton.isEnabled = true
+                self?.preferredFocusView = self?.playPauseButton
+                
 //                if preferredFocusView == tableView {
 //                    preferredFocusView = playPauseButton
 //                }
@@ -540,27 +600,12 @@ class MediaCollectionViewController: UIViewController
                 break
             }
         }
-    }
-    
-    var player:AVPlayer?
-    
-    func removePlayerObserver()
-    {
-        // observerActive and this function would not be needed if we cache as we would assume EVERY AVPlayer in the cache has an observer => must remove them prior to dealloc.
-        
-        if observerActive {
-            player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil) // &PlayerContext
-            observerActive = false
-        }
-    }
-    
-    func addPlayerObserver()
-    {
-        player?.currentItem?.addObserver(self,
-                                         forKeyPath: #keyPath(AVPlayerItem.status),
-                                         options: [.old, .new],
-                                         context: nil) // &PlayerContext
-        observerActive = true
+            
+//        player?.currentItem?.addObserver(self,
+//                                         forKeyPath: #keyPath(AVPlayerItem.status),
+//                                         options: [.old, .new],
+//                                         context: nil) // &PlayerContext
+//        observerActive = true
     }
     
     func playerURL(url: URL?)
@@ -646,24 +691,42 @@ class MediaCollectionViewController: UIViewController
                 return
             }
             
-            if (sermonSelected != oldValue) {
-                if sermonSelected != Globals.shared.mediaPlayer.playing, let playingURL = sermonSelected?.playingURL {
-                    Globals.shared.mediaPlayer.stop()
-                    removeProgressObserver()
-                    playerURL(url: playingURL)
-                } else {
-                    if !didSelectSeries {
-                        preferredFocusView = playPauseButton
-                    }
+            guard Globals.shared.reachability.isReachable else {
+                updateUI()
+                return
+            }
 
-                    removePlayerObserver()
-                    addProgressObserver()
-                }
+            if sermonSelected != Globals.shared.mediaPlayer.playing {
+                Globals.shared.mediaPlayer.stop()
+                removeProgressObserver()
+                playerURL(url: sermonSelected?.playingURL)
             } else {
                 if !didSelectSeries {
                     preferredFocusView = playPauseButton
                 }
+
+                removePlayerObserver()
+                addProgressObserver()
             }
+
+//            if (sermonSelected != oldValue) || !Globals.shared.mediaPlayer.loaded {
+//                if sermonSelected != Globals.shared.mediaPlayer.playing, let playingURL = sermonSelected?.playingURL {
+//                    Globals.shared.mediaPlayer.stop()
+//                    removeProgressObserver()
+//                    playerURL(url: playingURL)
+//                } else {
+//                    if !didSelectSeries {
+//                        preferredFocusView = playPauseButton
+//                    }
+//
+//                    removePlayerObserver()
+//                    addProgressObserver()
+//                }
+//            } else {
+//                if !didSelectSeries {
+//                    preferredFocusView = playPauseButton
+//                }
+//            }
         }
     }
     

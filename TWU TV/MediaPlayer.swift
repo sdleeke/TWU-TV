@@ -109,8 +109,10 @@ class MediaPlayer : NSObject
     var playerTimerReturn:Any? = nil
     var progressTimerReturn:Any? = nil
     
-    var observerActive = false
-    var observedItem:AVPlayerItem?
+    var observer: NSKeyValueObservation?
+
+//    var observerActive = false
+//    var observedItem:AVPlayerItem?
     
     var playerObserverTimer:Timer?
     
@@ -617,8 +619,8 @@ class MediaPlayer : NSObject
                                          forKeyPath: #keyPath(AVPlayerItem.status),
                                          options: [.old, .new],
                                          context: nil)
-        observerActive = true
-        observedItem = currentItem
+//        observerActive = true
+//        observedItem = currentItem
 
         playerTimerReturn = player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1,preferredTimescale: Constants.CMTime_Resolution), queue: DispatchQueue.main, using: { (time:CMTime) in // [weak globals]
             self.playerTimer()
@@ -633,6 +635,8 @@ class MediaPlayer : NSObject
     
     func unobserve()
     {
+        observer?.invalidate()
+        
         playerObserverTimer?.invalidate()
         playerObserverTimer = nil
         
@@ -641,24 +645,24 @@ class MediaPlayer : NSObject
             playerTimerReturn = nil
         }
         
-        if observerActive {
-            if observedItem != currentItem {
-                print("observedItem != currentPlayer!")
-            }
-            if observedItem != nil {
-                print("GLOBAL removeObserver: ",observedItem?.observationInfo as Any)
-
-                player?.removeObserver(self, forKeyPath: #keyPath(AVPlayer.timeControlStatus), context: nil)
-                
-                player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil)
-                
-                observedItem = nil
-                
-                observerActive = false
-            } else {
-                print("mediaPlayer.observedItem == nil!")
-            }
-        }
+//        if observerActive {
+//            if observedItem != currentItem {
+//                print("observedItem != currentPlayer!")
+//            }
+//            if observedItem != nil {
+//                print("GLOBAL removeObserver: ",observedItem?.observationInfo as Any)
+//
+//                player?.removeObserver(self, forKeyPath: #keyPath(AVPlayer.timeControlStatus), context: nil)
+//
+//                player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), context: nil)
+//
+//                observedItem = nil
+//
+//                observerActive = false
+//            } else {
+//                print("mediaPlayer.observedItem == nil!")
+//            }
+//        }
         
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
     }
